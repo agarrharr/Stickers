@@ -8,12 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		991C8F022B8FEC6100B227BA /* StickersApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 991C8F012B8FEC6100B227BA /* StickersApp.swift */; };
-		991C8F042B8FEC6100B227BA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 991C8F032B8FEC6100B227BA /* ContentView.swift */; };
 		991C8F062B8FEC6300B227BA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 991C8F052B8FEC6300B227BA /* Assets.xcassets */; };
 		991C8F092B8FEC6300B227BA /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 991C8F082B8FEC6300B227BA /* Preview Assets.xcassets */; };
 		991C8F132B8FEC6300B227BA /* StickersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 991C8F122B8FEC6300B227BA /* StickersTests.swift */; };
 		991C8F1D2B8FEC6300B227BA /* StickersUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 991C8F1C2B8FEC6300B227BA /* StickersUITests.swift */; };
 		991C8F1F2B8FEC6300B227BA /* StickersUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 991C8F1E2B8FEC6300B227BA /* StickersUITestsLaunchTests.swift */; };
+		99A2B7642B8FF84A001C0769 /* AppFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 99A2B7632B8FF84A001C0769 /* AppFeature */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,7 +36,6 @@
 /* Begin PBXFileReference section */
 		991C8EFE2B8FEC6100B227BA /* Stickers.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Stickers.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		991C8F012B8FEC6100B227BA /* StickersApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickersApp.swift; sourceTree = "<group>"; };
-		991C8F032B8FEC6100B227BA /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		991C8F052B8FEC6300B227BA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		991C8F082B8FEC6300B227BA /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		991C8F0E2B8FEC6300B227BA /* StickersTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StickersTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -44,6 +43,7 @@
 		991C8F182B8FEC6300B227BA /* StickersUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StickersUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		991C8F1C2B8FEC6300B227BA /* StickersUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickersUITests.swift; sourceTree = "<group>"; };
 		991C8F1E2B8FEC6300B227BA /* StickersUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickersUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		991C8F2B2B8FED2200B227BA /* Modules */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Modules; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,6 +51,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				99A2B7642B8FF84A001C0769 /* AppFeature in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -74,10 +75,12 @@
 		991C8EF52B8FEC6100B227BA = {
 			isa = PBXGroup;
 			children = (
+				991C8F2B2B8FED2200B227BA /* Modules */,
 				991C8F002B8FEC6100B227BA /* Stickers */,
 				991C8F112B8FEC6300B227BA /* StickersTests */,
 				991C8F1B2B8FEC6300B227BA /* StickersUITests */,
 				991C8EFF2B8FEC6100B227BA /* Products */,
+				99A2B7622B8FF84A001C0769 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -95,7 +98,6 @@
 			isa = PBXGroup;
 			children = (
 				991C8F012B8FEC6100B227BA /* StickersApp.swift */,
-				991C8F032B8FEC6100B227BA /* ContentView.swift */,
 				991C8F052B8FEC6300B227BA /* Assets.xcassets */,
 				991C8F072B8FEC6300B227BA /* Preview Content */,
 			);
@@ -127,6 +129,13 @@
 			path = StickersUITests;
 			sourceTree = "<group>";
 		};
+		99A2B7622B8FF84A001C0769 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -143,6 +152,9 @@
 			dependencies = (
 			);
 			name = Stickers;
+			packageProductDependencies = (
+				99A2B7632B8FF84A001C0769 /* AppFeature */,
+			);
 			productName = Stickers;
 			productReference = 991C8EFE2B8FEC6100B227BA /* Stickers.app */;
 			productType = "com.apple.product-type.application";
@@ -257,7 +269,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				991C8F042B8FEC6100B227BA /* ContentView.swift in Sources */,
 				991C8F022B8FEC6100B227BA /* StickersApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -588,6 +599,13 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		99A2B7632B8FF84A001C0769 /* AppFeature */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AppFeature;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 991C8EF62B8FEC6100B227BA /* Project object */;
 }
