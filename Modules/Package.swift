@@ -13,6 +13,9 @@ let package = Package(
             name: "ChartFeature",
             targets: ["ChartFeature"]),
         .library(
+            name: "SettingsFeature",
+            targets: ["SettingsFeature"]),
+        .library(
             name: "StickersFeature",
             targets: ["StickersFeature"]),
         .library(
@@ -29,6 +32,7 @@ let package = Package(
             dependencies: [
                 "ChartFeature",
                 "Models",
+                "SettingsFeature",
                 .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
             ]
         ),
@@ -37,6 +41,12 @@ let package = Package(
             dependencies: [
                 "Models",
                 "StickersFeature",
+                .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+            ]
+        ),
+        .target(
+            name: "SettingsFeature",
+            dependencies: [
                 .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
             ]
         ),

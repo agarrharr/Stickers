@@ -1,13 +1,20 @@
 import ComposableArchitecture
 import ChartFeature
 import Models
+import SettingsFeature
 import StickersFeature
 import SwiftUI
 
 @Reducer
 public struct AppFeature {
+    @Reducer(state: .equatable, action: .sendable)
+    public enum Destination {
+        case settings(SettingsFeature)
+    }
+    
     @ObservableState
     public struct State: Equatable {
+        @Presents var destination: Destination.State?
         var people: IdentifiedArrayOf<Person>
         var charts: IdentifiedArrayOf<ChartFeature.State>
         
@@ -21,13 +28,32 @@ public struct AppFeature {
     }
     
     public enum Action: Sendable {
+        case destination(PresentationAction<Destination.Action>)
         case charts(IdentifiedActionOf<ChartFeature>)
+        case view(ViewAction)
+        
+        @CasePathable
+        public enum ViewAction: Sendable {
+            case settingsIconTapped
+        }
     }
     
     public var body: some Reducer<State, Action> {
-        Reduce { _, _ in
-            return .none
+        Reduce { state, action in
+            switch action {
+            case .destination:
+                return .none
+            case .charts:
+                return .none
+            case let .view(action):
+                switch action {
+                case .settingsIconTapped:
+                    state.destination = .settings(SettingsFeature.State())
+                    return .none
+                }
+            }
         }
+        .ifLet(\.$destination, action: \.destination)
         .forEach(\.charts, action: \.charts) {
             ChartFeature()
         }
@@ -37,7 +63,7 @@ public struct AppFeature {
 }
 
 public struct AppView: View {
-    var store: StoreOf<AppFeature>
+    @Bindable var store: StoreOf<AppFeature>
     
     public init(store: StoreOf<AppFeature>) {
         self.store = store
@@ -69,7 +95,7 @@ public struct AppView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Settings", systemImage: "gear") {
-                        // TODO:
+                        store.send(.view(.settingsIconTapped))
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
@@ -77,6 +103,14 @@ public struct AppView: View {
                         // TODO:
                     }
                 }
+            }
+            .sheet(
+                item: $store.scope(
+                    state: \.destination?.settings,
+                    action: \.destination.settings
+                )
+            ) { store in
+                SettingsView(store: store)
             }
         }
     }
