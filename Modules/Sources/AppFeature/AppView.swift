@@ -99,8 +99,24 @@ public struct AppView: View {
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Add", systemImage: "plus") {
-                        // TODO:
+                    Menu {
+                        Button {
+                           // TODO
+                        } label: {
+                            Label("Add Chart", systemImage: "rectangle.stack")
+                        }
+                        Button {
+                           // TODO
+                        } label: {
+                            Label("Add Person", systemImage: "person.fill")
+                        }
+                        Button {
+                           // TODO
+                        } label: {
+                            Label("Add Sticker", systemImage: "star.fill")
+                        }
+                    } label: {
+                        Label("Add", systemImage: "plus")
                     }
                 }
             }
