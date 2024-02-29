@@ -29,13 +29,11 @@ public struct Chart: Equatable, Identifiable {
     public var id: UUID
     public var name: String
     public var reward: Reward
-    public var stickers: IdentifiedArrayOf<Sticker>
     
-    public init(id: UUID, name: String, reward: Reward, stickers: IdentifiedArrayOf<Sticker>) {
+    public init(id: UUID, name: String, reward: Reward) {
         self.id = id
         self.name = name
         self.reward = reward
-        self.stickers = stickers
     }
 }
 

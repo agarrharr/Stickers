@@ -5,9 +5,25 @@ import SwiftUI
 @Reducer
 public struct StickersFeature {
     @ObservableState
-    public struct State {
-        var stickers: IdentifiedArrayOf<Sticker> = []
+    public struct State: Equatable, Identifiable {
+        public let id: UUID
+        public var stickers: IdentifiedArrayOf<Sticker> = []
+        
+        public init(id: UUID, stickers: IdentifiedArrayOf<Sticker>) {
+            self.id = id
+            self.stickers = stickers
+        }
     }
+    
+    public enum Action: BindableAction, Sendable {
+        case binding(BindingAction<State>)
+    }
+    
+    public var body: some ReducerOf<Self> {
+        BindingReducer()
+    }
+    
+    public init() {}
 }
 
 public struct StickersView: View {
@@ -40,6 +56,7 @@ public struct StickersView: View {
     StickersView(
         store: Store(
             initialState: StickersFeature.State(
+                id: UUID(),
                 stickers: [
                     Sticker(id: UUID(), size: .large),
                     Sticker(id: UUID(), size: .large),

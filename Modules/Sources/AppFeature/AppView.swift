@@ -7,8 +7,8 @@ import SwiftUI
 public struct AppFeature {
     @ObservableState
     public struct State: Equatable {
-        var people: IdentifiedArrayOf<Person> = []
-        var charts: IdentifiedArrayOf<ChartFeature.State> = []
+        var people: IdentifiedArrayOf<Person>
+        var charts: IdentifiedArrayOf<ChartFeature.State>
         
         public init(
             people: IdentifiedArrayOf<Person> = [],
@@ -84,7 +84,26 @@ public struct AppView: View {
     AppView(
         store: Store(
             initialState: AppFeature.State(
-                people: []
+                people: [],
+                charts: [
+                    ChartFeature.State(
+                        id: UUID(),
+                        chart: Chart(
+                            id: UUID(),
+                            name: "Chores",
+                            reward: Reward(name: "Fishing rod"),
+                            stickers: [
+                                Sticker(id: UUID(), size: .large),
+                                Sticker(id: UUID(), size: .large),
+                                Sticker(id: UUID(), size: .large),
+                                Sticker(id: UUID(), size: .medium),
+                                Sticker(id: UUID(), size: .small),
+                                Sticker(id: UUID(), size: .small),
+                                Sticker(id: UUID(), size: .small),
+                            ]
+                        )
+                    )
+                ]
             )
         ) {
             AppFeature()
