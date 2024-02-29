@@ -46,66 +46,79 @@ public struct ChartView: View {
     public var body: some View {
         HStack {
             VStack {
-                Text(store.chart.name)
-                StickersView(store: store.scope(state: \.stickers, action: \.stickers))
+                HStack {
+                    Text(store.chart.name)
+                    Spacer()
+                }
+                HStack {
+                    StickersView(store: store.scope(state: \.stickers, action: \.stickers))
+                    Spacer()
+                }
             }
+            Spacer()
         }
     }
 }
 
 #Preview {
     List {
-        ChartView(
-            store: Store(
-                initialState: ChartFeature.State(
-                    chart: Chart(
-                        name: "Chores",
-                        reward: Reward(name: "Fishing rod")
-                    ),
-                    stickers: StickersFeature.State(
-                        stickers: [
-                            Sticker(size: .large),
-                            Sticker(size: .large),
-                            Sticker(size: .large),
-                            Sticker(size: .medium),
-                            Sticker(size: .small),
-                            Sticker(size: .small),
-                            Sticker(size: .small),
-                        ]
+        Section {
+            ChartView(
+                store: Store(
+                    initialState: ChartFeature.State(
+                        chart: Chart(
+                            name: "Chores",
+                            reward: Reward(name: "Fishing rod")
+                        ),
+                        stickers: StickersFeature.State(
+                            stickers: [
+                                Sticker(size: .large),
+                                Sticker(size: .large),
+                                Sticker(size: .large),
+                                Sticker(size: .medium),
+                                Sticker(size: .small),
+                                Sticker(size: .small),
+                                Sticker(size: .small),
+                            ]
+                        )
                     )
-                )
-            ) {
-                ChartFeature()
-            }
-        )
+                ) {
+                    ChartFeature()
+                }
+            )
+        }
         
-        ChartView(
-            store: Store(
-                initialState: ChartFeature.State(
-                    chart: Chart(
-                        name: "Chores",
-                        reward: Reward(name: "Fishing rod")
-                    ),
-                    stickers: StickersFeature.State(
-                        stickers: []
+        Section {
+            ChartView(
+                store: Store(
+                    initialState: ChartFeature.State(
+                        chart: Chart(
+                            name: "Chores",
+                            reward: Reward(name: "Fishing rod")
+                        ),
+                        stickers: StickersFeature.State(
+                            stickers: []
+                        )
                     )
-                )
-            ) {
-                ChartFeature()
-            }
-        )
+                ) {
+                    ChartFeature()
+                }
+            )
+        }
         
-        ChartView(
-            store: Store(
-                initialState: ChartFeature.State(
-                    chart: Chart(
-                        name: "Chores"
-                    ),
-                    stickers: StickersFeature.State()
-                )
-            ) {
-                ChartFeature()
-            }
-        )
+        Section {
+            ChartView(
+                store: Store(
+                    initialState: ChartFeature.State(
+                        chart: Chart(
+                            name: "Chores"
+                        ),
+                        stickers: StickersFeature.State()
+                    )
+                ) {
+                    ChartFeature()
+                }
+            )
+        }
     }
 }

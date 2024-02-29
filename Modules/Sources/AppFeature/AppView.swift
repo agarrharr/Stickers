@@ -45,7 +45,7 @@ public struct AppView: View {
     
     public var body: some View {
         NavigationView {
-            VStack {
+            List {
                 HStack {
                     Image(systemName: "person.circle")
                         .font(.largeTitle)
@@ -55,16 +55,15 @@ public struct AppView: View {
                         .font(.largeTitle)
                     Spacer()
                 }
-                .padding(.horizontal)
-                List {
-                    ForEach(
-                        store.scope(state: \.charts, action: \.charts),
-                        id: \.state.id
-                    ) { store in
+                .listRowBackground(Color.clear)
+                ForEach(
+                    store.scope(state: \.charts, action: \.charts),
+                    id: \.state.id
+                ) { store in
+                    Section {
                         ChartView(store: store)
                     }
                 }
-                Spacer()
             }
             .navigationTitle("Everyone")
             .toolbar {
