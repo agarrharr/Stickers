@@ -1,6 +1,7 @@
 import ComposableArchitecture
 import ChartFeature
 import Models
+import StickersFeature
 import SwiftUI
 
 @Reducer
@@ -91,7 +92,29 @@ public struct AppView: View {
                         chart: Chart(
                             id: UUID(),
                             name: "Chores",
-                            reward: Reward(name: "Fishing rod"),
+                            reward: Reward(name: "Fishing rod")
+                        ),
+                        stickers: StickersFeature.State(
+                            stickers: [
+                                Sticker(id: UUID(), size: .large),
+                                Sticker(id: UUID(), size: .large),
+                                Sticker(id: UUID(), size: .large),
+                                Sticker(id: UUID(), size: .medium),
+                                Sticker(id: UUID(), size: .small),
+                                Sticker(id: UUID(), size: .small),
+                                Sticker(id: UUID(), size: .small),
+                            ]
+                        )
+                    ),
+                    
+                    ChartFeature.State(
+                        id: UUID(),
+                        chart: Chart(
+                            id: UUID(),
+                            name: "Homework",
+                            reward: Reward(name: "Batting cages")
+                        ),
+                        stickers: StickersFeature.State(
                             stickers: [
                                 Sticker(id: UUID(), size: .large),
                                 Sticker(id: UUID(), size: .large),

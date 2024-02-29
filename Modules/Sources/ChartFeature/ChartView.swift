@@ -64,7 +64,6 @@ public struct ChartView: View {
                     reward: Reward(name: "Fishing rod")
                 ),
                 stickers: StickersFeature.State(
-                    id: UUID(),
                     stickers: [
                         Sticker(id: UUID(), size: .large),
                         Sticker(id: UUID(), size: .large),
