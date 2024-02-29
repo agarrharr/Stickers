@@ -1,17 +1,34 @@
 import ComposableArchitecture
+import ChartFeature
 import Models
 import SwiftUI
 
 @Reducer
 public struct AppFeature {
     @ObservableState
-    public struct State {
-        var people: IdentifiedArrayOf<Person>
-        var charts: IdentifiedArrayOf<Chart>
+    public struct State: Equatable {
+        var people: IdentifiedArrayOf<Person> = []
+        var charts: IdentifiedArrayOf<ChartFeature.State> = []
         
-        public init(people: IdentifiedArrayOf<Person>, charts: IdentifiedArrayOf<Chart>) {
+        public init(
+            people: IdentifiedArrayOf<Person> = [],
+            charts: IdentifiedArrayOf<ChartFeature.State> = []
+        ) {
             self.people = people
             self.charts = charts
+        }
+    }
+    
+    public enum Action: Sendable {
+        case charts(IdentifiedActionOf<ChartFeature>)
+    }
+    
+    public var body: some Reducer<State, Action> {
+        Reduce { _, _ in
+            return .none
+        }
+        .forEach(\.charts, action: \.charts) {
+            ChartFeature()
         }
     }
     
@@ -38,9 +55,9 @@ public struct AppView: View {
                     Spacer()
                 }
                 .padding(.horizontal)
-                ForEach(store.charts, id: \.id) { chart in
-                    Text(chart.name)
-                }
+//                ForEach(store.charts, id: \.id) { chart in
+//                    Text(chart.name)
+//                }
                 Spacer()
             }
             .navigationTitle("Everyone")
@@ -64,15 +81,7 @@ public struct AppView: View {
     AppView(
         store: Store(
             initialState: AppFeature.State(
-                people: [],
-                charts: [
-                    Chart(
-                        id: UUID(),
-                        name: "Chores",
-                        reward: Reward(name: "Fishing pole"),
-                        stickers: []
-                    )
-                ]
+                people: []
             )
         ) {
             AppFeature()

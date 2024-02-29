@@ -7,7 +7,7 @@ public enum StickerSize {
     case large
 }
 
-public struct Sticker: Identifiable {
+public struct Sticker: Equatable, Identifiable {
     public var id: UUID
     public var size: StickerSize
     
@@ -17,7 +17,7 @@ public struct Sticker: Identifiable {
     }
 }
 
-public struct Reward {
+public struct Reward: Equatable {
     public var name: String
     
     public init(name: String) {
@@ -25,7 +25,7 @@ public struct Reward {
     }
 }
 
-public struct Chart: Identifiable {
+public struct Chart: Equatable, Identifiable {
     public var id: UUID
     public var name: String
     public var reward: Reward
@@ -39,7 +39,7 @@ public struct Chart: Identifiable {
     }
 }
 
-public struct Person: Identifiable {
+public struct Person: Equatable, Identifiable {
     public var id: UUID
     public var charts: IdentifiedArrayOf<Chart>
     
