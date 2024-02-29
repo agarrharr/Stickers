@@ -50,18 +50,30 @@ public struct SettingsFeature {
 public struct SettingsView: View {
     @Bindable var store: StoreOf<SettingsFeature>
     
+    // Why am I initially hiding the list?
+    // It's because of a bug with SwiftUI
+    // I want to have a large title, but if
+    // there is a list, it shrinks down
+    // So I wait a split second to show the list
+    // https://developer.apple.com/forums/thread/737787
+    @State private var showList: Bool = false
+    
     public init(store: StoreOf<SettingsFeature>) {
         self.store = store
     }
     
     public var body: some View {
         NavigationStack {
-            List {
-                Section("Stickers") {
-                    Button {
-                        store.send(.view(.stickerValuesButtonTapped))
-                    } label : {
-                        Text("Button")
+            VStack {
+                if showList {
+                    List {
+                        Section("Stickers") {
+                            Button {
+                                store.send(.view(.stickerValuesButtonTapped))
+                            } label : {
+                                Text("Button")
+                            }
+                        }
                     }
                 }
             }
@@ -84,6 +96,12 @@ public struct SettingsView: View {
                 }
             )
             .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.large)
+            .onAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    showList = true
+                }
+            }
         }
     }
 }

@@ -127,6 +127,7 @@ public struct AppView: View {
                 )
             ) { store in
                 SettingsView(store: store)
+                    .presentationDragIndicator(.visible)
             }
         }
     }
