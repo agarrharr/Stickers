@@ -55,9 +55,12 @@ public struct AppView: View {
                     Spacer()
                 }
                 .padding(.horizontal)
-//                ForEach(store.charts, id: \.id) { chart in
-//                    Text(chart.name)
-//                }
+                ForEach(
+                    store.scope(state: \.charts, action: \.charts),
+                    id: \.state.id
+                ) { store in
+                    ChartView(store: store)
+                }
                 Spacer()
             }
             .navigationTitle("Everyone")
