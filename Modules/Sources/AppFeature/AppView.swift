@@ -1,7 +1,27 @@
+import ComposableArchitecture
+import Models
 import SwiftUI
 
+@Reducer
+public struct AppFeature {
+    @ObservableState
+    public struct State {
+        var people: IdentifiedArrayOf<Person>
+        
+        public init(people: IdentifiedArrayOf<Person>) {
+            self.people = people
+        }
+    }
+    
+    public init() {}
+}
+
 public struct AppView: View {
-    public init() { }
+    var store: StoreOf<AppFeature>
+    
+    public init(store: StoreOf<AppFeature>) {
+        self.store = store
+    }
     
     public var body: some View {
         Text("View")
@@ -9,5 +29,13 @@ public struct AppView: View {
 }
 
 #Preview {
-    AppView()
+    AppView(
+        store: Store(
+            initialState: AppFeature.State(
+                people: []
+            )
+        ) {
+            AppFeature()
+        }
+    )
 }

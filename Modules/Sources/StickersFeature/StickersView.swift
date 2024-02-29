@@ -1,9 +1,6 @@
 import ComposableArchitecture
+import Models
 import SwiftUI
-
-struct Sticker: Identifiable {
-    var id: UUID
-}
 
 @Reducer
 public struct StickersFeature {
@@ -23,7 +20,17 @@ public struct StickersView: View {
     public var body: some View {
         LazyHGrid(rows: [GridItem(.fixed(20))], content: {
             ForEach(store.stickers, id: \.id) { sticker in
-                Image(systemName: "star")
+                switch sticker.size {
+                case .large:
+                    Image(systemName: "star.circle")
+                        .font(.largeTitle)
+                case .medium:
+                    Image(systemName: "star.circle")
+                        .font(.title2)
+                case .small:
+                    Image(systemName: "star.circle")
+                        .font(.body)
+                }
             }
         })
     }
@@ -34,9 +41,12 @@ public struct StickersView: View {
         store: Store(
             initialState: StickersFeature.State(
                 stickers: [
-                    Sticker(id: UUID()),
-                    Sticker(id: UUID()),
-                    Sticker(id: UUID()),
+                    Sticker(id: UUID(), size: .large),
+                    Sticker(id: UUID(), size: .large),
+                    Sticker(id: UUID(), size: .medium),
+                    Sticker(id: UUID(), size: .small),
+                    Sticker(id: UUID(), size: .small),
+                    Sticker(id: UUID(), size: .small),
                 ]
             )) {
                 StickersFeature()
