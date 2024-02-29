@@ -11,7 +11,7 @@ public struct Sticker: Equatable, Identifiable {
     public var id: UUID
     public var size: StickerSize
     
-    public init(id: UUID, size: StickerSize) {
+    public init(id: UUID = UUID(), size: StickerSize) {
         self.id = id
         self.size = size
     }
@@ -28,9 +28,9 @@ public struct Reward: Equatable {
 public struct Chart: Equatable, Identifiable {
     public var id: UUID
     public var name: String
-    public var reward: Reward
+    public var reward: Reward?
     
-    public init(id: UUID, name: String, reward: Reward) {
+    public init(id: UUID = UUID(), name: String, reward: Reward? = nil) {
         self.id = id
         self.name = name
         self.reward = reward

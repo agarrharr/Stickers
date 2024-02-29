@@ -6,9 +6,9 @@ import SwiftUI
 public struct StickersFeature {
     @ObservableState
     public struct State: Equatable {
-        public var stickers: IdentifiedArrayOf<Sticker> = []
+        public var stickers: IdentifiedArrayOf<Sticker>
         
-        public init(stickers: IdentifiedArrayOf<Sticker>) {
+        public init(stickers: IdentifiedArrayOf<Sticker> = []) {
             self.stickers = stickers
         }
     }
@@ -55,12 +55,12 @@ public struct StickersView: View {
         store: Store(
             initialState: StickersFeature.State(
                 stickers: [
-                    Sticker(id: UUID(), size: .large),
-                    Sticker(id: UUID(), size: .large),
-                    Sticker(id: UUID(), size: .medium),
-                    Sticker(id: UUID(), size: .small),
-                    Sticker(id: UUID(), size: .small),
-                    Sticker(id: UUID(), size: .small),
+                    Sticker(size: .large),
+                    Sticker(size: .large),
+                    Sticker(size: .medium),
+                    Sticker(size: .small),
+                    Sticker(size: .small),
+                    Sticker(size: .small),
                 ]
             )) {
                 StickersFeature()

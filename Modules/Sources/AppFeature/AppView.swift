@@ -56,11 +56,13 @@ public struct AppView: View {
                     Spacer()
                 }
                 .padding(.horizontal)
-                ForEach(
-                    store.scope(state: \.charts, action: \.charts),
-                    id: \.state.id
-                ) { store in
-                    ChartView(store: store)
+                List {
+                    ForEach(
+                        store.scope(state: \.charts, action: \.charts),
+                        id: \.state.id
+                    ) { store in
+                        ChartView(store: store)
+                    }
                 }
                 Spacer()
             }
@@ -88,41 +90,37 @@ public struct AppView: View {
                 people: [],
                 charts: [
                     ChartFeature.State(
-                        id: UUID(),
                         chart: Chart(
-                            id: UUID(),
                             name: "Chores",
                             reward: Reward(name: "Fishing rod")
                         ),
                         stickers: StickersFeature.State(
                             stickers: [
-                                Sticker(id: UUID(), size: .large),
-                                Sticker(id: UUID(), size: .large),
-                                Sticker(id: UUID(), size: .large),
-                                Sticker(id: UUID(), size: .medium),
-                                Sticker(id: UUID(), size: .small),
-                                Sticker(id: UUID(), size: .small),
-                                Sticker(id: UUID(), size: .small),
+                                Sticker(size: .large),
+                                Sticker(size: .large),
+                                Sticker(size: .large),
+                                Sticker(size: .medium),
+                                Sticker(size: .small),
+                                Sticker(size: .small),
+                                Sticker(size: .small),
                             ]
                         )
                     ),
                     
                     ChartFeature.State(
-                        id: UUID(),
                         chart: Chart(
-                            id: UUID(),
                             name: "Homework",
                             reward: Reward(name: "Batting cages")
                         ),
                         stickers: StickersFeature.State(
                             stickers: [
-                                Sticker(id: UUID(), size: .large),
-                                Sticker(id: UUID(), size: .large),
-                                Sticker(id: UUID(), size: .large),
-                                Sticker(id: UUID(), size: .medium),
-                                Sticker(id: UUID(), size: .small),
-                                Sticker(id: UUID(), size: .small),
-                                Sticker(id: UUID(), size: .small),
+                                Sticker(size: .large),
+                                Sticker(size: .large),
+                                Sticker(size: .large),
+                                Sticker(size: .medium),
+                                Sticker(size: .small),
+                                Sticker(size: .small),
+                                Sticker(size: .small),
                             ]
                         )
                     )

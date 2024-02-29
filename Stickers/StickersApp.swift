@@ -2,6 +2,7 @@ import AppFeature
 import ChartFeature
 import ComposableArchitecture
 import Models
+import StickersFeature
 import SwiftUI
 
 @main
@@ -13,19 +14,19 @@ struct StickersApp: App {
                     people: [],
                     charts: [
                         ChartFeature.State(
-                            id: UUID(),
                             chart: Chart(
-                                id: UUID(),
                                 name: "Chores",
-                                reward: Reward(name: "Fishing rod"),
+                                reward: Reward(name: "Fishing rod")
+                            ),
+                            stickers: StickersFeature.State(
                                 stickers: [
-                                    Sticker(id: UUID(), size: .large),
-                                    Sticker(id: UUID(), size: .large),
-                                    Sticker(id: UUID(), size: .large),
-                                    Sticker(id: UUID(), size: .medium),
-                                    Sticker(id: UUID(), size: .small),
-                                    Sticker(id: UUID(), size: .small),
-                                    Sticker(id: UUID(), size: .small),
+                                    Sticker(size: .large),
+                                    Sticker(size: .large),
+                                    Sticker(size: .large),
+                                    Sticker(size: .medium),
+                                    Sticker(size: .small),
+                                    Sticker(size: .small),
+                                    Sticker(size: .small),
                                 ]
                             )
                         )

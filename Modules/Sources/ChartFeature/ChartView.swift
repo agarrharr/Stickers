@@ -12,7 +12,7 @@ public struct ChartFeature {
         public var stickers: StickersFeature.State
         
         public init(
-            id: UUID,
+            id: UUID = UUID(),
             chart: Chart,
             stickers: StickersFeature.State
         ) {
@@ -54,29 +54,58 @@ public struct ChartView: View {
 }
 
 #Preview {
-    ChartView(
-        store: Store(
-            initialState: ChartFeature.State(
-                id: UUID(),
-                chart: Chart(
-                    id: UUID(),
-                    name: "Chores",
-                    reward: Reward(name: "Fishing rod")
-                ),
-                stickers: StickersFeature.State(
-                    stickers: [
-                        Sticker(id: UUID(), size: .large),
-                        Sticker(id: UUID(), size: .large),
-                        Sticker(id: UUID(), size: .large),
-                        Sticker(id: UUID(), size: .medium),
-                        Sticker(id: UUID(), size: .small),
-                        Sticker(id: UUID(), size: .small),
-                        Sticker(id: UUID(), size: .small),
-                    ]
+    List {
+        ChartView(
+            store: Store(
+                initialState: ChartFeature.State(
+                    chart: Chart(
+                        name: "Chores",
+                        reward: Reward(name: "Fishing rod")
+                    ),
+                    stickers: StickersFeature.State(
+                        stickers: [
+                            Sticker(size: .large),
+                            Sticker(size: .large),
+                            Sticker(size: .large),
+                            Sticker(size: .medium),
+                            Sticker(size: .small),
+                            Sticker(size: .small),
+                            Sticker(size: .small),
+                        ]
+                    )
                 )
-            )
-        ) {
-            ChartFeature()
-        }
-    )
+            ) {
+                ChartFeature()
+            }
+        )
+        
+        ChartView(
+            store: Store(
+                initialState: ChartFeature.State(
+                    chart: Chart(
+                        name: "Chores",
+                        reward: Reward(name: "Fishing rod")
+                    ),
+                    stickers: StickersFeature.State(
+                        stickers: []
+                    )
+                )
+            ) {
+                ChartFeature()
+            }
+        )
+        
+        ChartView(
+            store: Store(
+                initialState: ChartFeature.State(
+                    chart: Chart(
+                        name: "Chores"
+                    ),
+                    stickers: StickersFeature.State()
+                )
+            ) {
+                ChartFeature()
+            }
+        )
+    }
 }
