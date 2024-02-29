@@ -3,22 +3,41 @@ import Models
 import StickersFeature
 import SwiftUI
 
+public struct Reward: Equatable {
+    public var name: String
+    
+    public init(name: String) {
+        self.name = name
+    }
+}
+
+public struct Chart: Equatable, Identifiable {
+    public var id: UUID
+    public var name: String
+    public var reward: Reward?
+    public var stickers: StickersFeature.State
+    
+    public init(id: UUID = UUID(), name: String, reward: Reward? = nil, stickers: StickersFeature.State) {
+        self.id = id
+        self.name = name
+        self.reward = reward
+        self.stickers = stickers
+    }
+}
+
 @Reducer
 public struct ChartFeature {
     @ObservableState
     public struct State: Equatable, Identifiable {
         public let id: UUID
         public var chart: Chart
-        public var stickers: StickersFeature.State
         
         public init(
             id: UUID = UUID(),
-            chart: Chart,
-            stickers: StickersFeature.State
+            chart: Chart
         ) {
             self.id = id
             self.chart = chart
-            self.stickers = stickers
         }
     }
 
@@ -28,7 +47,7 @@ public struct ChartFeature {
     }
 
     public var body: some ReducerOf<Self> {
-        Scope(state: \.stickers, action: \.stickers) {
+        Scope(state: \.chart.stickers, action: \.stickers) {
             StickersFeature()
         }
     }
@@ -51,7 +70,7 @@ public struct ChartView: View {
                     Spacer()
                 }
                 HStack {
-                    StickersView(store: store.scope(state: \.stickers, action: \.stickers))
+                    StickersView(store: store.scope(state: \.chart.stickers, action: \.stickers))
                     Spacer()
                 }
             }
@@ -68,18 +87,18 @@ public struct ChartView: View {
                     initialState: ChartFeature.State(
                         chart: Chart(
                             name: "Chores",
-                            reward: Reward(name: "Fishing rod")
-                        ),
-                        stickers: StickersFeature.State(
-                            stickers: [
-                                Sticker(size: .large),
-                                Sticker(size: .large),
-                                Sticker(size: .large),
-                                Sticker(size: .medium),
-                                Sticker(size: .small),
-                                Sticker(size: .small),
-                                Sticker(size: .small),
-                            ]
+                            reward: Reward(name: "Fishing rod"),
+                            stickers: StickersFeature.State(
+                                stickers: [
+                                    Sticker(size: .large),
+                                    Sticker(size: .large),
+                                    Sticker(size: .large),
+                                    Sticker(size: .medium),
+                                    Sticker(size: .small),
+                                    Sticker(size: .small),
+                                    Sticker(size: .small),
+                                ]
+                            )
                         )
                     )
                 ) {
@@ -94,10 +113,10 @@ public struct ChartView: View {
                     initialState: ChartFeature.State(
                         chart: Chart(
                             name: "Chores",
-                            reward: Reward(name: "Fishing rod")
-                        ),
-                        stickers: StickersFeature.State(
-                            stickers: []
+                            reward: Reward(name: "Fishing rod"),
+                            stickers: StickersFeature.State(
+                                stickers: []
+                            )
                         )
                     )
                 ) {
@@ -111,9 +130,9 @@ public struct ChartView: View {
                 store: Store(
                     initialState: ChartFeature.State(
                         chart: Chart(
-                            name: "Chores"
-                        ),
-                        stickers: StickersFeature.State()
+                            name: "Chores",
+                            stickers: StickersFeature.State()
+                        )
                     )
                 ) {
                     ChartFeature()

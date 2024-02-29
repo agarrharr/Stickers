@@ -142,36 +142,36 @@ public struct AppView: View {
                     ChartFeature.State(
                         chart: Chart(
                             name: "Chores",
-                            reward: Reward(name: "Fishing rod")
-                        ),
-                        stickers: StickersFeature.State(
-                            stickers: [
-                                Sticker(size: .large),
-                                Sticker(size: .large),
-                                Sticker(size: .large),
-                                Sticker(size: .medium),
-                                Sticker(size: .small),
-                                Sticker(size: .small),
-                                Sticker(size: .small),
-                            ]
+                            reward: Reward(name: "Fishing rod"),
+                            stickers: StickersFeature.State(
+                                stickers: [
+                                    Sticker(size: .large),
+                                    Sticker(size: .large),
+                                    Sticker(size: .large),
+                                    Sticker(size: .medium),
+                                    Sticker(size: .small),
+                                    Sticker(size: .small),
+                                    Sticker(size: .small),
+                                ]
+                            )
                         )
                     ),
                     
                     ChartFeature.State(
                         chart: Chart(
                             name: "Homework",
-                            reward: Reward(name: "Batting cages")
-                        ),
-                        stickers: StickersFeature.State(
-                            stickers: [
-                                Sticker(size: .large),
-                                Sticker(size: .large),
-                                Sticker(size: .large),
-                                Sticker(size: .medium),
-                                Sticker(size: .small),
-                                Sticker(size: .small),
-                                Sticker(size: .small),
-                            ]
+                            reward: Reward(name: "Batting cages"),
+                            stickers: StickersFeature.State(
+                                stickers: [
+                                    Sticker(size: .large),
+                                    Sticker(size: .large),
+                                    Sticker(size: .large),
+                                    Sticker(size: .medium),
+                                    Sticker(size: .small),
+                                    Sticker(size: .small),
+                                    Sticker(size: .small),
+                                ]
+                            )
                         )
                     )
                 ]

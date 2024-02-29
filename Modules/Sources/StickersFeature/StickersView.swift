@@ -2,6 +2,22 @@ import ComposableArchitecture
 import Models
 import SwiftUI
 
+public enum StickerSize {
+    case small
+    case medium
+    case large
+}
+
+public struct Sticker: Equatable, Identifiable {
+    public var id: UUID
+    public var size: StickerSize
+    
+    public init(id: UUID = UUID(), size: StickerSize) {
+        self.id = id
+        self.size = size
+    }
+}
+
 @Reducer
 public struct StickersFeature {
     @ObservableState
