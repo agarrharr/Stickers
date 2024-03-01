@@ -9,6 +9,12 @@ public struct PeopleButtonsView: View {
     
     @State private var selectedPersonId: UUID? = nil
     
+    public init(people: IdentifiedArrayOf<Person>, onTap: @escaping (Person) -> Void, selectedPersonId: UUID? = nil) {
+        self.people = people
+        self.onTap = onTap
+        self.selectedPersonId = selectedPersonId
+    }
+    
     public var body: some View {
         ScrollView(.horizontal) {
             HStack {
@@ -42,7 +48,7 @@ public struct PeopleButtonsView: View {
     }
 }
 
-public struct PersonButtonView: View {
+struct PersonButtonView: View {
     @Binding var isSelected: Bool
     var person: Person
     var onTap: () -> Void
@@ -61,7 +67,7 @@ public struct PersonButtonView: View {
         : colorScheme == .light ? .black : .white
     }
     
-    public var body: some View {
+    var body: some View {
         Button {
             onTap()
         } label: {

@@ -4,6 +4,7 @@ import SwiftUI
 import AddSticker
 import ChartFeature
 import Models
+import PeopleButtons
 import SettingsFeature
 import StickersFeature
 
@@ -18,17 +19,19 @@ public struct AppFeature {
     @ObservableState
     public struct State: Equatable {
         @Presents var destination: Destination.State?
-        var people: IdentifiedArrayOf<Person>
-        var charts: IdentifiedArrayOf<ChartFeature.State>
+        @Shared var people: IdentifiedArrayOf<Person>
+        @Shared var charts: IdentifiedArrayOf<ChartFeature.State>
         var personFilter: Person?
         
         public init(
-            people: IdentifiedArrayOf<Person> = [],
-            charts: IdentifiedArrayOf<ChartFeature.State> = [],
+            destination: Destination.State? = nil,
+            people: Shared<IdentifiedArrayOf<Person>>,
+            charts: Shared<IdentifiedArrayOf<ChartFeature.State>>,
             personFilter: Person? = nil
         ) {
-            self.people = people
-            self.charts = charts
+            self.destination = destination
+            self._people = people
+            self._charts = charts
             self.personFilter = personFilter
         }
     }
@@ -49,7 +52,9 @@ public struct AppFeature {
     }
     
     public var body: some Reducer<State, Action> {
-        Reduce { state, action in
+        Reduce {
+            state,
+            action in
             switch action {
             case .destination:
                 return .none
@@ -62,7 +67,12 @@ public struct AppFeature {
                 case .addPersonTapped:
                     return .none
                 case .addStickerTapped:
-                    state.destination = .addSticker(AddStickerFeature.State())
+                    state.destination = .addSticker(
+                        AddStickerFeature.State(
+                            people: state.$people,
+                            charts: state.$charts
+                        )
+                    )
                     return .none
                 case let .personTapped(person):
                     state.personFilter = person == state.personFilter ? nil : person
@@ -183,8 +193,8 @@ public struct AppView: View {
     return AppView(
         store: Store(
             initialState: AppFeature.State(
-                people: [person1, person2, person3],
-                charts: [
+                people: Shared([person1, person2, person3]),
+                charts: Shared([
                     ChartFeature.State(
                         chart: Chart(
                             name: "Chores",
@@ -228,7 +238,7 @@ public struct AppView: View {
                             person: person2
                         )
                     )
-                ]
+                ])
             )
         ) {
             AppFeature()

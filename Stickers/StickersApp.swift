@@ -16,8 +16,8 @@ struct StickersApp: App {
         WindowGroup {
             AppView(
                 store: Store(initialState: AppFeature.State(
-                    people: [person1, person2, person3],
-                    charts: [
+                    people: Shared([person1, person2, person3]),
+                    charts: Shared([
                         ChartFeature.State(
                             chart: Chart(
                                 name: "Chores",
@@ -72,7 +72,7 @@ struct StickersApp: App {
                                 person: person2
                             )
                         )
-                    ]
+                    ])
                 )) {
                     AppFeature()._printChanges()
                 }
