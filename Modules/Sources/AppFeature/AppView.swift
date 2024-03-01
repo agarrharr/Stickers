@@ -1,15 +1,18 @@
 import ComposableArchitecture
+import SwiftUI
+
+import AddSticker
 import ChartFeature
 import Models
 import SettingsFeature
 import StickersFeature
-import SwiftUI
 
 @Reducer
 public struct AppFeature {
     @Reducer(state: .equatable, action: .sendable)
     public enum Destination {
         case settings(SettingsFeature)
+        case addSticker(AddStickerFeature)
     }
     
     @ObservableState
@@ -37,8 +40,11 @@ public struct AppFeature {
         
         @CasePathable
         public enum ViewAction: Sendable {
-            case settingsIconTapped
+            case addChartTapped
+            case addPersonTapped
+            case addStickerTapped
             case personTapped(Person)
+            case settingsIconTapped
         }
     }
     
@@ -51,11 +57,18 @@ public struct AppFeature {
                 return .none
             case let .view(action):
                 switch action {
-                case .settingsIconTapped:
-                    state.destination = .settings(SettingsFeature.State())
+                case .addChartTapped:
+                    return .none
+                case .addPersonTapped:
+                    return .none
+                case .addStickerTapped:
+                    state.destination = .addSticker(AddStickerFeature.State())
                     return .none
                 case let .personTapped(person):
                     state.personFilter = person == state.personFilter ? nil : person
+                    return .none
+                case .settingsIconTapped:
+                    state.destination = .settings(SettingsFeature.State())
                     return .none
                 }
             }
@@ -121,17 +134,17 @@ public struct AppView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
                         Button {
-                           // TODO
+                            store.send(.view(.addChartTapped))
                         } label: {
                             Label("Add Chart", systemImage: "rectangle.stack")
                         }
                         Button {
-                           // TODO
+                            store.send(.view(.addPersonTapped))
                         } label: {
                             Label("Add Person", systemImage: "person.fill")
                         }
                         Button {
-                           // TODO
+                            store.send(.view(.addStickerTapped))
                         } label: {
                             Label("Add Sticker", systemImage: "star.fill")
                         }
@@ -147,6 +160,15 @@ public struct AppView: View {
                 )
             ) { store in
                 SettingsView(store: store)
+                    .presentationDragIndicator(.visible)
+            }
+            .sheet(
+                item: $store.scope(
+                    state: \.destination?.addSticker,
+                    action: \.destination.addSticker
+                )
+            ) { store in
+                AddStickerView(store: store)
                     .presentationDragIndicator(.visible)
             }
         }
