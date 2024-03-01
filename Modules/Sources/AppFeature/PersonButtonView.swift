@@ -83,6 +83,17 @@ public struct PersonButtonView: View {
 }
 
 #Preview {
+    PeopleButtonsView(
+        people: [
+            Person(name: "Blob"),
+            Person(name: "Megan"),
+            Person(name: "Sid"),
+        ],
+        onTap: { _ in }
+    )
+}
+
+#Preview {
     HStack {
         PersonButtonView(
             isSelected: .constant(true),

@@ -102,6 +102,7 @@ public struct AppView: View {
                         PeopleButtonsView(people: store.people) {
                             store.send(.view(.personTapped($0)))
                         }
+                        .textCase(nil)
                         .padding(.vertical)
                         // Make the header the full width so that the buttons can
                         // scroll to the edges and not get cut off
