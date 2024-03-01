@@ -12,17 +12,42 @@ public struct Reward: Equatable {
     }
 }
 
+public struct Behavior: Equatable, Identifiable {
+    public var id: UUID
+    public var name: String
+    public var amount: Int
+    
+    public init(
+        id: UUID = UUID(),
+        name: String,
+        amount: Int
+    ) {
+        self.id = id
+        self.name = name
+        self.amount = amount
+    }
+}
+
 public struct Chart: Equatable, Identifiable {
     public var id: UUID
     public var name: String
     public var reward: Reward?
+    public var behaviors: [Behavior]
     public var stickers: StickersFeature.State
     public var person: Person
     
-    public init(id: UUID = UUID(), name: String, reward: Reward? = nil, stickers: StickersFeature.State, person: Person) {
+    public init(
+        id: UUID = UUID(),
+        name: String,
+        reward: Reward? = nil,
+        behaviors: [Behavior] = [],
+        stickers: StickersFeature.State = StickersFeature.State(),
+        person: Person
+    ) {
         self.id = id
         self.name = name
         self.reward = reward
+        self.behaviors = behaviors
         self.stickers = stickers
         self.person = person
     }

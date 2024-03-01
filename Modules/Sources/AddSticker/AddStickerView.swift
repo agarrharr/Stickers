@@ -66,19 +66,41 @@ public struct AddStickerView: View {
     
     public var body: some View {
         NavigationView {
-            VStack {
-                PeopleButtonsView(people: store.people) {
-                    store.send(.view(.personTapped($0)))
-                }
-                ForEach(
-                    store.scope(state: \.charts, action: \.charts),
-                    id: \.state.id
-                ) { childStore in
-                    if (store.personFilter == nil || store.personFilter == childStore.chart.person) {
-                        Text(childStore.chart.name)
+            GeometryReader { reader in
+                List {
+                    Section {
+                        // Empty section
+                    } header: {
+                        PeopleButtonsView(people: store.people) {
+                            store.send(.view(.personTapped($0)))
+                        }
+                        .textCase(nil)
+                        // Make the header the full width so that the buttons can
+                        // scroll to the edges and not get cut off
+                        .frame(width: reader.size.width, alignment: .leading)
+                    }
+                    ForEach(
+                        store.scope(state: \.charts, action: \.charts),
+                        id: \.state.id
+                    ) { childStore in
+                        if (store.personFilter == nil || store.personFilter == childStore.chart.person) {
+                            Section {
+                                ForEach(childStore.chart.behaviors, id: \.id) { behavior in
+                                    HStack {
+                                        Text(behavior.name)
+                                        Spacer()
+                                        Text("\(behavior.amount)")
+                                    }
+                                }
+                                Text("+1")
+                                Text("+5")
+                                Text("+10")
+                            } header: {
+                                Text(childStore.chart.name)
+                            }
+                        }
                     }
                 }
-                Spacer()
             }
             .navigationTitle("Add Sticker")
         }
@@ -99,23 +121,11 @@ public struct AddStickerView: View {
                         chart: Chart(
                             name: "Chores",
                             reward: Reward(name: "Fishing rod"),
-                            stickers: StickersFeature.State(
-                                stickers: [
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .medium),
-                                    Sticker(size: .small),
-                                    Sticker(size: .small),
-                                    Sticker(size: .small),
-                                ]
-                            ),
+                            behaviors: [
+                                Behavior(name: "Load dishwasher", amount: 1),
+                                Behavior(name: "Sweep bathroom", amount: 5),
+                                Behavior(name: "Put away clothes", amount: 2)
+                            ],
                             person: person1
                         )
                     ),
@@ -124,17 +134,10 @@ public struct AddStickerView: View {
                         chart: Chart(
                             name: "Homework",
                             reward: Reward(name: "Batting cages"),
-                            stickers: StickersFeature.State(
-                                stickers: [
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .medium),
-                                    Sticker(size: .small),
-                                    Sticker(size: .small),
-                                    Sticker(size: .small),
-                                ]
-                            ),
+                            behaviors: [
+                                Behavior(name: "Math homework", amount: 1),
+                                Behavior(name: "Read", amount: 2)
+                            ],
                             person: person2
                         )
                     )

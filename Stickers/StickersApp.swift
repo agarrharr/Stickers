@@ -49,6 +49,11 @@ struct StickersApp: App {
                             chart: Chart(
                                 name: "Chores",
                                 reward: Reward(name: "Batting cages"),
+                                behaviors: [
+                                    Behavior(name: "Load dishwasher", amount: 1),
+                                    Behavior(name: "Sweep bathroom", amount: 5),
+                                    Behavior(name: "Put away clothes", amount: 2)
+                                ],
                                 stickers: StickersFeature.State(
                                     stickers: [
                                         Sticker(size: .large)
@@ -61,6 +66,10 @@ struct StickersApp: App {
                             chart: Chart(
                                 name: "Homework",
                                 reward: Reward(name: "TV"),
+                                behaviors: [
+                                    Behavior(name: "Math homework", amount: 1),
+                                    Behavior(name: "Read", amount: 2)
+                                ],
                                 stickers: StickersFeature.State(
                                     stickers: [
                                         Sticker(size: .small),
