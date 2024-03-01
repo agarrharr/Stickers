@@ -86,24 +86,8 @@ public struct AppView: View {
     public var body: some View {
         NavigationView {
             List {
-                HStack {
-                    ForEach(store.people, id: \.id) { person in
-                        PersonButtonView(
-                            isSelected: Binding(
-                                get: {
-                                    guard let selectedPerson = store.personFilter else {
-                                        return false
-                                    }
-                                    return selectedPerson.id == person.id
-                                },
-                                set: { _ in }
-                            ),
-                            person: person,
-                            onTap: {
-                            store.send(.view(.personTapped(person)))
-                        })
-                    }
-                    Spacer()
+                PeopleButtonsView(people: store.people) {
+                    store.send(.view(.personTapped($0)))
                 }
                 .listRowBackground(Color.clear)
                 

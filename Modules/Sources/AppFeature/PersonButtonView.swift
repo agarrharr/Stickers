@@ -1,5 +1,43 @@
+import IdentifiedCollections
 import Models
 import SwiftUI
+
+public struct PeopleButtonsView: View {
+    var people: IdentifiedArrayOf<Person>
+    var onTap: (Person) -> Void
+    
+    @State private var selectedPersonId: UUID? = nil
+    
+    public var body: some View {
+        ScrollView(.horizontal) {
+            HStack {
+                ForEach(people, id: \.id) { person in
+                    PersonButtonView(
+                        isSelected: Binding(
+                            get: {
+                                guard let selectedPersonId else {
+                                    return false
+                                }
+                                return selectedPersonId == person.id
+                            },
+                            set: { _ in }
+                        ),
+                        person: person,
+                        onTap: {
+                            if selectedPersonId == person.id {
+                                selectedPersonId = nil
+                            } else {
+                                selectedPersonId = person.id
+                            }
+                            onTap(person)
+                        })
+                }
+                Spacer()
+            }
+        }
+        .scrollIndicators(.hidden)
+    }
+}
 
 public struct PersonButtonView: View {
     @Binding var isSelected: Bool
@@ -38,6 +76,7 @@ public struct PersonButtonView: View {
         .overlay(Capsule()
             .stroke(colorScheme == .light ? .black : .white, lineWidth: 1)
         )
+        .padding(1)
     }
 }
 
