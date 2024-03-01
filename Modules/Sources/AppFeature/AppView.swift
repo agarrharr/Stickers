@@ -88,25 +88,25 @@ public struct AppView: View {
             GeometryReader { reader in
                 List {
                     Section {
-                        ForEach(
-                            store.scope(state: \.charts, action: \.charts),
-                            id: \.state.id
-                        ) { childStore in
-                            if (store.personFilter == nil || store.personFilter == childStore.chart.person) {
-                                Section {
-                                    ChartView(store: childStore)
-                                }
-                            }
-                        }
+                        // Empty section
                     } header: {
                         PeopleButtonsView(people: store.people) {
                             store.send(.view(.personTapped($0)))
                         }
                         .textCase(nil)
-                        .padding(.vertical)
                         // Make the header the full width so that the buttons can
                         // scroll to the edges and not get cut off
                         .frame(width: reader.size.width, alignment: .leading)
+                    }
+                    ForEach(
+                        store.scope(state: \.charts, action: \.charts),
+                        id: \.state.id
+                    ) { childStore in
+                        if (store.personFilter == nil || store.personFilter == childStore.chart.person) {
+                            Section {
+                                ChartView(store: childStore)
+                            }
+                        }
                     }
                 }
             }
