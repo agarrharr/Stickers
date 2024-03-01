@@ -85,24 +85,32 @@ public struct AppView: View {
     
     public var body: some View {
         NavigationView {
-            List {
-                PeopleButtonsView(people: store.people) {
-                    store.send(.view(.personTapped($0)))
-                }
-                .listRowBackground(Color.clear)
-                
-                ForEach(
-                    store.scope(state: \.charts, action: \.charts),
-                    id: \.state.id
-                ) { childStore in
-                    if (store.personFilter == nil || store.personFilter == childStore.chart.person) {
-                        Section {
-                            ChartView(store: childStore)
+            GeometryReader { reader in
+                List {
+                    Section {
+                        ForEach(
+                            store.scope(state: \.charts, action: \.charts),
+                            id: \.state.id
+                        ) { childStore in
+                            if (store.personFilter == nil || store.personFilter == childStore.chart.person) {
+                                Section {
+                                    ChartView(store: childStore)
+                                }
+                            }
                         }
+                    } header: {
+                        PeopleButtonsView(people: store.people) {
+                            store.send(.view(.personTapped($0)))
+                        }
+                        .padding(.vertical)
+                        // Make the header the full width so that the buttons can
+                        // scroll to the edges and not get cut off
+                        .frame(width: reader.size.width, alignment: .leading)
                     }
                 }
             }
             .navigationTitle(title)
+            .listStyle(.insetGrouped)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Settings", systemImage: "gear") {

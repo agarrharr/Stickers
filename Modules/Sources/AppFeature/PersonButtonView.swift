@@ -11,6 +11,8 @@ public struct PeopleButtonsView: View {
     public var body: some View {
         ScrollView(.horizontal) {
             HStack {
+                Spacer()
+                    .frame(width: 20)
                 ForEach(people, id: \.id) { person in
                     PersonButtonView(
                         isSelected: Binding(
