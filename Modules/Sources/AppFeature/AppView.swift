@@ -72,6 +72,13 @@ public struct AppFeature {
 public struct AppView: View {
     @Bindable var store: StoreOf<AppFeature>
     
+    private var title: String {
+        guard let person = store.personFilter else {
+            return "Everyone"
+        }
+        return person.name
+    }
+    
     public init(store: StoreOf<AppFeature>) {
         self.store = store
     }
@@ -103,7 +110,7 @@ public struct AppView: View {
                     }
                 }
             }
-            .navigationTitle("Everyone")
+            .navigationTitle(title)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Settings", systemImage: "gear") {
