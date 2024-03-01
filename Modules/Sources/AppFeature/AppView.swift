@@ -17,13 +17,16 @@ public struct AppFeature {
         @Presents var destination: Destination.State?
         var people: IdentifiedArrayOf<Person>
         var charts: IdentifiedArrayOf<ChartFeature.State>
+        var personFilter: Person?
         
         public init(
             people: IdentifiedArrayOf<Person> = [],
-            charts: IdentifiedArrayOf<ChartFeature.State> = []
+            charts: IdentifiedArrayOf<ChartFeature.State> = [],
+            personFilter: Person? = nil
         ) {
             self.people = people
             self.charts = charts
+            self.personFilter = personFilter
         }
     }
     
@@ -35,6 +38,7 @@ public struct AppFeature {
         @CasePathable
         public enum ViewAction: Sendable {
             case settingsIconTapped
+            case personTapped(Person)
         }
     }
     
@@ -49,6 +53,9 @@ public struct AppFeature {
                 switch action {
                 case .settingsIconTapped:
                     state.destination = .settings(SettingsFeature.State())
+                    return .none
+                case let .personTapped(person):
+                    state.personFilter = person == state.personFilter ? nil : person
                     return .none
                 }
             }
@@ -73,21 +80,26 @@ public struct AppView: View {
         NavigationView {
             List {
                 HStack {
-                    Image(systemName: "person.circle")
-                        .font(.largeTitle)
-                    Image(systemName: "person.circle")
-                        .font(.largeTitle)
-                    Image(systemName: "person.circle")
-                        .font(.largeTitle)
+                    ForEach(store.people, id: \.id) { person in
+                        Button(action: {
+                            store.send(.view(.personTapped(person)))
+                        }, label: {
+                            Image(systemName: "person.circle")
+                        })
+                        .buttonStyle(.borderless)
+                    }
                     Spacer()
                 }
                 .listRowBackground(Color.clear)
+                
                 ForEach(
                     store.scope(state: \.charts, action: \.charts),
                     id: \.state.id
-                ) { store in
-                    Section {
-                        ChartView(store: store)
+                ) { childStore in
+                    if (store.personFilter == nil || store.personFilter == childStore.chart.person) {
+                        Section {
+                            ChartView(store: childStore)
+                        }
                     }
                 }
             }
@@ -134,10 +146,14 @@ public struct AppView: View {
 }
 
 #Preview {
-    AppView(
+    let person1 = Person(name: "Blob")
+    let person2 = Person(name: "Son")
+    let person3 = Person(name: "Daughter")
+    
+    return AppView(
         store: Store(
             initialState: AppFeature.State(
-                people: [],
+                people: [person1, person2, person3],
                 charts: [
                     ChartFeature.State(
                         chart: Chart(
@@ -153,7 +169,8 @@ public struct AppView: View {
                                     Sticker(size: .small),
                                     Sticker(size: .small),
                                 ]
-                            )
+                            ),
+                            person: person1
                         )
                     ),
                     
@@ -171,7 +188,8 @@ public struct AppView: View {
                                     Sticker(size: .small),
                                     Sticker(size: .small),
                                 ]
-                            )
+                            ),
+                            person: person2
                         )
                     )
                 ]

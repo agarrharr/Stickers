@@ -16,12 +16,14 @@ public struct Chart: Equatable, Identifiable {
     public var name: String
     public var reward: Reward?
     public var stickers: StickersFeature.State
+    public var person: Person
     
-    public init(id: UUID = UUID(), name: String, reward: Reward? = nil, stickers: StickersFeature.State) {
+    public init(id: UUID = UUID(), name: String, reward: Reward? = nil, stickers: StickersFeature.State, person: Person) {
         self.id = id
         self.name = name
         self.reward = reward
         self.stickers = stickers
+        self.person = person
     }
 }
 
@@ -66,6 +68,7 @@ public struct ChartView: View {
         HStack {
             VStack {
                 HStack {
+                    Image(systemName: "person.circle")
                     Text(store.chart.name)
                     Spacer()
                 }
@@ -98,7 +101,8 @@ public struct ChartView: View {
                                     Sticker(size: .small),
                                     Sticker(size: .small),
                                 ]
-                            )
+                            ),
+                            person: Person(name: "Blob")
                         )
                     )
                 ) {
@@ -116,7 +120,8 @@ public struct ChartView: View {
                             reward: Reward(name: "Fishing rod"),
                             stickers: StickersFeature.State(
                                 stickers: []
-                            )
+                            ),
+                            person: Person(name: "Blob")
                         )
                     )
                 ) {
@@ -131,7 +136,8 @@ public struct ChartView: View {
                     initialState: ChartFeature.State(
                         chart: Chart(
                             name: "Chores",
-                            stickers: StickersFeature.State()
+                            stickers: StickersFeature.State(),
+                            person: Person(name: "Blob")
                         )
                     )
                 ) {
