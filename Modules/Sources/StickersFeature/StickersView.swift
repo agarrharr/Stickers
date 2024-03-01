@@ -48,21 +48,31 @@ public struct StickersView: View {
     }
     
     public var body: some View {
-        LazyHGrid(rows: [GridItem(.fixed(20))], content: {
-            ForEach(store.stickers, id: \.id) { sticker in
-                switch sticker.size {
-                case .large:
-                    Image(systemName: "star.circle")
-                        .font(.largeTitle)
-                case .medium:
-                    Image(systemName: "star.circle")
-                        .font(.title2)
-                case .small:
-                    Image(systemName: "star.circle")
-                        .font(.body)
+        ScrollViewReader { value in
+            ScrollView(.horizontal) {
+                HStack {
+                    ForEach(store.stickers, id: \.id) { sticker in
+                        switch sticker.size {
+                        case .large:
+                            Image(systemName: "star.circle")
+                                .font(.largeTitle)
+                        case .medium:
+                            Image(systemName: "star.circle")
+                                .font(.title2)
+                        case .small:
+                            Image(systemName: "star.circle")
+                                .font(.body)
+                        }
+                    }
                 }
+                Spacer()
             }
-        })
+            .scrollIndicators(.hidden)
+            .onAppear {
+                // Scroll all the way to the right
+                value.scrollTo(store.stickers[store.stickers.count - 1].id, anchor: .trailing)
+            }
+        }
     }
 }
 
@@ -71,6 +81,12 @@ public struct StickersView: View {
         store: Store(
             initialState: StickersFeature.State(
                 stickers: [
+                    Sticker(size: .large),
+                    Sticker(size: .large),
+                    Sticker(size: .large),
+                    Sticker(size: .large),
+                    Sticker(size: .large),
+                    Sticker(size: .large),
                     Sticker(size: .large),
                     Sticker(size: .large),
                     Sticker(size: .medium),

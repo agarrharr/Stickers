@@ -67,17 +67,17 @@ public struct ChartView: View {
     public var body: some View {
         HStack {
             VStack {
+                Spacer()
                 HStack {
                     Image(systemName: "person.circle")
                     Text(store.chart.name)
                     Spacer()
                 }
-                HStack {
-                    StickersView(store: store.scope(state: \.chart.stickers, action: \.stickers))
-                    Spacer()
-                }
+                Spacer()
+                    .frame(height: 50)
+                StickersView(store: store.scope(state: \.chart.stickers, action: \.stickers))
             }
-            Spacer()
+                Spacer()
         }
     }
 }
@@ -93,6 +93,14 @@ public struct ChartView: View {
                             reward: Reward(name: "Fishing rod"),
                             stickers: StickersFeature.State(
                                 stickers: [
+                                    Sticker(size: .large),
+                                    Sticker(size: .large),
+                                    Sticker(size: .large),
+                                    Sticker(size: .large),
+                                    Sticker(size: .large),
+                                    Sticker(size: .large),
+                                    Sticker(size: .large),
+                                    Sticker(size: .large),
                                     Sticker(size: .large),
                                     Sticker(size: .large),
                                     Sticker(size: .large),
