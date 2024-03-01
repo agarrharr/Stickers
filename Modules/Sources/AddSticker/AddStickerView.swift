@@ -13,21 +13,45 @@ public struct AddStickerFeature {
     public struct State: Equatable {
         @Shared var people: IdentifiedArrayOf<Person>
         @Shared var charts: IdentifiedArrayOf<ChartFeature.State>
+        var personFilter: Person?
         
         public init(
             people: Shared<IdentifiedArrayOf<Person>>,
-            charts: Shared<IdentifiedArrayOf<ChartFeature.State>>
+            charts: Shared<IdentifiedArrayOf<ChartFeature.State>>,
+            personFilter: Person? = nil
         ) {
             self._people = people
             self._charts = charts
+            self.personFilter = personFilter
         }
     }
     
     public enum Action: Sendable {
+        case charts(IdentifiedActionOf<ChartFeature>)
+        case view(ViewAction)
+        
+        @CasePathable
+        public enum ViewAction: Sendable {
+            case personTapped(Person)
+        }
     }
     
     public var body: some ReducerOf<Self> {
-        EmptyReducer()
+        Reduce { state, action in
+            switch action {
+            case let .view(action):
+                switch action {
+                case let .personTapped(person):
+                    state.personFilter = person == state.personFilter ? nil : person
+                    return .none
+                }
+            case .charts:
+                return .none
+            }
+        }
+        .forEach(\.charts, action: \.charts) {
+            ChartFeature()
+        }
     }
     
     public init() {}
@@ -43,10 +67,18 @@ public struct AddStickerView: View {
     public var body: some View {
         NavigationView {
             VStack {
-                PeopleButtonsView(
-                    people: store.people,
-                    onTap: { person in }
-                )
+                PeopleButtonsView(people: store.people) {
+                    store.send(.view(.personTapped($0)))
+                }
+                ForEach(
+                    store.scope(state: \.charts, action: \.charts),
+                    id: \.state.id
+                ) { childStore in
+                    if (store.personFilter == nil || store.personFilter == childStore.chart.person) {
+                        Text(childStore.chart.name)
+                    }
+                }
+                Spacer()
             }
             .navigationTitle("Add Sticker")
         }
