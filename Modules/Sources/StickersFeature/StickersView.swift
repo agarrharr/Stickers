@@ -1,6 +1,7 @@
 import ComposableArchitecture
-import Models
 import SwiftUI
+
+import Models
 
 public enum StickerSize {
     case small

@@ -1,9 +1,10 @@
+import ComposableArchitecture
+import SwiftUI
+
 import AppFeature
 import ChartFeature
-import ComposableArchitecture
 import Models
 import StickersFeature
-import SwiftUI
 
 @main
 struct StickersApp: App {

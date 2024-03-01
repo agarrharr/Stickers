@@ -1,6 +1,7 @@
 import IdentifiedCollections
-import Models
 import SwiftUI
+
+import Models
 
 public struct PeopleButtonsView: View {
     var people: IdentifiedArrayOf<Person>
