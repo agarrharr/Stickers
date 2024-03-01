@@ -88,12 +88,20 @@ public struct AppView: View {
             List {
                 HStack {
                     ForEach(store.people, id: \.id) { person in
-                        Button(action: {
+                        PersonButtonView(
+                            isSelected: Binding(
+                                get: {
+                                    guard let selectedPerson = store.personFilter else {
+                                        return false
+                                    }
+                                    return selectedPerson.id == person.id
+                                },
+                                set: { _ in }
+                            ),
+                            person: person,
+                            onTap: {
                             store.send(.view(.personTapped(person)))
-                        }, label: {
-                            Image(systemName: "person.circle")
                         })
-                        .buttonStyle(.borderless)
                     }
                     Spacer()
                 }
