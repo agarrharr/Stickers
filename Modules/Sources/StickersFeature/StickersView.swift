@@ -44,6 +44,10 @@ public struct StickersView: View {
                 Spacer()
             }
             .scrollIndicators(.hidden)
+            .onChange(of: store.amount, { _, _ in
+                // Scroll all the way to the right
+                value.scrollTo(totalNumberOfStars() - 1, anchor: .trailing)
+            })
             .onAppear {
                 // Scroll all the way to the right
                 value.scrollTo(totalNumberOfStars() - 1, anchor: .trailing)

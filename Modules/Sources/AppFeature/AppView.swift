@@ -53,9 +53,7 @@ public struct AppFeature {
     }
     
     public var body: some Reducer<State, Action> {
-        Reduce {
-            state,
-            action in
+        Reduce { state, action in
             switch action {
             case .destination:
                 return .none

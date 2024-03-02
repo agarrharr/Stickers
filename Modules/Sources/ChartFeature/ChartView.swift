@@ -12,7 +12,7 @@ public struct Reward: Equatable {
     }
 }
 
-public struct Behavior: Equatable, Identifiable {
+public struct Behavior: Equatable, Identifiable, Sendable {
     public var id: UUID
     public var name: String
     public var amount: Int
@@ -60,11 +60,8 @@ public struct ChartFeature {
         public let id: UUID
         public var chart: Chart
         
-        public init(
-            id: UUID = UUID(),
-            chart: Chart
-        ) {
-            self.id = id
+        public init(chart: Chart) {
+            self.id = chart.id
             self.chart = chart
         }
     }
