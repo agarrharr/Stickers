@@ -29,6 +29,7 @@ public struct AddStickerToChartFeature {
         
         @CasePathable
         public enum ViewAction: Sendable {
+            case behaviorButtonTapped(Behavior)
         }
     }
     
@@ -36,7 +37,12 @@ public struct AddStickerToChartFeature {
         Reduce { state, action in
             switch action {
             case let .view(action):
-                return .none
+                switch action {
+                case let .behaviorButtonTapped(behavior):
+                    // TODO:
+                    // state.charts[id: state.chartID].chart.stickers.append(contentsOf: newStickers)
+                    return .none
+                }
             case .charts:
                 return .none
             }
@@ -67,10 +73,14 @@ public struct AddStickerToChartView: View {
                         if (childStore.chart.id == store.chartID) {
                             Section {
                                 ForEach(childStore.chart.behaviors, id: \.id) { behavior in
-                                    HStack {
-                                        Text(behavior.name)
-                                        Spacer()
-                                        Text("\(behavior.amount)")
+                                    Button {
+                                        store.send(.view(.behaviorButtonTapped(behavior)))
+                                    } label: {
+                                        HStack {
+                                            Text(behavior.name)
+                                            Spacer()
+                                            Text("\(behavior.amount)")
+                                        }
                                     }
                                 }
                                 Text("+1")
