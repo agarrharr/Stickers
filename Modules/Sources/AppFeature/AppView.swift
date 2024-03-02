@@ -14,6 +14,7 @@ public struct AppFeature {
     public enum Destination {
         case settings(SettingsFeature)
         case addSticker(AddStickerFeature)
+        case addStickerToChart(AddStickerToChartFeature)
     }
     
     @ObservableState
@@ -58,8 +59,22 @@ public struct AppFeature {
             switch action {
             case .destination:
                 return .none
-            case .charts:
-                return .none
+            case let .charts(.element(id: _, action: action)):
+                switch action {
+                case let .delegate(action):
+                    switch action {
+                    case let .onAddButtonTap(chartID):
+                        state.destination = .addStickerToChart(
+                            AddStickerToChartFeature.State(
+                                charts: state.$charts,
+                                chartID: chartID
+                            )
+                        )
+                        return .none
+                    }
+                default:
+                    return .none
+                }
             case let .view(action):
                 switch action {
                 case .addChartTapped:
@@ -108,6 +123,52 @@ public struct AppView: View {
     
     public var body: some View {
         NavigationView {
+            ListWithSections(store: store)
+            .navigationTitle(title)
+            .listStyle(.insetGrouped)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    SettingsButton(store: store)
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    AddButton(store: store)
+                }
+            }
+            .sheet(
+                item: $store.scope(
+                    state: \.destination?.settings,
+                    action: \.destination.settings
+                )
+            ) { store in
+                SettingsView(store: store)
+                    .presentationDragIndicator(.visible)
+            }
+            .sheet(
+                item: $store.scope(
+                    state: \.destination?.addSticker,
+                    action: \.destination.addSticker
+                )
+            ) { store in
+                AddStickerView(store: store)
+                    .presentationDragIndicator(.visible)
+            }
+            .sheet(
+                item: $store.scope(
+                    state: \.destination?.addStickerToChart,
+                    action: \.destination.addStickerToChart
+                )
+            ) { store in
+                AddStickerToChartView(store: store)
+                    .presentationDragIndicator(.visible)
+                    .presentationDetents([.medium, .large])
+            }
+        }
+    }
+    
+    struct ListWithSections: View {
+        var store: StoreOf<AppFeature>
+        
+        var body: some View {
             GeometryReader { reader in
                 List {
                     Section {
@@ -133,56 +194,45 @@ public struct AppView: View {
                     }
                 }
             }
-            .navigationTitle(title)
-            .listStyle(.insetGrouped)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("Settings", systemImage: "gear") {
-                        store.send(.view(.settingsIconTapped))
-                    }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Menu {
-                        Button {
-                            store.send(.view(.addChartTapped))
-                        } label: {
-                            Label("Add Chart", systemImage: "rectangle.stack")
-                        }
-                        Button {
-                            store.send(.view(.addPersonTapped))
-                        } label: {
-                            Label("Add Person", systemImage: "person.fill")
-                        }
-                        Button {
-                            store.send(.view(.addStickerTapped))
-                        } label: {
-                            Label("Add Sticker", systemImage: "star.fill")
-                        }
-                    } label: {
-                        Label("Add", systemImage: "plus")
-                    }
-                }
-            }
-            .sheet(
-                item: $store.scope(
-                    state: \.destination?.settings,
-                    action: \.destination.settings
-                )
-            ) { store in
-                SettingsView(store: store)
-                    .presentationDragIndicator(.visible)
-            }
-            .sheet(
-                item: $store.scope(
-                    state: \.destination?.addSticker,
-                    action: \.destination.addSticker
-                )
-            ) { store in
-                AddStickerView(store: store)
-                    .presentationDragIndicator(.visible)
+        }
+    }
+    
+    struct SettingsButton: View {
+        var store: StoreOf<AppFeature>
+
+        var body: some View {
+            Button("Settings", systemImage: "gear") {
+                store.send(.view(.settingsIconTapped))
             }
         }
     }
+    
+    struct AddButton: View {
+        var store: StoreOf<AppFeature>
+        
+        var body: some View {
+            Menu {
+                Button {
+                    store.send(.view(.addChartTapped))
+                } label: {
+                    Label("Add Chart", systemImage: "rectangle.stack")
+                }
+                Button {
+                    store.send(.view(.addPersonTapped))
+                } label: {
+                    Label("Add Person", systemImage: "person.fill")
+                }
+                Button {
+                    store.send(.view(.addStickerTapped))
+                } label: {
+                    Label("Add Sticker", systemImage: "star.fill")
+                }
+            } label: {
+                Label("Add", systemImage: "plus")
+            }
+        }
+    }
+
 }
 
 #Preview {

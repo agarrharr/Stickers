@@ -72,9 +72,37 @@ public struct ChartFeature {
     public enum Action: Sendable {
         case binding(BindingAction<State>)
         case stickers(StickersFeature.Action)
+        case view(ViewAction)
+        case delegate(DelegateAction)
+        
+        @CasePathable
+        public enum ViewAction: Sendable {
+            case addButtonTapped
+        }
+        @CasePathable
+        public enum DelegateAction: Sendable {
+            case onAddButtonTap(UUID)
+        }
     }
 
     public var body: some ReducerOf<Self> {
+        Reduce { state, action in
+            switch action {
+            case let .view(action):
+                switch action {
+                case .addButtonTapped:
+                    return .run { [chart = state.chart] send in
+                        await send(.delegate(.onAddButtonTap(chart.id)))
+                    }
+                }
+            case .delegate:
+                return .none
+            case .binding:
+                return .none
+            case .stickers:
+                return .none
+            }
+        }
         Scope(state: \.chart.stickers, action: \.stickers) {
             StickersFeature()
         }
@@ -91,19 +119,22 @@ public struct ChartView: View {
     }
     
     public var body: some View {
-        HStack {
-            VStack {
+        VStack {
+            Spacer()
+            HStack {
+                Image(systemName: "person.circle")
+                Text(store.chart.name)
                 Spacer()
-                HStack {
-                    Image(systemName: "person.circle")
-                    Text(store.chart.name)
-                    Spacer()
+                Button {
+                    store.send(.view(.addButtonTapped))
+                } label: {
+                    Image(systemName: "plus")
+                        .accessibilityLabel("Add sticker to \(store.chart.name)")
                 }
-                Spacer()
-                    .frame(height: 50)
-                StickersView(store: store.scope(state: \.chart.stickers, action: \.stickers))
             }
-                Spacer()
+            Spacer()
+                .frame(height: 50)
+            StickersView(store: store.scope(state: \.chart.stickers, action: \.stickers))
         }
     }
 }
