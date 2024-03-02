@@ -33,8 +33,12 @@ public struct AddStickerFeature {
         @CasePathable
         public enum ViewAction: Sendable {
             case personTapped(Person)
+            case behaviorButtonTapped(UUID, Behavior)
+            case addAmountButtonTapped(UUID, Int)
         }
     }
+    
+    @Dependency(\.dismiss) var dismiss
     
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
@@ -44,6 +48,16 @@ public struct AddStickerFeature {
                 case let .personTapped(person):
                     state.personFilter = person == state.personFilter ? nil : person
                     return .none
+                case let .behaviorButtonTapped(chartID, behavior):
+                    state.charts[id: chartID]?.chart.stickers.amount += behavior.amount
+                    return .run { _ in
+                        await dismiss()
+                    }
+                case let .addAmountButtonTapped(chartID, amount):
+                    state.charts[id: chartID]?.chart.stickers.amount += amount
+                    return .run { _ in
+                        await dismiss()
+                    }
                 }
             case .charts:
                 return .none
@@ -86,15 +100,31 @@ public struct AddStickerView: View {
                         if (store.personFilter == nil || store.personFilter == childStore.chart.person) {
                             Section {
                                 ForEach(childStore.chart.behaviors, id: \.id) { behavior in
-                                    HStack {
-                                        Text(behavior.name)
-                                        Spacer()
-                                        Text("\(behavior.amount)")
+                                    Button {
+                                        store.send(.view(.behaviorButtonTapped(childStore.chart.id, behavior)))
+                                    } label: {
+                                        HStack {
+                                            Text(behavior.name)
+                                            Spacer()
+                                            Text("\(behavior.amount)")
+                                        }
                                     }
                                 }
-                                Text("+1")
-                                Text("+5")
-                                Text("+10")
+                                Button {
+                                    store.send(.view(.addAmountButtonTapped(childStore.chart.id, 1)))
+                                } label: {
+                                    Text("+1")
+                                }
+                                Button {
+                                    store.send(.view(.addAmountButtonTapped(childStore.chart.id, 5)))
+                                } label: {
+                                    Text("+5")
+                                }
+                                Button {
+                                    store.send(.view(.addAmountButtonTapped(childStore.chart.id, 10)))
+                                } label: {
+                                    Text("+10")
+                                }
                             } header: {
                                 Text(childStore.chart.name)
                             }
