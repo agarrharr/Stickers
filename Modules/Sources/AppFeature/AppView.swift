@@ -249,23 +249,7 @@ public struct AppView: View {
                         chart: Chart(
                             name: "Chores",
                             reward: Reward(name: "Fishing rod"),
-                            stickers: StickersFeature.State(
-                                stickers: [
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .medium),
-                                    Sticker(size: .small),
-                                    Sticker(size: .small),
-                                    Sticker(size: .small),
-                                ]
-                            ),
+                            stickers: StickersFeature.State(amount: 98),
                             person: person1
                         )
                     ),
@@ -274,17 +258,7 @@ public struct AppView: View {
                         chart: Chart(
                             name: "Homework",
                             reward: Reward(name: "Batting cages"),
-                            stickers: StickersFeature.State(
-                                stickers: [
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .medium),
-                                    Sticker(size: .small),
-                                    Sticker(size: .small),
-                                    Sticker(size: .small),
-                                ]
-                            ),
+                            stickers: StickersFeature.State(amount: 38),
                             person: person2
                         )
                     )

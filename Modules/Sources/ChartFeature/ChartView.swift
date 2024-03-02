@@ -148,25 +148,7 @@ public struct ChartView: View {
                         chart: Chart(
                             name: "Chores",
                             reward: Reward(name: "Fishing rod"),
-                            stickers: StickersFeature.State(
-                                stickers: [
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .large),
-                                    Sticker(size: .medium),
-                                    Sticker(size: .small),
-                                    Sticker(size: .small),
-                                    Sticker(size: .small),
-                                ]
-                            ),
+                            stickers: StickersFeature.State(amount: 108),
                             person: Person(name: "Blob")
                         )
                     )
@@ -183,9 +165,7 @@ public struct ChartView: View {
                         chart: Chart(
                             name: "Chores",
                             reward: Reward(name: "Fishing rod"),
-                            stickers: StickersFeature.State(
-                                stickers: []
-                            ),
+                            stickers: StickersFeature.State(),
                             person: Person(name: "Blob")
                         )
                     )

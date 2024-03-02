@@ -22,26 +22,7 @@ struct StickersApp: App {
                             chart: Chart(
                                 name: "Chores",
                                 reward: Reward(name: "Fishing rod"),
-                                stickers: StickersFeature.State(
-                                    stickers: [
-                                        Sticker(size: .large),
-                                        Sticker(size: .large),
-                                        Sticker(size: .large),
-                                        Sticker(size: .large),
-                                        Sticker(size: .large),
-                                        Sticker(size: .large),
-                                        Sticker(size: .large),
-                                        Sticker(size: .large),
-                                        Sticker(size: .large),
-                                        Sticker(size: .large),
-                                        Sticker(size: .large),
-                                        Sticker(size: .large),
-                                        Sticker(size: .medium),
-                                        Sticker(size: .small),
-                                        Sticker(size: .small),
-                                        Sticker(size: .small),
-                                    ]
-                                ),
+                                stickers: StickersFeature.State(amount: 128),
                                 person: person1
                             )
                         ),
@@ -54,11 +35,7 @@ struct StickersApp: App {
                                     Behavior(name: "Sweep bathroom", amount: 5),
                                     Behavior(name: "Put away clothes", amount: 2)
                                 ],
-                                stickers: StickersFeature.State(
-                                    stickers: [
-                                        Sticker(size: .large)
-                                    ]
-                                ),
+                                stickers: StickersFeature.State(amount: 10),
                                 person: person2
                             )
                         ),
@@ -70,14 +47,7 @@ struct StickersApp: App {
                                     Behavior(name: "Math homework", amount: 1),
                                     Behavior(name: "Read", amount: 2)
                                 ],
-                                stickers: StickersFeature.State(
-                                    stickers: [
-                                        Sticker(size: .small),
-                                        Sticker(size: .small),
-                                        Sticker(size: .small),
-                                        Sticker(size: .small),
-                                    ]
-                                ),
+                                stickers: StickersFeature.State(amount: 4),
                                 person: person2
                             )
                         )

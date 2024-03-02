@@ -3,30 +3,14 @@ import SwiftUI
 
 import Models
 
-public enum StickerSize {
-    case small
-    case medium
-    case large
-}
-
-public struct Sticker: Equatable, Identifiable {
-    public var id: UUID
-    public var size: StickerSize
-    
-    public init(id: UUID = UUID(), size: StickerSize) {
-        self.id = id
-        self.size = size
-    }
-}
-
 @Reducer
 public struct StickersFeature {
     @ObservableState
     public struct State: Equatable {
-        public var stickers: IdentifiedArrayOf<Sticker>
+        public var amount: Int
         
-        public init(stickers: IdentifiedArrayOf<Sticker> = []) {
-            self.stickers = stickers
+        public init(amount: Int = 0) {
+            self.amount = amount
         }
     }
     
@@ -51,19 +35,10 @@ public struct StickersView: View {
     public var body: some View {
         ScrollViewReader { value in
             ScrollView(.horizontal) {
-                HStack {
-                    ForEach(store.stickers, id: \.id) { sticker in
-                        switch sticker.size {
-                        case .large:
-                            Image(systemName: "star.circle")
-                                .font(.largeTitle)
-                        case .medium:
-                            Image(systemName: "star.circle")
-                                .font(.title2)
-                        case .small:
-                            Image(systemName: "star.circle")
-                                .font(.body)
-                        }
+                HStack(alignment: .bottom) {
+                    ForEach(0..<totalNumberOfStars(), id: \.self) { index in
+                        let starSize = self.starSize(forIndex: index)
+                        starImage(size: starSize)
                     }
                 }
                 Spacer()
@@ -71,32 +46,50 @@ public struct StickersView: View {
             .scrollIndicators(.hidden)
             .onAppear {
                 // Scroll all the way to the right
-                value.scrollTo(store.stickers[store.stickers.count - 1].id, anchor: .trailing)
+                value.scrollTo(totalNumberOfStars() - 1, anchor: .trailing)
             }
         }
+    }
+    
+    private func starImage(size: CGFloat) -> some View {
+        Image(systemName: "star.fill")
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(width: size, height: size)
+            .foregroundColor(.yellow)
+    }
+    
+    private func totalNumberOfStars() -> Int {
+        return numberOfLargeStars() + numberOfMediumStars() + numberOfSmallStars()
+    }
+    
+    private func starSize(forIndex index: Int) -> CGFloat {
+        if index < numberOfLargeStars() {
+            return 30
+        } else if index < numberOfLargeStars() + numberOfMediumStars() {
+            return 20
+        } else {
+            return 15
+        }
+    }
+    
+    private func numberOfLargeStars() -> Int {
+        store.amount / 10
+    }
+    
+    private func numberOfMediumStars() -> Int {
+        (store.amount % 10) / 5
+    }
+    
+    private func numberOfSmallStars() -> Int {
+        (store.amount % 10) % 5
     }
 }
 
 #Preview {
-    StickersView(
-        store: Store(
-            initialState: StickersFeature.State(
-                stickers: [
-                    Sticker(size: .large),
-                    Sticker(size: .large),
-                    Sticker(size: .large),
-                    Sticker(size: .large),
-                    Sticker(size: .large),
-                    Sticker(size: .large),
-                    Sticker(size: .large),
-                    Sticker(size: .large),
-                    Sticker(size: .medium),
-                    Sticker(size: .small),
-                    Sticker(size: .small),
-                    Sticker(size: .small),
-                ]
-            )) {
-                StickersFeature()
-            }
+    StickersView(store: Store(
+        initialState: StickersFeature.State(amount: 88)) {
+            StickersFeature()
+        }
     )
 }
