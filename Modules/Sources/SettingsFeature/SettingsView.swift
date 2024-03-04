@@ -80,12 +80,7 @@ public struct SettingsView: View {
             .navigationDestination(
                 isPresented: Binding(
                     get: {
-                        switch store.destination {
-                        case .stickerValues:
-                            return true
-                        default:
-                            return false
-                        }
+                        store.destination.is(\.stickerValues)
                     },
                     set: { _ in
                         store.send(.destination(.dismiss))
