@@ -63,7 +63,7 @@ public struct PersonView: View {
             selection:  $store.activeChartID.sending(\.selectChart),
             content:  {
                 ForEach(store.scope(state: \.charts, action: \.charts)) { childStore in
-                    Text("Stickers for \(childStore.name)")
+                    ChartView(store: childStore)
                         .tabItem {
                             Text(childStore.name)
                         }

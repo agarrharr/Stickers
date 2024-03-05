@@ -103,10 +103,11 @@ public struct ChartView: View {
     
     public var body: some View {
         VStack {
+            StickersView(store: store.scope(state: \.stickers, action: \.stickers))
+            
             Spacer()
+            
             HStack {
-                Image(systemName: "person.circle")
-                Text(store.name)
                 Spacer()
                 Button {
                     store.send(.view(.addButtonTapped))
@@ -114,55 +115,24 @@ public struct ChartView: View {
                     Image(systemName: "plus")
                         .accessibilityLabel("Add sticker to \(store.name)")
                 }
+                Spacer()
             }
-            Spacer()
-                .frame(height: 50)
-            StickersView(store: store.scope(state: \.stickers, action: \.stickers))
         }
     }
 }
 
 #Preview {
-    List {
-        Section {
-            ChartView(
-                store: Store(
-                    initialState: ChartFeature.State(
-                        name: "Chores",
-                        reward: Reward(name: "Fishing rod"),
-                        stickers: StickersFeature.State(amount: 108)
-                    )
-                ) {
-                    ChartFeature()
-                }
-            )
-        }
-        
-        Section {
-            ChartView(
-                store: Store(
-                    initialState: ChartFeature.State(
-                        name: "Chores",
-                        reward: Reward(name: "Fishing rod"),
-                        stickers: StickersFeature.State()
-                    )
-                ) {
-                    ChartFeature()
-                }
-            )
-        }
-        
-        Section {
-            ChartView(
-                store: Store(
-                    initialState: ChartFeature.State(
-                        name: "Chores",
-                        stickers: StickersFeature.State()
-                    )
-                ) {
-                    ChartFeature()
-                }
-            )
-        }
+    Section {
+        ChartView(
+            store: Store(
+                initialState: ChartFeature.State(
+                    name: "Chores",
+                    reward: Reward(name: "Fishing rod"),
+                    stickers: StickersFeature.State(amount: 108)
+                )
+            ) {
+                ChartFeature()
+            }
+        )
     }
 }

@@ -31,60 +31,22 @@ public struct StickersView: View {
     }
     
     public var body: some View {
-        ScrollViewReader { value in
-            ScrollView(.horizontal) {
-                HStack(alignment: .bottom) {
-                    ForEach(0..<totalNumberOfStars(), id: \.self) { index in
-                        let starSize = self.starSize(forIndex: index)
-                        starImage(size: starSize)
-                    }
+        ScrollView {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 30))], spacing: 20) {
+                ForEach(0..<store.amount, id: \.self) { index in
+                    starImage()
                 }
-                Spacer()
             }
-            .scrollIndicators(.hidden)
-            .onChange(of: store.amount, { _, _ in
-                // Scroll all the way to the right
-                value.scrollTo(totalNumberOfStars() - 1, anchor: .trailing)
-            })
-            .onAppear {
-                // Scroll all the way to the right
-                value.scrollTo(totalNumberOfStars() - 1, anchor: .trailing)
-            }
+            .padding(.horizontal)
         }
     }
     
-    private func starImage(size: CGFloat) -> some View {
+    private func starImage() -> some View {
         Image(systemName: "star.fill")
             .resizable()
             .aspectRatio(contentMode: .fit)
-            .frame(width: size, height: size)
+            .frame(width: 30, height: 30)
             .foregroundColor(.yellow)
-    }
-    
-    private func totalNumberOfStars() -> Int {
-        return numberOfLargeStars() + numberOfMediumStars() + numberOfSmallStars()
-    }
-    
-    private func starSize(forIndex index: Int) -> CGFloat {
-        if index < numberOfLargeStars() {
-            return 30
-        } else if index < numberOfLargeStars() + numberOfMediumStars() {
-            return 20
-        } else {
-            return 15
-        }
-    }
-    
-    private func numberOfLargeStars() -> Int {
-        store.amount / 10
-    }
-    
-    private func numberOfMediumStars() -> Int {
-        (store.amount % 10) / 5
-    }
-    
-    private func numberOfSmallStars() -> Int {
-        (store.amount % 10) % 5
     }
 }
 
