@@ -22,18 +22,22 @@ public struct AppFeature {
         @Presents var destination: Destination.State?
         @Shared var people: IdentifiedArrayOf<Person>
         @Shared var charts: IdentifiedArrayOf<ChartFeature.State>
-        var personFilter: Person?
+        var activePersonID: UUID
+        var activeChartID: UUID
+        var selectedTab = 1
         
         public init(
             destination: Destination.State? = nil,
             people: Shared<IdentifiedArrayOf<Person>>,
             charts: Shared<IdentifiedArrayOf<ChartFeature.State>>,
-            personFilter: Person? = nil
+            activePersonID: UUID,
+            activeChartID: UUID
         ) {
             self.destination = destination
             self._people = people
             self._charts = charts
-            self.personFilter = personFilter
+            self.activePersonID = activePersonID
+            self.activeChartID = activeChartID
         }
     }
     
@@ -41,6 +45,7 @@ public struct AppFeature {
         case destination(PresentationAction<Destination.Action>)
         case charts(IdentifiedActionOf<ChartFeature>)
         case view(ViewAction)
+        case selectChart(UUID)
         
         @CasePathable
         public enum ViewAction: Sendable {
@@ -48,7 +53,8 @@ public struct AppFeature {
             case addPersonTapped
             case addStickerTapped
             case personTapped(Person)
-            case settingsIconTapped
+            case profileButtonTapped
+//            case settingsIconTapped
         }
     }
     
@@ -88,12 +94,18 @@ public struct AppFeature {
                     )
                     return .none
                 case let .personTapped(person):
-                    state.personFilter = person == state.personFilter ? nil : person
+                    state.activePersonID = person.id
                     return .none
-                case .settingsIconTapped:
-                    state.destination = .settings(SettingsFeature.State())
+                case .profileButtonTapped:
                     return .none
+                    
+//                case .settingsIconTapped:
+//                    state.destination = .settings(SettingsFeature.State())
+//                    return .none
                 }
+            case let .selectChart(chartID):
+                state.activeChartID = chartID
+                return .none
             }
         }
         .ifLet(\.$destination, action: \.destination)
@@ -109,10 +121,7 @@ public struct AppView: View {
     @Bindable var store: StoreOf<AppFeature>
     
     private var title: String {
-        guard let person = store.personFilter else {
-            return "Everyone"
-        }
-        return person.name
+        store.charts[id: store.activeChartID]?.chart.name ?? "Chart"
     }
     
     public init(store: StoreOf<AppFeature>) {
@@ -121,12 +130,31 @@ public struct AppView: View {
     
     public var body: some View {
         NavigationView {
-            ListWithSections(store: store)
+            TabView(
+                selection:  $store.activeChartID.sending(\.selectChart),
+                content:  {
+                    ForEach(
+                        store.scope(state: \.charts, action: \.charts),
+                        id: \.state.id
+                    ) { childStore in
+                        if (store.activePersonID == childStore.chart.person.id) {
+                            Text("Stickers for \(childStore.chart.name)")
+                                .tabItem {
+                                    Text(childStore.chart.name)
+                                }
+                                .tag(childStore.chart.id)
+                        }
+                    }
+                }
+            )
+            .tabViewStyle(.page)
+            .indexViewStyle(.page(backgroundDisplayMode: .always))
             .navigationTitle(title)
+            .navigationBarTitleDisplayMode(.inline)
             .listStyle(.insetGrouped)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    SettingsButton(store: store)
+                    ProfileButton(store: store)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     AddButton(store: store)
@@ -141,66 +169,41 @@ public struct AppView: View {
                 SettingsView(store: store)
                     .presentationDragIndicator(.visible)
             }
-            .sheet(
-                item: $store.scope(
-                    state: \.destination?.addSticker,
-                    action: \.destination.addSticker
-                )
-            ) { store in
-                AddStickerView(store: store)
-                    .presentationDragIndicator(.visible)
-            }
-            .sheet(
-                item: $store.scope(
-                    state: \.destination?.addStickerToChart,
-                    action: \.destination.addStickerToChart
-                )
-            ) { store in
-                AddStickerToChartView(store: store)
-                    .presentationDragIndicator(.visible)
-                    .presentationDetents([.medium, .large])
-            }
         }
     }
     
-    struct ListWithSections: View {
-        var store: StoreOf<AppFeature>
-        
-        var body: some View {
-            GeometryReader { reader in
-                List {
-                    Section {
-                        // Empty section
-                    } header: {
-                        PeopleButtonsView(people: store.people) {
-                            store.send(.view(.personTapped($0)))
-                        }
-                        .textCase(nil)
-                        // Make the header the full width so that the buttons can
-                        // scroll to the edges and not get cut off
-                        .frame(width: reader.size.width, alignment: .leading)
-                    }
-                    ForEach(
-                        store.scope(state: \.charts, action: \.charts),
-                        id: \.state.id
-                    ) { childStore in
-                        if (store.personFilter == nil || store.personFilter == childStore.chart.person) {
-                            Section {
-                                ChartView(store: childStore)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    struct SettingsButton: View {
+    struct ProfileButton: View {
         var store: StoreOf<AppFeature>
 
         var body: some View {
-            Button("Settings", systemImage: "gear") {
-                store.send(.view(.settingsIconTapped))
+            Menu {
+                // TODO: make this dynamic with each person
+                Button {
+                    // TODO: send the person in the action
+                    store.send(.view(.profileButtonTapped))
+                } label: {
+                    Label("Blob", systemImage: "person")
+                }
+                Button {
+                    // TODO: send the person in the action
+                    store.send(.view(.profileButtonTapped))
+                } label: {
+                    Label("Son", systemImage: "cat.fill")
+                }
+                Button {
+                    // TODO: send the person in the action
+                    store.send(.view(.profileButtonTapped))
+                } label: {
+                    Label("Daughter", systemImage: "fish.fill")
+                }
+                Button {
+                    // TODO: send the person in the action
+                    store.send(.view(.profileButtonTapped))
+                } label: {
+                    Label("Add person", systemImage: "person.fill.badge.plus")
+                }
+            } label: {
+                Label("Switch profile", systemImage: "person.fill")
             }
         }
     }
@@ -209,24 +212,10 @@ public struct AppView: View {
         var store: StoreOf<AppFeature>
         
         var body: some View {
-            Menu {
-                Button {
-                    store.send(.view(.addChartTapped))
-                } label: {
-                    Label("Add Chart", systemImage: "rectangle.stack")
-                }
-                Button {
-                    store.send(.view(.addPersonTapped))
-                } label: {
-                    Label("Add Person", systemImage: "person.fill")
-                }
-                Button {
-                    store.send(.view(.addStickerTapped))
-                } label: {
-                    Label("Add Sticker", systemImage: "star.fill")
-                }
+            Button {
+                store.send(.view(.addChartTapped))
             } label: {
-                Label("Add", systemImage: "plus")
+                Label("Add chart", systemImage: "plus")
             }
         }
     }
@@ -238,19 +227,26 @@ public struct AppView: View {
     let person2 = Person(name: "Son")
     let person3 = Person(name: "Daughter")
     
+    let chart1 = Chart(
+        name: "Chores",
+        reward: Reward(name: "Fishing rod"),
+        stickers: StickersFeature.State(amount: 98),
+        person: person1
+    )
+    let chart2 = Chart(
+        name: "Homework",
+        reward: Reward(name: "Fishing rod"),
+        stickers: StickersFeature.State(amount: 98),
+        person: person1
+    )
+    
     return AppView(
         store: Store(
             initialState: AppFeature.State(
                 people: Shared([person1, person2, person3]),
                 charts: Shared([
-                    ChartFeature.State(
-                        chart: Chart(
-                            name: "Chores",
-                            reward: Reward(name: "Fishing rod"),
-                            stickers: StickersFeature.State(amount: 98),
-                            person: person1
-                        )
-                    ),
+                    ChartFeature.State(chart: chart1),
+                    ChartFeature.State(chart: chart2),
                     
                     ChartFeature.State(
                         chart: Chart(
@@ -260,7 +256,9 @@ public struct AppView: View {
                             person: person2
                         )
                     )
-                ])
+                ]),
+                activePersonID: person1.id,
+                activeChartID: chart1.id
             )
         ) {
             AppFeature()
