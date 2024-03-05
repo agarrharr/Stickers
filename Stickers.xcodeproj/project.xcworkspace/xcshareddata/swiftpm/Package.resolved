@@ -73,15 +73,6 @@
       }
     },
     {
-      "identity" : "swift-nonempty",
-      "kind" : "remoteSourceControl",
-      "location" : "https://www.github.com/pointfreeco/swift-nonempty",
-      "state" : {
-        "revision" : "8074e5f2e4a6de5a42476e545cc33438021aa2a4",
-        "version" : "0.4.0"
-      }
-    },
-    {
       "identity" : "swift-perception",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-perception",

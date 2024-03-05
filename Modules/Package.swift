@@ -24,22 +24,17 @@ let package = Package(
         .library(
             name: "StickersFeature",
             targets: ["StickersFeature"]),
-        .library(
-            name: "Models",
-            targets: ["Models"]),
     ],
     dependencies: [
 //        .package(url: "https://www.github.com/pointfreeco/swift-composable-architecture", from: "1.8.2"),
         .package(url: "https://www.github.com/pointfreeco/swift-composable-architecture", branch: "shared-state-beta"),
         .package(url: "https://www.github.com/pointfreeco/swift-identified-collections", from: "1.0.0"),
-        .package(url: "https://www.github.com/pointfreeco/swift-nonempty", from: "0.4.0"),
     ],
     targets: [
         .target(
             name: "AddSticker",
             dependencies: [
                 "ChartFeature",
-                "Models",
                 "PeopleButtons",
                 "StickersFeature",
                 .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
@@ -50,7 +45,6 @@ let package = Package(
             dependencies: [
                 "AddSticker",
                 "ChartFeature",
-                "Models",
                 "PeopleButtons",
                 "SettingsFeature",
                 "StickersFeature",
@@ -60,7 +54,6 @@ let package = Package(
         .target(
             name: "ChartFeature",
             dependencies: [
-                "Models",
                 "StickersFeature",
                 .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
             ]
@@ -68,7 +61,6 @@ let package = Package(
         .target(
             name: "PeopleButtons",
             dependencies: [
-                "Models",
                 .product(name: "IdentifiedCollections", package: "swift-identified-collections"),
             ]
         ),
@@ -81,15 +73,7 @@ let package = Package(
         .target(
             name: "StickersFeature",
             dependencies: [
-                "Models",
                 .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
-            ]
-        ),
-        .target(
-            name: "Models",
-            dependencies: [
-                .product(name: "IdentifiedCollections", package: "swift-identified-collections"),
-                .product(name: "NonEmpty", package: "swift-nonempty"),
             ]
         ),
     ]
