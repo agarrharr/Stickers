@@ -54,6 +54,10 @@ public struct PersonFeature {
 public struct PersonView: View {
     @Bindable var store: StoreOf<PersonFeature>
     
+    private var title: String {
+        store.charts[id: store.activeChartID]?.name ?? "Chart"
+    }
+    
     public var body: some View {
         TabView(
                 selection:  $store.activeChartID.sending(\.selectChart),
@@ -67,6 +71,8 @@ public struct PersonView: View {
                     }
                 }
             )
+            .navigationTitle(title)
+            .navigationBarTitleDisplayMode(.inline)
             .tabViewStyle(.page)
             .indexViewStyle(.page(backgroundDisplayMode: .always))
     }
@@ -130,6 +136,7 @@ public struct AppFeature {
                 case .addChartTapped:
                     return .none
                 case .addPersonTapped:
+                    // TODO:
                     return .none
                 case .addStickerTapped:
 //                    state.destination = .addSticker(
@@ -160,11 +167,6 @@ public struct AppFeature {
 public struct AppView: View {
     @Bindable var store: StoreOf<AppFeature>
     
-//    private var title: String {
-//        "Chart"
-////        store.charts[id: store.activeChartID]?.name ?? "Chart"
-//    }
-    
     public init(store: StoreOf<AppFeature>) {
         self.store = store
     }
@@ -177,8 +179,6 @@ public struct AppView: View {
                     action: \.people
                 ).first!
             )
-//            .navigationTitle(title)
-//            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     ProfileButton(store: store)
