@@ -32,6 +32,7 @@ let package = Package(
 //        .package(url: "https://www.github.com/pointfreeco/swift-composable-architecture", from: "1.8.2"),
         .package(url: "https://www.github.com/pointfreeco/swift-composable-architecture", branch: "shared-state-beta"),
         .package(url: "https://www.github.com/pointfreeco/swift-identified-collections", from: "1.0.0"),
+        .package(url: "https://www.github.com/pointfreeco/swift-nonempty", from: "0.4.0"),
     ],
     targets: [
         .target(
@@ -88,6 +89,7 @@ let package = Package(
             name: "Models",
             dependencies: [
                 .product(name: "IdentifiedCollections", package: "swift-identified-collections"),
+                .product(name: "NonEmpty", package: "swift-nonempty"),
             ]
         ),
     ]

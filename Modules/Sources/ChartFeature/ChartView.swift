@@ -28,41 +28,28 @@ public struct Behavior: Equatable, Identifiable, Sendable {
     }
 }
 
-public struct Chart: Equatable, Identifiable {
-    public var id: UUID
-    public var name: String
-    public var reward: Reward?
-    public var behaviors: [Behavior]
-    public var stickers: StickersFeature.State
-    public var person: Person
-    
-    public init(
-        id: UUID = UUID(),
-        name: String,
-        reward: Reward? = nil,
-        behaviors: [Behavior] = [],
-        stickers: StickersFeature.State = StickersFeature.State(),
-        person: Person
-    ) {
-        self.id = id
-        self.name = name
-        self.reward = reward
-        self.behaviors = behaviors
-        self.stickers = stickers
-        self.person = person
-    }
-}
-
 @Reducer
 public struct ChartFeature {
     @ObservableState
     public struct State: Equatable, Identifiable {
         public let id: UUID
-        public var chart: Chart
+        public var name: String
+        public var reward: Reward?
+        public var behaviors: [Behavior]
+        public var stickers: StickersFeature.State
         
-        public init(chart: Chart) {
-            self.id = chart.id
-            self.chart = chart
+        public init(
+            id: UUID = UUID(),
+            name: String,
+            reward: Reward? = nil,
+            behaviors: [Behavior] = [],
+            stickers: StickersFeature.State = StickersFeature.State()
+        ) {
+            self.id = id
+            self.name = name
+            self.reward = reward
+            self.behaviors = behaviors
+            self.stickers = stickers
         }
     }
 
@@ -88,8 +75,8 @@ public struct ChartFeature {
             case let .view(action):
                 switch action {
                 case .addButtonTapped:
-                    return .run { [chart = state.chart] send in
-                        await send(.delegate(.onAddButtonTap(chart.id)))
+                    return .run { [state] send in
+                        await send(.delegate(.onAddButtonTap(state.id)))
                     }
                 }
             case .delegate:
@@ -100,7 +87,7 @@ public struct ChartFeature {
                 return .none
             }
         }
-        Scope(state: \.chart.stickers, action: \.stickers) {
+        Scope(state: \.stickers, action: \.stickers) {
             StickersFeature()
         }
     }
@@ -120,18 +107,18 @@ public struct ChartView: View {
             Spacer()
             HStack {
                 Image(systemName: "person.circle")
-                Text(store.chart.name)
+                Text(store.name)
                 Spacer()
                 Button {
                     store.send(.view(.addButtonTapped))
                 } label: {
                     Image(systemName: "plus")
-                        .accessibilityLabel("Add sticker to \(store.chart.name)")
+                        .accessibilityLabel("Add sticker to \(store.name)")
                 }
             }
             Spacer()
                 .frame(height: 50)
-            StickersView(store: store.scope(state: \.chart.stickers, action: \.stickers))
+            StickersView(store: store.scope(state: \.stickers, action: \.stickers))
         }
     }
 }
@@ -142,12 +129,9 @@ public struct ChartView: View {
             ChartView(
                 store: Store(
                     initialState: ChartFeature.State(
-                        chart: Chart(
-                            name: "Chores",
-                            reward: Reward(name: "Fishing rod"),
-                            stickers: StickersFeature.State(amount: 108),
-                            person: Person(name: "Blob")
-                        )
+                        name: "Chores",
+                        reward: Reward(name: "Fishing rod"),
+                        stickers: StickersFeature.State(amount: 108)
                     )
                 ) {
                     ChartFeature()
@@ -159,12 +143,9 @@ public struct ChartView: View {
             ChartView(
                 store: Store(
                     initialState: ChartFeature.State(
-                        chart: Chart(
-                            name: "Chores",
-                            reward: Reward(name: "Fishing rod"),
-                            stickers: StickersFeature.State(),
-                            person: Person(name: "Blob")
-                        )
+                        name: "Chores",
+                        reward: Reward(name: "Fishing rod"),
+                        stickers: StickersFeature.State()
                     )
                 ) {
                     ChartFeature()
@@ -176,11 +157,8 @@ public struct ChartView: View {
             ChartView(
                 store: Store(
                     initialState: ChartFeature.State(
-                        chart: Chart(
-                            name: "Chores",
-                            stickers: StickersFeature.State(),
-                            person: Person(name: "Blob")
-                        )
+                        name: "Chores",
+                        stickers: StickersFeature.State()
                     )
                 ) {
                     ChartFeature()
