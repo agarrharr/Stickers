@@ -4,87 +4,15 @@ import SwiftUI
 
 import AddSticker
 import ChartFeature
-import Models
-import PeopleButtons
+import PersonFeature
 import SettingsFeature
 import StickersFeature
-
-@Reducer
-public struct PersonFeature {
-  @ObservableState
-  public struct State: Equatable, Identifiable {
-      public var id: UUID
-      public var name: String
-      public var charts: IdentifiedArrayOf<ChartFeature.State>
-      var activeChartID: UUID
-      
-      public init(
-        id: UUID = UUID(),
-        name: String,
-        charts: IdentifiedArrayOf<ChartFeature.State>
-      ) {
-          self.id = id
-          self.name = name
-          self.charts = charts
-          self.activeChartID = charts.first!.id // TODO: Don't force unwrap
-      }
-  }
-
-  public enum Action: Sendable {
-      case charts(IdentifiedActionOf<ChartFeature>)
-      case selectChart(UUID)
-  }
-
-  public var body: some Reducer<State, Action> {
-      Reduce { state, action in
-          switch action {
-          case .charts:
-              return .none
-          case let .selectChart(chartID):
-              state.activeChartID = chartID
-              return .none
-          }
-      }
-      .forEach(\.charts, action: \.charts) {
-          ChartFeature()
-      }
-  }
-}
-
-public struct PersonView: View {
-    @Bindable var store: StoreOf<PersonFeature>
-    
-    private var title: String {
-        store.charts[id: store.activeChartID]?.name ?? "Chart"
-    }
-    
-    public var body: some View {
-        TabView(
-                selection:  $store.activeChartID.sending(\.selectChart),
-                content:  {
-                    ForEach(store.scope(state: \.charts, action: \.charts)) { childStore in
-                        Text("Stickers for \(childStore.name)")
-                            .tabItem {
-                                Text(childStore.name)
-                            }
-                            .tag(childStore.state.id)
-                    }
-                }
-            )
-            .navigationTitle(title)
-            .navigationBarTitleDisplayMode(.inline)
-            .tabViewStyle(.page)
-            .indexViewStyle(.page(backgroundDisplayMode: .always))
-    }
-}
 
 @Reducer
 public struct AppFeature {
     @Reducer(state: .equatable, action: .sendable)
     public enum Destination {
         case settings(SettingsFeature)
-//        case addSticker(AddStickerFeature)
-//        case addStickerToChart(AddStickerToChartFeature)
     }
     
     @ObservableState
@@ -120,7 +48,7 @@ public struct AppFeature {
             case addPersonTapped
             case addStickerTapped
             case personTapped(UUID)
-//            case settingsIconTapped
+            case settingsIconTapped
         }
     }
     
@@ -134,24 +62,20 @@ public struct AppFeature {
             case let .view(action):
                 switch action {
                 case .addChartTapped:
+                    // TODO: open new chart feature
                     return .none
                 case .addPersonTapped:
-                    // TODO:
+                    // TODO: open new person feature
                     return .none
-                case .addStickerTapped:
-//                    state.destination = .addSticker(
-//                        AddStickerFeature.State(
-//                            people: state.$people
-////                            charts: state.$charts
-//                        )
-//                    )
+                case .addStickerTapped: // TODO: send this action
+                    // TODO: show some UI to add a sticker
                     return .none
                 case let .personTapped(personID):
                     state.activePersonID = personID
                     return .none
-//                case .settingsIconTapped:
-//                    state.destination = .settings(SettingsFeature.State())
-//                    return .none
+                case .settingsIconTapped: // TODO: send this action
+                    state.destination = .settings(SettingsFeature.State())
+                    return .none
                 }
             }
         }
@@ -210,6 +134,11 @@ public struct AppView: View {
                     } label: {
                         Label(person.name, systemImage: "person")
                     }
+                }
+                Button {
+                    store.send(.view(.addPersonTapped))
+                } label: {
+                    Label("Add person", systemImage: "person.fill.badge.plus")
                 }
             } label: {
                 Label("Switch profile", systemImage: "person.fill")

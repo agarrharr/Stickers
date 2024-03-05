@@ -1,8 +1,6 @@
 //import IdentifiedCollections
 //import SwiftUI
 //
-//import Models
-//
 //public struct PeopleButtonsView: View {
 //    var people: IdentifiedArrayOf<Person>
 //    var onTap: (Person) -> Void

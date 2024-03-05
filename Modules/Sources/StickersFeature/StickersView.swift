@@ -1,8 +1,6 @@
 import ComposableArchitecture
 import SwiftUI
 
-import Models
-
 @Reducer
 public struct StickersFeature {
     @ObservableState

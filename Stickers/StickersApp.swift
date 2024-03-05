@@ -3,7 +3,7 @@ import SwiftUI
 
 import AppFeature
 import ChartFeature
-import Models
+import PersonFeature
 import StickersFeature
 
 let chart11 = ChartFeature.State(

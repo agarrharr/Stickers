@@ -1,7 +1,6 @@
 import ComposableArchitecture
 import SwiftUI
 
-import Models
 import StickersFeature
 
 public struct Reward: Equatable {

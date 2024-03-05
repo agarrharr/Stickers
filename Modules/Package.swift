@@ -7,9 +7,6 @@ let package = Package(
     platforms: [.iOS(.v17)],
     products: [
         .library(
-            name: "AddSticker",
-            targets: ["AddSticker"]),
-        .library(
             name: "AppFeature",
             targets: ["AppFeature"]),
         .library(
@@ -18,6 +15,9 @@ let package = Package(
         .library(
             name: "PeopleButtons",
             targets: ["PeopleButtons"]),
+        .library(
+            name: "PersonFeature",
+            targets: ["PersonFeature"]),
         .library(
             name: "SettingsFeature",
             targets: ["SettingsFeature"]),
@@ -32,20 +32,11 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "AddSticker",
-            dependencies: [
-                "ChartFeature",
-                "PeopleButtons",
-                "StickersFeature",
-                .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
-            ]
-        ),
-        .target(
             name: "AppFeature",
             dependencies: [
-                "AddSticker",
                 "ChartFeature",
                 "PeopleButtons",
+                "PersonFeature",
                 "SettingsFeature",
                 "StickersFeature",
                 .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
@@ -62,6 +53,13 @@ let package = Package(
             name: "PeopleButtons",
             dependencies: [
                 .product(name: "IdentifiedCollections", package: "swift-identified-collections"),
+            ]
+        ),
+        .target(
+            name: "PersonFeature",
+            dependencies: [
+                "ChartFeature",
+                .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
             ]
         ),
         .target(
