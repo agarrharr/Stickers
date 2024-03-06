@@ -42,9 +42,7 @@ public struct AppFeature {
         
         @CasePathable
         public enum ViewAction: Sendable {
-            case addChartTapped
             case addPersonTapped
-            case addStickerTapped
             case personTapped(UUID)
             case settingsIconTapped
         }
@@ -59,14 +57,8 @@ public struct AppFeature {
                 return .none
             case let .view(action):
                 switch action {
-                case .addChartTapped:
-                    // TODO: open new chart feature
-                    return .none
                 case .addPersonTapped:
                     // TODO: open new person feature
-                    return .none
-                case .addStickerTapped: // TODO: send this action
-                    // TODO: show some UI to add a sticker
                     return .none
                 case let .personTapped(personID):
                     state.activePersonID = personID
@@ -149,9 +141,9 @@ public struct AppView: View {
         
         var body: some View {
             Button {
-                store.send(.view(.addChartTapped))
+                store.send(.view(.settingsIconTapped))
             } label: {
-                Label("Add chart", systemImage: "plus")
+                Label("Settings", systemImage: "gear")
             }
         }
     }
