@@ -9,27 +9,40 @@ import StickersFeature
 let chart11 = ChartFeature.State(
     name: "Chores",
     reward: Reward(name: "Fishing rod"),
-    stickers: StickersFeature.State(amount: 98)
+    stickers: StickersFeature.State(stickers: [
+        StickerFeature.State(sticker: Sticker(id: UUID(), systemName: "star.fill")),
+        StickerFeature.State(sticker: Sticker(id: UUID(), systemName: "cat.fill")),
+        StickerFeature.State(sticker: Sticker(id: UUID(), systemName: "dog.fill")),
+        StickerFeature.State(sticker: Sticker(id: UUID(), systemName: "moon.fill"))
+    ])
 )
 let chart12 = ChartFeature.State(
     name: "Homework",
     reward: Reward(name: "Fishing rod"),
-    stickers: StickersFeature.State(amount: 43)
+    stickers: StickersFeature.State(stickers: [
+        StickerFeature.State(sticker: Sticker(id: UUID(), systemName: "star.fill"))
+    ])
 )
 let chart21 = ChartFeature.State(
     name: "Calm body",
     reward: Reward(name: "Batting cages"),
-    stickers: StickersFeature.State(amount: 5)
+    stickers: StickersFeature.State(stickers: [
+        StickerFeature.State(sticker: Sticker(id: UUID(), systemName: "star.fill"))
+    ])
 )
 let chart22 = ChartFeature.State(
     name: "Homework",
     reward: Reward(name: "Batting cages"),
-    stickers: StickersFeature.State(amount: 14)
+    stickers: StickersFeature.State(stickers: [
+        StickerFeature.State(sticker: Sticker(id: UUID(), systemName: "star.fill"))
+    ])
 )
 let chart31 = ChartFeature.State(
     name: "Homework",
     reward: Reward(name: "Batting cages"),
-    stickers: StickersFeature.State(amount: 38)
+    stickers: StickersFeature.State(stickers: [
+        StickerFeature.State(sticker: Sticker(id: UUID(), systemName: "star.fill"))
+    ])
 )
 
 let person1 = PersonFeature.State(name: "Blob", charts: [chart11, chart12])

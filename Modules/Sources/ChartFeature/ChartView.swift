@@ -42,7 +42,7 @@ public struct ChartFeature {
             name: String,
             reward: Reward? = nil,
             behaviors: [Behavior] = [],
-            stickers: StickersFeature.State = StickersFeature.State()
+            stickers: StickersFeature.State
         ) {
             self.id = id
             self.name = name
@@ -128,7 +128,12 @@ public struct ChartView: View {
                 initialState: ChartFeature.State(
                     name: "Chores",
                     reward: Reward(name: "Fishing rod"),
-                    stickers: StickersFeature.State(amount: 108)
+                    stickers: StickersFeature.State(
+                        stickers:
+                            [
+                                StickerFeature.State(sticker: Sticker(id: UUID(), systemName: "star.fill"))
+                            ]
+                    )
                 )
             ) {
                 ChartFeature()
