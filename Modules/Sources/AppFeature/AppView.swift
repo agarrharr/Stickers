@@ -111,6 +111,7 @@ public struct AppView: View {
                     .presentationDragIndicator(.visible)
             }
         }
+        .navigationViewStyle(.stack)
     }
     
     struct ProfileButton: View {
@@ -147,7 +148,6 @@ public struct AppView: View {
             }
         }
     }
-
 }
 
 #Preview {
