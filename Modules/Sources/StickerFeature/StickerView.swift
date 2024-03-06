@@ -66,58 +66,15 @@ public struct StickerView: View {
     }
 }
 
-@Reducer
-public struct StickersFeature {
-    @ObservableState
-    public struct State: Equatable {
-        public var stickers: IdentifiedArrayOf<StickerFeature.State>
-        
-        public init(stickers: IdentifiedArrayOf<StickerFeature.State>) {
-            self.stickers = stickers
-        }
-    }
-    
-    public enum Action: Sendable {
-        case stickers(IdentifiedActionOf<StickerFeature>)
-    }
-    
-    public var body: some ReducerOf<Self> {
-        EmptyReducer()
-    }
-    
-    public init() {}
-}
-
-public struct StickersView: View {
-    var store: StoreOf<StickersFeature>
-    
-    public init(store: StoreOf<StickersFeature>) {
-        self.store = store
-    }
-    
-    public var body: some View {
-        ScrollView {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 30))], spacing: 20) {
-                ForEach(store.scope(state: \.stickers, action: \.stickers), id: \.self) { store in
-                    StickerView(store: store)
-                }
-            }
-            .padding(.horizontal)
-        }
-    }
-}
-
 #Preview {
-    StickersView(store: Store(
-        initialState: StickersFeature.State(
-            stickers: [
-                StickerFeature.State(sticker: defaultStickerPack.stickers[0]),
-                StickerFeature.State(sticker: defaultStickerPack.stickers[1]),
-                StickerFeature.State(sticker: defaultStickerPack.stickers[2])
-            ]
-        )
-    ) {
-        StickersFeature()
-    }
+    StickerView(
+        store: Store(
+            initialState: StickerFeature.State(
+                sticker: defaultStickerPack.stickers[0]
+            )
+        ) {
+                StickerFeature()
+                
+            }
     )
 }
