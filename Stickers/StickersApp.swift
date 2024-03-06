@@ -7,13 +7,11 @@ import PersonFeature
 import StickersFeature
 
 let chart11 = ChartFeature.State(
-    id: UUID(uuidString: "00000000-0000-0000-0000-000000000000")!,
     name: "Chores",
     reward: Reward(name: "Fishing rod"),
     stickers: StickersFeature.State(amount: 98)
 )
 let chart12 = ChartFeature.State(
-    id: UUID(uuidString: "00000000-0000-0000-0000-000000000001")!,
     name: "Homework",
     reward: Reward(name: "Fishing rod"),
     stickers: StickersFeature.State(amount: 43)
