@@ -1,8 +1,6 @@
 import ComposableArchitecture
-import NonEmpty
 import SwiftUI
 
-import AddSticker
 import ChartFeature
 import PersonFeature
 import SettingsFeature
