@@ -23,7 +23,7 @@ public struct SettingsFeature {
         case view(ViewAction)
         
         @CasePathable
-        public enum ViewAction {
+        public enum ViewAction: Sendable {
             case stickerValuesButtonTapped
         }
     }
