@@ -13,9 +13,6 @@ let package = Package(
             name: "ChartFeature",
             targets: ["ChartFeature"]),
         .library(
-            name: "PeopleButtons",
-            targets: ["PeopleButtons"]),
-        .library(
             name: "PersonFeature",
             targets: ["PersonFeature"]),
         .library(
@@ -28,14 +25,12 @@ let package = Package(
     dependencies: [
 //        .package(url: "https://www.github.com/pointfreeco/swift-composable-architecture", from: "1.8.2"),
         .package(url: "https://www.github.com/pointfreeco/swift-composable-architecture", branch: "shared-state-beta"),
-        .package(url: "https://www.github.com/pointfreeco/swift-identified-collections", from: "1.0.0"),
     ],
     targets: [
         .target(
             name: "AppFeature",
             dependencies: [
                 "ChartFeature",
-                "PeopleButtons",
                 "PersonFeature",
                 "SettingsFeature",
                 "StickersFeature",
@@ -47,12 +42,6 @@ let package = Package(
             dependencies: [
                 "StickersFeature",
                 .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
-            ]
-        ),
-        .target(
-            name: "PeopleButtons",
-            dependencies: [
-                .product(name: "IdentifiedCollections", package: "swift-identified-collections"),
             ]
         ),
         .target(
