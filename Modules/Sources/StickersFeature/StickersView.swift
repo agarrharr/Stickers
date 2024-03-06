@@ -1,23 +1,88 @@
 import ComposableArchitecture
 import SwiftUI
 
+public struct Sticker: Equatable, Identifiable {
+    public var id: UUID
+    public var systemName: String
+    
+    public init(id: UUID, systemName: String) {
+        self.id = id
+        self.systemName = systemName
+    }
+}
+
+struct StickerPack: Equatable {
+    var stickers: [Sticker]
+}
+
+let defaultStickerPack = StickerPack(
+    stickers: [
+        Sticker(id: UUID(), systemName: "star.fill"),
+        Sticker(id: UUID(), systemName: "sun.max.fill"),
+        Sticker(id: UUID(), systemName: "moon.fill"),
+        Sticker(id: UUID(), systemName: "rainbow"),
+        Sticker(id: UUID(), systemName: "face.smiling.inverse"),
+        Sticker(id: UUID(), systemName: "cat.fill"),
+        Sticker(id: UUID(), systemName: "dog.fill"),
+    ]
+)
+
+@Reducer
+public struct StickerFeature {
+    @ObservableState
+    public struct State: Equatable, Identifiable {
+        public var id: UUID
+        public var sticker: Sticker
+        
+        public init(sticker: Sticker) {
+            self.id = sticker.id
+            self.sticker = sticker
+        }
+    }
+    
+    public enum Action: Sendable {
+    }
+    
+    public var body: some ReducerOf<Self> {
+        EmptyReducer()
+    }
+    
+    public init() {}
+}
+
+public struct StickerView: View {
+    var store: StoreOf<StickerFeature>
+    
+    public init(store: StoreOf<StickerFeature>) {
+        self.store = store
+    }
+    
+    public var body: some View {
+        Image(systemName: store.sticker.systemName)
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(width: 30, height: 30)
+            .foregroundColor(.yellow)
+    }
+}
+
 @Reducer
 public struct StickersFeature {
     @ObservableState
     public struct State: Equatable {
-        public var amount: Int
+        public var stickers: IdentifiedArrayOf<StickerFeature.State>
         
-        public init(amount: Int = 0) {
-            self.amount = amount
+        public init(stickers: IdentifiedArrayOf<StickerFeature.State>) {
+            self.stickers = stickers
         }
     }
     
-    public enum Action: BindableAction, Sendable {
-        case binding(BindingAction<State>)
+    public enum Action: Sendable {
+        case stickers(IdentifiedActionOf<StickerFeature>)
     }
     
     public var body: some ReducerOf<Self> {
-        BindingReducer()
+        EmptyReducer()
     }
     
     public init() {}
@@ -33,27 +98,26 @@ public struct StickersView: View {
     public var body: some View {
         ScrollView {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 30))], spacing: 20) {
-                ForEach(0..<store.amount, id: \.self) { index in
-                    starImage()
+                ForEach(store.scope(state: \.stickers, action: \.stickers), id: \.self) { store in
+                    StickerView(store: store)
                 }
             }
             .padding(.horizontal)
         }
     }
-    
-    private func starImage() -> some View {
-        Image(systemName: "star.fill")
-            .resizable()
-            .aspectRatio(contentMode: .fit)
-            .frame(width: 30, height: 30)
-            .foregroundColor(.yellow)
-    }
 }
 
 #Preview {
     StickersView(store: Store(
-        initialState: StickersFeature.State(amount: 88)) {
-            StickersFeature()
-        }
+        initialState: StickersFeature.State(
+            stickers: [
+                StickerFeature.State(sticker: defaultStickerPack.stickers[0]),
+                StickerFeature.State(sticker: defaultStickerPack.stickers[1]),
+                StickerFeature.State(sticker: defaultStickerPack.stickers[2])
+            ]
+        )
+    ) {
+        StickersFeature()
+    }
     )
 }
