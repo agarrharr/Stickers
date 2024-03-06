@@ -61,6 +61,7 @@ public struct ChartFeature {
         @CasePathable
         public enum ViewAction: Sendable {
             case addButtonTapped
+            case redeemButtonTapped
         }
         @CasePathable
         public enum DelegateAction: Sendable {
@@ -80,6 +81,9 @@ public struct ChartFeature {
                     return .run { [state] send in
                         await send(.delegate(.onAddButtonTap(state.id)))
                     }
+                case .redeemButtonTapped:
+                    // TODO
+                    return .none
                 }
             case .delegate:
                 return .none
@@ -119,6 +123,16 @@ public struct ChartView: View {
             
             HStack {
                 Spacer()
+                    .frame(width: 20)
+                Button {
+                    store.send(.view(.redeemButtonTapped))
+                } label: {
+                    Image(systemName: "gift")
+                        .accessibilityLabel("Redeem stickers")
+                }
+                
+                Spacer()
+                
                 Button {
                     store.send(.view(.addButtonTapped))
                 } label: {
@@ -126,6 +140,7 @@ public struct ChartView: View {
                         .accessibilityLabel("Add sticker to \(store.name)")
                 }
                 Spacer()
+                    .frame(width: 20)
             }
         }
     }
