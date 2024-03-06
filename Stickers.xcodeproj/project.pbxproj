@@ -44,6 +44,7 @@
 		991C8F1C2B8FEC6300B227BA /* StickersUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickersUITests.swift; sourceTree = "<group>"; };
 		991C8F1E2B8FEC6300B227BA /* StickersUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickersUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		991C8F2B2B8FED2200B227BA /* Modules */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Modules; sourceTree = "<group>"; };
+		992A2EAA2B98ECA400062D22 /* ci_pre_xcodebuild.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = ci_pre_xcodebuild.sh; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +76,7 @@
 		991C8EF52B8FEC6100B227BA = {
 			isa = PBXGroup;
 			children = (
+				992A2EA92B98EC5E00062D22 /* ci_scripts */,
 				991C8F2B2B8FED2200B227BA /* Modules */,
 				991C8F002B8FEC6100B227BA /* Stickers */,
 				991C8F112B8FEC6300B227BA /* StickersTests */,
@@ -127,6 +129,14 @@
 				991C8F1E2B8FEC6300B227BA /* StickersUITestsLaunchTests.swift */,
 			);
 			path = StickersUITests;
+			sourceTree = "<group>";
+		};
+		992A2EA92B98EC5E00062D22 /* ci_scripts */ = {
+			isa = PBXGroup;
+			children = (
+				992A2EAA2B98ECA400062D22 /* ci_pre_xcodebuild.sh */,
+			);
+			path = ci_scripts;
 			sourceTree = "<group>";
 		};
 		99A2B7622B8FF84A001C0769 /* Frameworks */ = {
