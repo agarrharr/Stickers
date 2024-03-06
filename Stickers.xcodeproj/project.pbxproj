@@ -45,6 +45,7 @@
 		991C8F1E2B8FEC6300B227BA /* StickersUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickersUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		991C8F2B2B8FED2200B227BA /* Modules */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Modules; sourceTree = "<group>"; };
 		992A2EAA2B98ECA400062D22 /* ci_pre_xcodebuild.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = ci_pre_xcodebuild.sh; sourceTree = "<group>"; };
+		993D5EE52B990DD800BA500F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,6 +100,7 @@
 		991C8F002B8FEC6100B227BA /* Stickers */ = {
 			isa = PBXGroup;
 			children = (
+				993D5EE52B990DD800BA500F /* Info.plist */,
 				991C8F012B8FEC6100B227BA /* StickersApp.swift */,
 				991C8F052B8FEC6300B227BA /* Assets.xcassets */,
 				991C8F072B8FEC6300B227BA /* Preview Content */,
@@ -447,6 +449,7 @@
 				DEVELOPMENT_TEAM = 47C966XSTJ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Stickers/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -478,6 +481,7 @@
 				DEVELOPMENT_TEAM = 47C966XSTJ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Stickers/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

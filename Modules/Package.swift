@@ -19,8 +19,8 @@ let package = Package(
             name: "SettingsFeature",
             targets: ["SettingsFeature"]),
         .library(
-            name: "StickersFeature",
-            targets: ["StickersFeature"]),
+            name: "StickerFeature",
+            targets: ["StickerFeature"]),
     ],
     dependencies: [
 //        .package(url: "https://www.github.com/pointfreeco/swift-composable-architecture", from: "1.8.2"),
@@ -33,14 +33,14 @@ let package = Package(
                 "ChartFeature",
                 "PersonFeature",
                 "SettingsFeature",
-                "StickersFeature",
+                "StickerFeature",
                 .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
             ]
         ),
         .target(
             name: "ChartFeature",
             dependencies: [
-                "StickersFeature",
+                "StickerFeature",
                 .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
             ]
         ),
@@ -58,7 +58,7 @@ let package = Package(
             ]
         ),
         .target(
-            name: "StickersFeature",
+            name: "StickerFeature",
             dependencies: [
                 .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
             ]

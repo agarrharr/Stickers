@@ -62,12 +62,12 @@ public struct PersonView: View {
         TabView(
             selection:  $store.activeChartID.sending(\.selectChart),
             content:  {
-                ForEach(store.scope(state: \.charts, action: \.charts)) { childStore in
-                    ChartView(store: childStore)
+                ForEach(store.scope(state: \.charts, action: \.charts)) { store in
+                    ChartView(store: store)
                         .tabItem {
-                            Text(childStore.name)
+                            Text(store.name)
                         }
-                        .tag(childStore.state.id)
+                        .tag(store.state.id)
                 }
             }
         )

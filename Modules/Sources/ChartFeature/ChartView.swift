@@ -1,7 +1,7 @@
 import ComposableArchitecture
 import SwiftUI
 
-import StickersFeature
+import StickerFeature
 
 public struct Reward: Equatable {
     public var name: String
@@ -35,14 +35,14 @@ public struct ChartFeature {
         public var name: String
         public var reward: Reward?
         public var behaviors: [Behavior]
-        public var stickers: StickersFeature.State
+        public var stickers: IdentifiedArrayOf<StickerFeature.State>
         
         public init(
             id: UUID = UUID(),
             name: String,
             reward: Reward? = nil,
             behaviors: [Behavior] = [],
-            stickers: StickersFeature.State
+            stickers: IdentifiedArrayOf<StickerFeature.State>
         ) {
             self.id = id
             self.name = name
@@ -54,7 +54,7 @@ public struct ChartFeature {
 
     public enum Action: Sendable {
         case binding(BindingAction<State>)
-        case stickers(StickersFeature.Action)
+        case stickers(IdentifiedActionOf<StickerFeature>)
         case view(ViewAction)
         case delegate(DelegateAction)
         
@@ -74,6 +74,9 @@ public struct ChartFeature {
             case let .view(action):
                 switch action {
                 case .addButtonTapped:
+                    state.stickers.append(StickerFeature.State(
+                        sticker: Sticker(id: UUID(), systemName: "heart.fill")
+                    ))
                     return .run { [state] send in
                         await send(.delegate(.onAddButtonTap(state.id)))
                     }
@@ -86,8 +89,8 @@ public struct ChartFeature {
                 return .none
             }
         }
-        Scope(state: \.stickers, action: \.stickers) {
-            StickersFeature()
+        .forEach(\.stickers, action: \.stickers) {
+            StickerFeature()
         }
     }
 
@@ -103,7 +106,14 @@ public struct ChartView: View {
     
     public var body: some View {
         VStack {
-            StickersView(store: store.scope(state: \.stickers, action: \.stickers))
+            ScrollView {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 30))], spacing: 20) {
+                    ForEach(store.scope(state: \.stickers, action: \.stickers), id: \.self) { store in
+                        StickerView(store: store)
+                    }
+                }
+                .padding(.horizontal)
+            }
             
             Spacer()
             
@@ -128,12 +138,10 @@ public struct ChartView: View {
                 initialState: ChartFeature.State(
                     name: "Chores",
                     reward: Reward(name: "Fishing rod"),
-                    stickers: StickersFeature.State(
-                        stickers:
-                            [
-                                StickerFeature.State(sticker: Sticker(id: UUID(), systemName: "star.fill"))
-                            ]
-                    )
+                    stickers:
+                        [
+                            StickerFeature.State(sticker: Sticker(id: UUID(), systemName: "star.fill"))
+                        ]
                 )
             ) {
                 ChartFeature()
