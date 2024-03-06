@@ -50,43 +50,20 @@ public struct ChartFeature {
             self.behaviors = behaviors
             self.stickers = stickers
         }
+        
+        public mutating func addSticker() {
+            stickers.append(StickerFeature.State(sticker: Sticker(id: UUID(), systemName: "heart.fill")))
+        }
     }
 
     public enum Action: Sendable {
         case binding(BindingAction<State>)
         case stickers(IdentifiedActionOf<StickerFeature>)
-        case view(ViewAction)
-        case delegate(DelegateAction)
-        
-        @CasePathable
-        public enum ViewAction: Sendable {
-            case addButtonTapped
-            case redeemButtonTapped
-        }
-        @CasePathable
-        public enum DelegateAction: Sendable {
-            case onAddButtonTap(UUID)
-        }
     }
 
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            case let .view(action):
-                switch action {
-                case .addButtonTapped:
-                    state.stickers.append(StickerFeature.State(
-                        sticker: Sticker(id: UUID(), systemName: "heart.fill")
-                    ))
-                    return .run { [state] send in
-                        await send(.delegate(.onAddButtonTap(state.id)))
-                    }
-                case .redeemButtonTapped:
-                    // TODO
-                    return .none
-                }
-            case .delegate:
-                return .none
             case .binding:
                 return .none
             case .stickers:
@@ -117,30 +94,6 @@ public struct ChartView: View {
                     }
                 }
                 .padding(.horizontal)
-            }
-            
-            Spacer()
-            
-            HStack {
-                Spacer()
-                    .frame(width: 20)
-                Button {
-                    store.send(.view(.redeemButtonTapped))
-                } label: {
-                    Image(systemName: "gift")
-                        .accessibilityLabel("Redeem stickers")
-                }
-                
-                Spacer()
-                
-                Button {
-                    store.send(.view(.addButtonTapped))
-                } label: {
-                    Image(systemName: "plus")
-                        .accessibilityLabel("Add sticker to \(store.name)")
-                }
-                Spacer()
-                    .frame(width: 20)
             }
         }
     }
