@@ -13,7 +13,7 @@
 		991C8F132B8FEC6300B227BA /* StickersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 991C8F122B8FEC6300B227BA /* StickersTests.swift */; };
 		991C8F1D2B8FEC6300B227BA /* StickersUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 991C8F1C2B8FEC6300B227BA /* StickersUITests.swift */; };
 		991C8F1F2B8FEC6300B227BA /* StickersUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 991C8F1E2B8FEC6300B227BA /* StickersUITestsLaunchTests.swift */; };
-		99A2B7642B8FF84A001C0769 /* AppFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 99A2B7632B8FF84A001C0769 /* AppFeature */; };
+		99349C782B98DE2A0085D6F3 /* AppFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 99349C772B98DE2A0085D6F3 /* AppFeature */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,7 +51,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				99A2B7642B8FF84A001C0769 /* AppFeature in Frameworks */,
+				99349C782B98DE2A0085D6F3 /* AppFeature in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -153,7 +153,7 @@
 			);
 			name = Stickers;
 			packageProductDependencies = (
-				99A2B7632B8FF84A001C0769 /* AppFeature */,
+				99349C772B98DE2A0085D6F3 /* AppFeature */,
 			);
 			productName = Stickers;
 			productReference = 991C8EFE2B8FEC6100B227BA /* Stickers.app */;
@@ -605,7 +605,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		99A2B7632B8FF84A001C0769 /* AppFeature */ = {
+		99349C772B98DE2A0085D6F3 /* AppFeature */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = AppFeature;
 		};
