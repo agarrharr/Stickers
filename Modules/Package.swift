@@ -25,6 +25,7 @@ let package = Package(
     dependencies: [
 //        .package(url: "https://www.github.com/pointfreeco/swift-composable-architecture", from: "1.8.2"),
         .package(url: "https://www.github.com/pointfreeco/swift-composable-architecture", branch: "shared-state-beta"),
+        .package(url: "https://github.com/pointfreeco/swift-nonempty", from: "0.4.0"),
     ],
     targets: [
         .target(
@@ -61,6 +62,7 @@ let package = Package(
             name: "StickerFeature",
             dependencies: [
                 .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+                .product(name: "NonEmpty", package: "swift-nonempty"),
             ]
         ),
     ]

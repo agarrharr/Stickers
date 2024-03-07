@@ -36,23 +36,29 @@ public struct ChartFeature {
         public var reward: Reward?
         public var behaviors: [Behavior]
         public var stickers: IdentifiedArrayOf<StickerFeature.State>
+        public var stickerPack: StickerPack
         
         public init(
             id: UUID = UUID(),
             name: String,
             reward: Reward? = nil,
             behaviors: [Behavior] = [],
-            stickers: IdentifiedArrayOf<StickerFeature.State>
+            stickers: IdentifiedArrayOf<StickerFeature.State>,
+            stickerPack: StickerPack = defaultStickerPack
         ) {
             self.id = id
             self.name = name
             self.reward = reward
             self.behaviors = behaviors
             self.stickers = stickers
+            self.stickerPack = stickerPack
         }
         
         public mutating func addSticker() {
-            stickers.append(StickerFeature.State(sticker: Sticker(id: UUID(), systemName: "heart.fill")))
+            let sticker = stickerPack.stickers.randomElement()
+            self.stickers.append(StickerFeature.State(
+                sticker: sticker
+            ))
         }
     }
 

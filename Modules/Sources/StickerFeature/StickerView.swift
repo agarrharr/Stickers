@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import NonEmpty
 import SwiftUI
 
 public struct Sticker: Equatable, Identifiable {
@@ -11,20 +12,20 @@ public struct Sticker: Equatable, Identifiable {
     }
 }
 
-struct StickerPack: Equatable {
-    var stickers: [Sticker]
+public struct StickerPack: Equatable {
+    public var stickers: NonEmpty<[Sticker]>
 }
 
-let defaultStickerPack = StickerPack(
-    stickers: [
+public let defaultStickerPack = StickerPack(
+    stickers: NonEmpty<[Sticker]>(
         Sticker(id: UUID(), systemName: "star.fill"),
         Sticker(id: UUID(), systemName: "sun.max.fill"),
         Sticker(id: UUID(), systemName: "moon.fill"),
         Sticker(id: UUID(), systemName: "rainbow"),
         Sticker(id: UUID(), systemName: "face.smiling.inverse"),
         Sticker(id: UUID(), systemName: "cat.fill"),
-        Sticker(id: UUID(), systemName: "dog.fill"),
-    ]
+        Sticker(id: UUID(), systemName: "dog.fill")
+    )
 )
 
 @Reducer
@@ -34,8 +35,8 @@ public struct StickerFeature {
         public var id: UUID
         public var sticker: Sticker
         
-        public init(sticker: Sticker) {
-            self.id = sticker.id
+        public init(id: UUID = UUID(), sticker: Sticker) {
+            self.id = id
             self.sticker = sticker
         }
     }
@@ -70,7 +71,7 @@ public struct StickerView: View {
     StickerView(
         store: Store(
             initialState: StickerFeature.State(
-                sticker: defaultStickerPack.stickers[0]
+                sticker: defaultStickerPack.stickers.first
             )
         ) {
                 StickerFeature()

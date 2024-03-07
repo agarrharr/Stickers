@@ -88,7 +88,7 @@ public struct PersonView: View {
                             ChartView(store: store)
                             Spacer()
                             Text(chartName)
-                            Text("^[\(totalStickers) stickers](inflect: true)")
+                            Text("^[\(totalStickers) stickers](inflect: true, partOfSpeech: nount)")
                             Spacer()
                                 .frame(height: 60)
                         }
