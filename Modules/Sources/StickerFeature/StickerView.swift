@@ -2,13 +2,11 @@ import ComposableArchitecture
 import NonEmpty
 import SwiftUI
 
-public struct Sticker: Equatable, Identifiable {
-    public var id: UUID
-    public var systemName: String
+public struct Sticker: Equatable {
+    public var imageName: String
     
-    public init(id: UUID, systemName: String) {
-        self.id = id
-        self.systemName = systemName
+    public init(imageName: String) {
+        self.imageName = imageName
     }
 }
 
@@ -18,13 +16,29 @@ public struct StickerPack: Equatable {
 
 public let defaultStickerPack = StickerPack(
     stickers: NonEmpty<[Sticker]>(
-        Sticker(id: UUID(), systemName: "star.fill"),
-        Sticker(id: UUID(), systemName: "sun.max.fill"),
-        Sticker(id: UUID(), systemName: "moon.fill"),
-        Sticker(id: UUID(), systemName: "rainbow"),
-        Sticker(id: UUID(), systemName: "face.smiling.inverse"),
-        Sticker(id: UUID(), systemName: "cat.fill"),
-        Sticker(id: UUID(), systemName: "dog.fill")
+        Sticker(imageName: "0"),
+        Sticker(imageName: "1"),
+        Sticker(imageName: "2"),
+        Sticker(imageName: "3"),
+        Sticker(imageName: "4"),
+        Sticker(imageName: "5"),
+        Sticker(imageName: "6"),
+        Sticker(imageName: "7"),
+        Sticker(imageName: "8"),
+        Sticker(imageName: "8"),
+        Sticker(imageName: "10"),
+        Sticker(imageName: "11"),
+        Sticker(imageName: "12"),
+        Sticker(imageName: "13"),
+        Sticker(imageName: "14"),
+        Sticker(imageName: "15"),
+        Sticker(imageName: "16"),
+        Sticker(imageName: "17"),
+        Sticker(imageName: "18"),
+        Sticker(imageName: "19"),
+        Sticker(imageName: "20"),
+        Sticker(imageName: "21"),
+        Sticker(imageName: "22")
     )
 )
 
@@ -59,7 +73,7 @@ public struct StickerView: View {
     }
     
     public var body: some View {
-        Image(systemName: store.sticker.systemName)
+        Image(store.sticker.imageName, bundle: .module)
             .resizable()
             .aspectRatio(contentMode: .fit)
             .frame(width: 30, height: 30)

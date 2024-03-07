@@ -141,7 +141,7 @@ public struct PersonView: View {
                         name: "Chores",
                         stickers: [
                             StickerFeature.State(
-                                sticker: Sticker(id: UUID(), systemName: "rainbow")
+                                sticker: Sticker(imageName: "0")
                             )
                         ]
                     ),
@@ -149,7 +149,7 @@ public struct PersonView: View {
                         name: "Homework",
                         stickers: [
                             StickerFeature.State(
-                                sticker: Sticker(id: UUID(), systemName: "cat.fill")
+                                sticker: Sticker(imageName: "0")
                             )
                         ]
                     )
