@@ -4,44 +4,32 @@ import SwiftUI
 @Reducer
 public struct SettingsFeature {
     @Reducer(state: .equatable, action: .sendable)
-    public enum Destination {
+    public enum Path {
         @ReducerCaseIgnored
-        case stickerValues
+        case people
     }
     
     @ObservableState
     public struct State: Equatable {
-        @Presents var destination: Destination.State?
+        var path = StackState<Path.State>()
         
-        public init(destination: Destination.State? = nil) {
-            self.destination = destination
+        public init(path: StackState<Path.State> = StackState<Path.State>()) {
+            self.path = path
         }
     }
     
     public enum Action: Sendable {
-        case destination(PresentationAction<Destination.Action>)
-        case view(ViewAction)
-        
-        @CasePathable
-        public enum ViewAction: Sendable {
-            case stickerValuesButtonTapped
-        }
+        case path(StackAction<Path.State, Path.Action>)
     }
     
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            case .destination:
+            case .path:
                 return .none
-            case let .view(action):
-                switch action {
-                case .stickerValuesButtonTapped:
-                    state.destination = .stickerValues
-                    return .none
-                }
             }
         }
-        .ifLet(\.$destination, action: \.destination)
+        .forEach(\.path, action: \.path)
     }
     
     public init() {}
@@ -63,39 +51,36 @@ public struct SettingsView: View {
     }
     
     public var body: some View {
-        NavigationStack {
+        NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
             VStack {
                 if showList {
                     List {
-                        Section("Stickers") {
-                            Button {
-                                store.send(.view(.stickerValuesButtonTapped))
-                            } label : {
-                                Text("Button")
+                        Section("Setup") {
+                            NavigationLink(state: SettingsFeature.Path.State.people) {
+                                HStack {
+                                    Image(systemName: "person.crop.square.fill")
+                                        .resizable()
+                                        .frame(width: 26, height: 26)
+                                        .foregroundStyle(.white, .blue)
+                                    Text("People")
+                                }
                             }
                         }
                     }
                 }
             }
-            .navigationDestination(
-                isPresented: Binding(
-                    get: {
-                        store.destination.is(\.stickerValues)
-                    },
-                    set: { _ in
-                        store.send(.destination(.dismiss))
-                    }
-                ),
-                destination: {
-                    Text("Sticker Values")
-                }
-            )
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
-            .onAppear {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                    showList = true
-                }
+        } destination: { store in
+            switch store.state {
+            case .people:
+                Text("List of people")
+                    .navigationTitle("People")
+            }
+        }
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                showList = true
             }
         }
     }
