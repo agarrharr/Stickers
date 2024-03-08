@@ -38,7 +38,8 @@ public let defaultStickerPack = StickerPack(
         Sticker(imageName: "19"),
         Sticker(imageName: "20"),
         Sticker(imageName: "21"),
-        Sticker(imageName: "22")
+        Sticker(imageName: "22"),
+        Sticker(imageName: "23")
     )
 )
 
