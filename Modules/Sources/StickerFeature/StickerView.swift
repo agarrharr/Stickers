@@ -78,7 +78,6 @@ public struct StickerView: View {
             .resizable()
             .aspectRatio(contentMode: .fit)
             .frame(width: 30, height: 30)
-            .foregroundColor(.yellow)
     }
 }
 
