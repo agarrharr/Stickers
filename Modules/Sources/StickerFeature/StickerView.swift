@@ -91,7 +91,7 @@ public struct StickerView: View {
         Image(store.sticker.imageName, bundle: .module)
             .resizable()
             .aspectRatio(contentMode: .fit)
-            .frame(width: 30, height: 30)
+            .frame(width: 60, height: 60)
     }
 }
 

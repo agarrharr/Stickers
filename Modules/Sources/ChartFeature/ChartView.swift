@@ -94,7 +94,7 @@ public struct ChartView: View {
     public var body: some View {
         VStack {
             ScrollView {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 30))], spacing: 20) {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))], spacing: 20) {
                     ForEach(store.scope(state: \.stickers, action: \.stickers), id: \.self) { store in
                         StickerView(store: store)
                     }
@@ -114,7 +114,14 @@ public struct ChartView: View {
                     reward: Reward(name: "Fishing rod"),
                     stickers:
                         [
-                            StickerFeature.State(sticker: Sticker(imageName: "face-0"))
+                            StickerFeature.State(sticker: Sticker(imageName: "face-0")),
+                            StickerFeature.State(sticker: Sticker(imageName: "face-1")),
+                            StickerFeature.State(sticker: Sticker(imageName: "face-2")),
+                            StickerFeature.State(sticker: Sticker(imageName: "face-3")),
+                            StickerFeature.State(sticker: Sticker(imageName: "face-4")),
+                            StickerFeature.State(sticker: Sticker(imageName: "face-5")),
+                            StickerFeature.State(sticker: Sticker(imageName: "face-6")),
+                            StickerFeature.State(sticker: Sticker(imageName: "face-7"))
                         ]
                 )
             ) {
