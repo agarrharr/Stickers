@@ -16,30 +16,44 @@ public struct StickerPack: Equatable {
 
 public let defaultStickerPack = StickerPack(
     stickers: NonEmpty<[Sticker]>(
-        Sticker(imageName: "0"),
-        Sticker(imageName: "1"),
-        Sticker(imageName: "2"),
-        Sticker(imageName: "3"),
-        Sticker(imageName: "4"),
-        Sticker(imageName: "5"),
-        Sticker(imageName: "6"),
-        Sticker(imageName: "7"),
-        Sticker(imageName: "8"),
-        Sticker(imageName: "8"),
-        Sticker(imageName: "10"),
-        Sticker(imageName: "11"),
-        Sticker(imageName: "12"),
-        Sticker(imageName: "13"),
-        Sticker(imageName: "14"),
-        Sticker(imageName: "15"),
-        Sticker(imageName: "16"),
-        Sticker(imageName: "17"),
-        Sticker(imageName: "18"),
-        Sticker(imageName: "19"),
-        Sticker(imageName: "20"),
-        Sticker(imageName: "21"),
-        Sticker(imageName: "22"),
-        Sticker(imageName: "23")
+        Sticker(imageName: "face-0"),
+        Sticker(imageName: "face-1"),
+        Sticker(imageName: "face-2"),
+        Sticker(imageName: "face-3"),
+        Sticker(imageName: "face-4"),
+        Sticker(imageName: "face-5"),
+        Sticker(imageName: "face-6"),
+        Sticker(imageName: "face-7"),
+        Sticker(imageName: "face-8"),
+        Sticker(imageName: "face-8"),
+        Sticker(imageName: "face-10"),
+        Sticker(imageName: "face-11"),
+        Sticker(imageName: "face-12"),
+        Sticker(imageName: "face-13"),
+        Sticker(imageName: "face-14"),
+        Sticker(imageName: "face-15"),
+        Sticker(imageName: "face-16"),
+        Sticker(imageName: "face-17"),
+        Sticker(imageName: "face-18"),
+        Sticker(imageName: "face-19"),
+        Sticker(imageName: "face-20"),
+        Sticker(imageName: "face-21"),
+        Sticker(imageName: "face-22"),
+        Sticker(imageName: "face-23")
+    )
+)
+
+public let catStickerPack = StickerPack(
+    stickers: NonEmpty<[Sticker]>(
+        Sticker(imageName: "cat-0"),
+        Sticker(imageName: "cat-1"),
+        Sticker(imageName: "cat-2"),
+        Sticker(imageName: "cat-3"),
+        Sticker(imageName: "cat-4"),
+        Sticker(imageName: "cat-5"),
+        Sticker(imageName: "cat-6"),
+        Sticker(imageName: "cat-7"),
+        Sticker(imageName: "cat-8")
     )
 )
 

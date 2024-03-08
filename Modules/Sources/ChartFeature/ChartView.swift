@@ -114,7 +114,7 @@ public struct ChartView: View {
                     reward: Reward(name: "Fishing rod"),
                     stickers:
                         [
-                            StickerFeature.State(sticker: Sticker(imageName: "0"))
+                            StickerFeature.State(sticker: Sticker(imageName: "face-0"))
                         ]
                 )
             ) {

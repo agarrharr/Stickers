@@ -155,28 +155,28 @@ public struct AppView: View {
         name: "Chores",
         reward: Reward(name: "Fishing rod"),
         stickers: [
-            StickerFeature.State(sticker: Sticker(imageName: "0"))
+            StickerFeature.State(sticker: Sticker(imageName: "face-0"))
         ]
     )
     let chart12 = ChartFeature.State(
         name: "Homework",
         reward: Reward(name: "Fishing rod"),
         stickers: [
-            StickerFeature.State(sticker: Sticker(imageName: "0"))
+            StickerFeature.State(sticker: Sticker(imageName: "face-0"))
         ]
     )
     let chart21 = ChartFeature.State(
         name: "Calm body",
         reward: Reward(name: "Batting cages"),
         stickers: [
-            StickerFeature.State(sticker: Sticker(imageName: "0"))
+            StickerFeature.State(sticker: Sticker(imageName: "face-0"))
         ]
     )
     let chart31 = ChartFeature.State(
         name: "Homework",
         reward: Reward(name: "Batting cages"),
         stickers: [
-            StickerFeature.State(sticker: Sticker(imageName: "0"))
+            StickerFeature.State(sticker: Sticker(imageName: "face-0"))
         ]
     )
     
