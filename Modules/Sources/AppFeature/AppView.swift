@@ -50,6 +50,7 @@ public struct AppFeature {
         public enum ViewAction: Sendable {
             case addPersonButtonTapped
             case settingsButtonTapped
+            case addStickerButtonTapped
             case personTapped(UUID)
             case redeemButtonTapped
         }
@@ -62,17 +63,8 @@ public struct AppFeature {
             switch action {
             case .destination:
                 return .none
-            case let .people(.element(id: _, action: action)):
-                switch action {
-                case let .delegate(action):
-                    switch action {
-                    case .onSettingsButtonTapped:
-                        state.destination = .settings(SettingsFeature.State())
-                        return .none
-                    }
-                default:
-                    return .none
-                }
+            case .people:
+                return .none
             case let .view(action):
                 switch action {
                 case .addPersonButtonTapped:
@@ -94,6 +86,11 @@ public struct AppFeature {
                     return .none
                 case .settingsButtonTapped:
                     state.destination = .settings(SettingsFeature.State())
+                    return .none
+                case .addStickerButtonTapped:
+                    if let activePersonID = state.activePersonID {
+                        state.people[id: activePersonID]?.addSticker()
+                    }
                     return .none
                 case let .personTapped(personID):
                     state.activePersonID = personID
@@ -122,49 +119,62 @@ public struct AppView: View {
     
     public var body: some View {
         NavigationView {
-            if store.activePersonID == nil {
-                VStack {
-                    Spacer()
-                    
-                    Text("No people added yet")
-                    Button{
-                        store.send(.view(.addPersonButtonTapped))
-                    } label: {
-                        Text("Add a person")
-                    }
-                    
-                    Spacer()
-                    
-                    HStack {
+            VStack {
+                if store.activePersonID == nil {
+                    VStack {
                         Spacer()
-                            .frame(width: 20)
                         
-                        Button {
-                            store.send(.view(.settingsButtonTapped))
+                        Text("No people added yet")
+                        Button{
+                            store.send(.view(.addPersonButtonTapped))
                         } label: {
-                            Image(systemName: "gear")
-                                .imageScale(.large)
-                                .accessibilityLabel("Settings")
+                            Text("Add a person")
                         }
                         
                         Spacer()
                     }
+                    .navigationTitle("Stickers")
+                } else {
+                    PersonView(
+                        store: store.scope(
+                            state: \.filteredPeople,
+                            action: \.people
+                        ).first!
+                    )
+                    .toolbar {
+                        ToolbarItem(placement: .topBarLeading) {
+                            ProfileButton(store: store)
+                        }
+                        ToolbarItem(placement: .topBarTrailing) {
+                            AddButton(store: store)
+                        }
+                    }
                 }
-                .navigationTitle("Stickers")
-            } else {
-                PersonView(
-                    store: store.scope(
-                        state: \.filteredPeople,
-                        action: \.people
-                    ).first!
-                )
-                .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        ProfileButton(store: store)
+                
+                HStack {
+                    Spacer()
+                        .frame(width: 20)
+                    
+                    Button {
+                        store.send(.view(.settingsButtonTapped))
+                    } label: {
+                        Image(systemName: "gear")
+                            .imageScale(.large)
+                            .accessibilityLabel("Settings")
                     }
-                    ToolbarItem(placement: .topBarTrailing) {
-                        AddButton(store: store)
+                    
+                    Spacer()
+                    
+                    Button {
+                        store.send(.view(.addStickerButtonTapped))
+                    } label: {
+                        Image(systemName: "plus")
+                            .imageScale(.large)
+                            .accessibilityLabel("Add sticker")
                     }
+                    
+                    Spacer()
+                        .frame(width: 20)
                 }
             }
         }

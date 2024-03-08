@@ -13,6 +13,10 @@ public struct PersonFeature {
         public var charts: IdentifiedArrayOf<ChartFeature.State>
         var activeChartID: UUID
         
+        public mutating func addSticker() {
+            charts[id: activeChartID]?.addSticker()
+        }
+        
         public init(
             id: UUID = UUID(),
             name: String,
@@ -28,19 +32,6 @@ public struct PersonFeature {
     public enum Action: Sendable {
         case charts(IdentifiedActionOf<ChartFeature>)
         case selectChart(UUID)
-        case view(ViewAction)
-        case delegate(DelegateAction)
-        
-        @CasePathable
-        public enum ViewAction: Sendable {
-            case addButtonTapped
-            case settingsButtonTapped
-        }
-        
-        @CasePathable
-        public enum DelegateAction: Sendable {
-            case onSettingsButtonTapped
-        }
     }
     
     public var body: some Reducer<State, Action> {
@@ -50,18 +41,6 @@ public struct PersonFeature {
                 return .none
             case let .selectChart(chartID):
                 state.activeChartID = chartID
-                return .none
-            case let .view(action):
-                switch action {
-                case .addButtonTapped:
-                    state.charts[id: state.activeChartID]?.addSticker()
-                    return .none
-                case .settingsButtonTapped:
-                    return .run { send in
-                        await send(.delegate(.onSettingsButtonTapped))
-                    }
-                }
-            case .delegate:
                 return .none
             }
         }
@@ -110,32 +89,6 @@ public struct PersonView: View {
             )
             
             Spacer()
-            
-            HStack {
-                Spacer()
-                    .frame(width: 20)
-                
-                Button {
-                    store.send(.view(.settingsButtonTapped))
-                } label: {
-                    Image(systemName: "gear")
-                        .imageScale(.large)
-                        .accessibilityLabel("Settings")
-                }
-                
-                Spacer()
-                
-                Button {
-                    store.send(.view(.addButtonTapped))
-                } label: {
-                    Image(systemName: "plus")
-                        .imageScale(.large)
-                        .accessibilityLabel("Add sticker to \(store.name)")
-                }
-                
-                Spacer()
-                    .frame(width: 20)
-            }
         }
         .navigationTitle(store.name)
         .navigationBarTitleDisplayMode(.inline)
