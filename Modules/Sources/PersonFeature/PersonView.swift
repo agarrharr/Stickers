@@ -114,10 +114,12 @@ public struct PersonView: View {
             HStack {
                 Spacer()
                     .frame(width: 20)
+                
                 Button {
                     store.send(.view(.settingsButtonTapped))
                 } label: {
                     Image(systemName: "gear")
+                        .imageScale(.large)
                         .accessibilityLabel("Settings")
                 }
                 
@@ -127,8 +129,10 @@ public struct PersonView: View {
                     store.send(.view(.addButtonTapped))
                 } label: {
                     Image(systemName: "plus")
+                        .imageScale(.large)
                         .accessibilityLabel("Add sticker to \(store.name)")
                 }
+                
                 Spacer()
                     .frame(width: 20)
             }
