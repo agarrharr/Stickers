@@ -29,11 +29,17 @@ public struct PersonFeature {
         case charts(IdentifiedActionOf<ChartFeature>)
         case selectChart(UUID)
         case view(ViewAction)
+        case delegate(DelegateAction)
         
         @CasePathable
         public enum ViewAction: Sendable {
             case addButtonTapped
-            case redeemButtonTapped
+            case settingsButtonTapped
+        }
+        
+        @CasePathable
+        public enum DelegateAction: Sendable {
+            case onSettingsAppTapped
         }
     }
     
@@ -50,10 +56,13 @@ public struct PersonFeature {
                 case .addButtonTapped:
                     state.charts[id: state.activeChartID]?.addSticker()
                     return .none
-                case .redeemButtonTapped:
-                    // TODO
-                    return .none
+                case .settingsButtonTapped:
+                    return .run { send in
+                        await send(.delegate(.onSettingsAppTapped))
+                    }
                 }
+            case .delegate:
+                return .none
             }
         }
         .forEach(\.charts, action: \.charts) {
@@ -106,10 +115,10 @@ public struct PersonView: View {
                 Spacer()
                     .frame(width: 20)
                 Button {
-                    store.send(.view(.redeemButtonTapped))
+                    store.send(.view(.settingsButtonTapped))
                 } label: {
-                    Image(systemName: "gift")
-                        .accessibilityLabel("Redeem stickers")
+                    Image(systemName: "gear")
+                        .accessibilityLabel("Settings")
                 }
                 
                 Spacer()

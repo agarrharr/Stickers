@@ -44,7 +44,7 @@ public struct AppFeature {
         public enum ViewAction: Sendable {
             case addPersonTapped
             case personTapped(UUID)
-            case settingsIconTapped
+            case redeemButtonTapped
         }
     }
     
@@ -53,8 +53,17 @@ public struct AppFeature {
             switch action {
             case .destination:
                 return .none
-            case .people:
-                return .none
+            case let .people(.element(id: _, action: action)):
+                switch action {
+                case let .delegate(action):
+                    switch action {
+                    case .onSettingsAppTapped:
+                        state.destination = .settings(SettingsFeature.State())
+                        return .none
+                    }
+                default:
+                    return .none
+                }
             case let .view(action):
                 switch action {
                 case .addPersonTapped:
@@ -63,8 +72,8 @@ public struct AppFeature {
                 case let .personTapped(personID):
                     state.activePersonID = personID
                     return .none
-                case .settingsIconTapped: // TODO: send this action
-                    state.destination = .settings(SettingsFeature.State())
+                case .redeemButtonTapped:
+                    // TODO
                     return .none
                 }
             }
@@ -142,9 +151,10 @@ public struct AppView: View {
         
         var body: some View {
             Button {
-                store.send(.view(.settingsIconTapped))
+                store.send(.view(.redeemButtonTapped))
             } label: {
-                Label("Settings", systemImage: "gear")
+                Image(systemName: "gift")
+                    .accessibilityLabel("Redeem stickers")
             }
         }
     }
