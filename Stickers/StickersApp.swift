@@ -55,16 +55,9 @@ struct StickersApp: App {
     
     var body: some Scene {
         WindowGroup {
-            AppView(
-                store: Store(
-                    initialState: AppFeature.State(
-                        people: Shared([person1, person2, person3]),
-                        activePersonID: person1.id
-                    )
-                ) {
-                    AppFeature()._printChanges()
-                }
-            )
+            AppView(store: Store(initialState: AppFeature.State()) {
+                AppFeature()._printChanges()
+            })
         }
     }
 }

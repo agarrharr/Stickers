@@ -7,7 +7,7 @@ import StickerFeature
 @Reducer
 public struct PersonFeature {
     @ObservableState
-    public struct State: Equatable, Identifiable {
+    public struct State: Codable, Equatable, Identifiable {
         public var id: UUID
         public var name: String
         public var charts: IdentifiedArrayOf<ChartFeature.State>
@@ -39,7 +39,7 @@ public struct PersonFeature {
         
         @CasePathable
         public enum DelegateAction: Sendable {
-            case onSettingsAppTapped
+            case onSettingsButtonTapped
         }
     }
     
@@ -58,7 +58,7 @@ public struct PersonFeature {
                     return .none
                 case .settingsButtonTapped:
                     return .run { send in
-                        await send(.delegate(.onSettingsAppTapped))
+                        await send(.delegate(.onSettingsButtonTapped))
                     }
                 }
             case .delegate:

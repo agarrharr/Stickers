@@ -2,7 +2,7 @@ import ComposableArchitecture
 import NonEmpty
 import SwiftUI
 
-public struct Sticker: Equatable {
+public struct Sticker: Codable, Equatable {
     public var imageName: String
     
     public init(imageName: String) {
@@ -10,7 +10,7 @@ public struct Sticker: Equatable {
     }
 }
 
-public struct StickerPack: Equatable {
+public struct StickerPack: Codable, Equatable {
     public var stickers: NonEmpty<[Sticker]>
 }
 
@@ -60,7 +60,7 @@ public let catStickerPack = StickerPack(
 @Reducer
 public struct StickerFeature {
     @ObservableState
-    public struct State: Equatable, Identifiable {
+    public struct State: Codable, Equatable, Identifiable {
         public var id: UUID
         public var sticker: Sticker
         

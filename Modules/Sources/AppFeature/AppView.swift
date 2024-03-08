@@ -6,6 +6,14 @@ import PersonFeature
 import SettingsFeature
 import StickerFeature
 
+func getAppSandboxDirectory() -> URL {
+    FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+}
+
+func getPeopleJSONURL() -> URL {
+    getAppSandboxDirectory().appendingPathComponent("people.json")
+}
+
 @Reducer
 public struct AppFeature {
     @Reducer(state: .equatable, action: .sendable)
@@ -16,8 +24,8 @@ public struct AppFeature {
     @ObservableState
     public struct State: Equatable {
         @Presents var destination: Destination.State?
-        @Shared var people: IdentifiedArrayOf<PersonFeature.State>
-        var activePersonID: UUID
+        @Shared(.fileStorage(getPeopleJSONURL())) var people: IdentifiedArrayOf<PersonFeature.State> = []
+        var activePersonID: UUID?
         var selectedTab = 1
         
         var filteredPeople: IdentifiedArrayOf<PersonFeature.State> {
@@ -26,12 +34,10 @@ public struct AppFeature {
         
         public init(
             destination: Destination.State? = nil,
-            people: Shared<IdentifiedArrayOf<PersonFeature.State>>,
-            activePersonID: UUID
+            activePersonID: UUID? = nil
         ) {
             self.destination = destination
-            self._people = people
-            self.activePersonID = activePersonID
+            self.activePersonID = activePersonID ?? self.people.first?.id
         }
     }
     
@@ -42,14 +48,17 @@ public struct AppFeature {
         
         @CasePathable
         public enum ViewAction: Sendable {
-            case addPersonTapped
+            case addPersonButtonTapped
+            case settingsButtonTapped
             case personTapped(UUID)
             case redeemButtonTapped
         }
     }
     
     public var body: some Reducer<State, Action> {
-        Reduce { state, action in
+        Reduce {
+            state,
+            action in
             switch action {
             case .destination:
                 return .none
@@ -57,7 +66,7 @@ public struct AppFeature {
                 switch action {
                 case let .delegate(action):
                     switch action {
-                    case .onSettingsAppTapped:
+                    case .onSettingsButtonTapped:
                         state.destination = .settings(SettingsFeature.State())
                         return .none
                     }
@@ -66,8 +75,25 @@ public struct AppFeature {
                 }
             case let .view(action):
                 switch action {
-                case .addPersonTapped:
+                case .addPersonButtonTapped:
                     // TODO: open new person feature
+                    let chart11 = ChartFeature.State(
+                        name: "Chores",
+                        reward: Reward(name: "Fishing rod"),
+                        stickers: [
+                            StickerFeature.State(sticker: Sticker(imageName: "face-0"))
+                        ]
+                    )
+                    
+                    let person1 = PersonFeature.State(
+                        name: "Blob",
+                        charts: [chart11]
+                    )
+
+                    state.people.append(person1)
+                    return .none
+                case .settingsButtonTapped:
+                    state.destination = .settings(SettingsFeature.State())
                     return .none
                 case let .personTapped(personID):
                     state.activePersonID = personID
@@ -96,29 +122,60 @@ public struct AppView: View {
     
     public var body: some View {
         NavigationView {
-            PersonView(
-                store: store.scope(
-                    state: \.filteredPeople,
-                    action: \.people
-                ).first!
-            )
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    ProfileButton(store: store)
+            if store.activePersonID == nil {
+                VStack {
+                    Spacer()
+                    
+                    Text("No people added yet")
+                    Button{
+                        store.send(.view(.addPersonButtonTapped))
+                    } label: {
+                        Text("Add a person")
+                    }
+                    
+                    Spacer()
+                    
+                    HStack {
+                        Spacer()
+                            .frame(width: 20)
+                        
+                        Button {
+                            store.send(.view(.settingsButtonTapped))
+                        } label: {
+                            Image(systemName: "gear")
+                                .imageScale(.large)
+                                .accessibilityLabel("Settings")
+                        }
+                        
+                        Spacer()
+                    }
                 }
-                ToolbarItem(placement: .topBarTrailing) {
-                    AddButton(store: store)
-                }
-            }
-            .sheet(
-                item: $store.scope(
-                    state: \.destination?.settings,
-                    action: \.destination.settings
+                .navigationTitle("Stickers")
+            } else {
+                PersonView(
+                    store: store.scope(
+                        state: \.filteredPeople,
+                        action: \.people
+                    ).first!
                 )
-            ) { store in
-                SettingsView(store: store)
-                    .presentationDragIndicator(.visible)
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        ProfileButton(store: store)
+                    }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        AddButton(store: store)
+                    }
+                }
             }
+        }
+        .sheet(
+            item: $store.scope(
+                state: \.destination?.settings,
+                action: \.destination.settings
+            )
+        ) { store in
+            SettingsView(store: store)
+                .presentationDragIndicator(.visible)
         }
         .navigationViewStyle(.stack)
     }
@@ -136,7 +193,7 @@ public struct AppView: View {
                     }
                 }
                 Button {
-                    store.send(.view(.addPersonTapped))
+                    store.send(.view(.addPersonButtonTapped))
                 } label: {
                     Label("Add person", systemImage: "person.fill.badge.plus")
                 }
@@ -161,47 +218,57 @@ public struct AppView: View {
 }
 
 #Preview {
-    let chart11 = ChartFeature.State(
-        name: "Chores",
-        reward: Reward(name: "Fishing rod"),
-        stickers: [
-            StickerFeature.State(sticker: Sticker(imageName: "face-0"))
-        ]
-    )
-    let chart12 = ChartFeature.State(
-        name: "Homework",
-        reward: Reward(name: "Fishing rod"),
-        stickers: [
-            StickerFeature.State(sticker: Sticker(imageName: "face-0"))
-        ]
-    )
-    let chart21 = ChartFeature.State(
-        name: "Calm body",
-        reward: Reward(name: "Batting cages"),
-        stickers: [
-            StickerFeature.State(sticker: Sticker(imageName: "face-0"))
-        ]
-    )
-    let chart31 = ChartFeature.State(
-        name: "Homework",
-        reward: Reward(name: "Batting cages"),
-        stickers: [
-            StickerFeature.State(sticker: Sticker(imageName: "face-0"))
-        ]
-    )
-    
-    let person1 = PersonFeature.State(name: "Blob", charts: [chart11, chart12])
-    let person2 = PersonFeature.State(name: "Son", charts: [chart21])
-    let person3 = PersonFeature.State(name: "Daughter", charts: [chart31])
+//    let chart11 = ChartFeature.State(
+//        name: "Chores",
+//        reward: Reward(name: "Fishing rod"),
+//        stickers: [
+//            StickerFeature.State(sticker: Sticker(imageName: "face-0"))
+//        ]
+//    )
+//    let chart12 = ChartFeature.State(
+//        name: "Homework",
+//        reward: Reward(name: "Fishing rod"),
+//        stickers: [
+//            StickerFeature.State(sticker: Sticker(imageName: "face-0"))
+//        ]
+//    )
+//    let chart21 = ChartFeature.State(
+//        name: "Calm body",
+//        reward: Reward(name: "Batting cages"),
+//        stickers: [
+//            StickerFeature.State(sticker: Sticker(imageName: "face-0"))
+//        ]
+//    )
+//    let chart31 = ChartFeature.State(
+//        name: "Homework",
+//        reward: Reward(name: "Batting cages"),
+//        stickers: [
+//            StickerFeature.State(sticker: Sticker(imageName: "face-0"))
+//        ]
+//    )
+//    
+//    let person1 = PersonFeature.State(name: "Blob", charts: [chart11, chart12])
+//    let person2 = PersonFeature.State(name: "Son", charts: [chart21])
+//    let person3 = PersonFeature.State(name: "Daughter", charts: [chart31])
     
     return AppView(
         store: Store(
             initialState: AppFeature.State(
-                people: Shared([person1, person2, person3]),
-                activePersonID: person1.id
+//                people: [person1, person2, person3]
             )
         ) {
             AppFeature()
         }
     )
+}
+
+#Preview("Empty state") {
+    AppView(
+        store: Store(
+            initialState: AppFeature.State()
+        ) {
+            AppFeature()
+        }
+    )
+   
 }
