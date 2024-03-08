@@ -7,6 +7,10 @@ public struct SettingsFeature {
     public enum Path {
         @ReducerCaseIgnored
         case people
+        @ReducerCaseIgnored
+        case charts
+        @ReducerCaseIgnored
+        case rewards
     }
     
     @ObservableState
@@ -50,6 +54,8 @@ public struct SettingsView: View {
         self.store = store
     }
     
+    @Environment(\.sizeCategory) var sizeCategory
+    
     public var body: some View {
         NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
             VStack {
@@ -59,10 +65,31 @@ public struct SettingsView: View {
                             NavigationLink(state: SettingsFeature.Path.State.people) {
                                 HStack {
                                     Image(systemName: "person.crop.square.fill")
-                                        .resizable()
-                                        .frame(width: 26, height: 26)
-                                        .foregroundStyle(.white, .blue)
+                                        .padding(4)
+                                        .background(.blue)
+                                        .foregroundColor(.white)
+                                        .clipShape(RoundedRectangle(cornerRadius: self.cornerRadius))
                                     Text("People")
+                                }
+                            }
+                            NavigationLink(state: SettingsFeature.Path.State.charts) {
+                                HStack {
+                                    Image(systemName: "star.square.fill")
+                                        .padding(4)
+                                        .background(.yellow)
+                                        .foregroundColor(.white)
+                                        .clipShape(RoundedRectangle(cornerRadius: self.cornerRadius))
+                                    Text("Charts")
+                                }
+                            }
+                            NavigationLink(state: SettingsFeature.Path.State.rewards) {
+                                HStack {
+                                    Image(systemName: "gift.fill")
+                                        .padding(4)
+                                        .background(.purple)
+                                        .foregroundColor(.white)
+                                        .clipShape(RoundedRectangle(cornerRadius: self.cornerRadius))
+                                    Text("Rewards")
                                 }
                             }
                         }
@@ -76,6 +103,12 @@ public struct SettingsView: View {
             case .people:
                 Text("List of people")
                     .navigationTitle("People")
+            case .charts:
+                Text("List of charts")
+                    .navigationTitle("Charts")
+            case .rewards:
+                Text("List of rewards")
+                    .navigationTitle("Rewards")
             }
         }
         .onAppear {
@@ -84,6 +117,14 @@ public struct SettingsView: View {
             }
         }
     }
+    
+    var cornerRadius: CGFloat {
+            switch sizeCategory {
+            case .extraSmall, .small: 4
+            case .medium: 6
+            default: 8
+            }
+        }
 }
 
 #Preview {
