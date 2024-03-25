@@ -7,6 +7,9 @@ let package = Package(
     platforms: [.iOS(.v17)],
     products: [
         .library(
+            name: "AddPersonFeature",
+            targets: ["AddPersonFeature"]),
+        .library(
             name: "AppFeature",
             targets: ["AppFeature"]),
         .library(
@@ -29,8 +32,15 @@ let package = Package(
     ],
     targets: [
         .target(
+            name: "AddPersonFeature",
+            dependencies: [
+                .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+            ]
+        ),
+        .target(
             name: "AppFeature",
             dependencies: [
+                "AddPersonFeature",
                 "ChartFeature",
                 "PersonFeature",
                 "SettingsFeature",

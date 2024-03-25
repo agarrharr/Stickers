@@ -1,6 +1,7 @@
 import ComposableArchitecture
 import SwiftUI
 
+import AddPersonFeature
 import ChartFeature
 import PersonFeature
 import SettingsFeature
@@ -19,6 +20,7 @@ public struct AppFeature {
     @Reducer(state: .equatable, action: .sendable)
     public enum Destination {
         case settings(SettingsFeature)
+        case addPerson(AddPersonFeature)
     }
     
     @ObservableState
@@ -61,6 +63,17 @@ public struct AppFeature {
             state,
             action in
             switch action {
+            case let .destination(.presented(.addPerson(.delegate(action)))):
+                switch action {
+                case let .onPersonAdded(name):
+                    state.people.append(
+                        PersonFeature.State(
+                            name: name,
+                            charts: []
+                        )
+                    )
+                    return .none
+                }
             case .destination:
                 return .none
             case .people:
@@ -68,21 +81,7 @@ public struct AppFeature {
             case let .view(action):
                 switch action {
                 case .addPersonButtonTapped:
-                    // TODO: open new person feature
-                    let chart11 = ChartFeature.State(
-                        name: "Chores",
-                        reward: Reward(name: "Fishing rod"),
-                        stickers: [
-                            StickerFeature.State(sticker: Sticker(imageName: "face-0"))
-                        ]
-                    )
-                    
-                    let person1 = PersonFeature.State(
-                        name: "Blob",
-                        charts: [chart11]
-                    )
-
-                    state.people.append(person1)
+                    state.destination = .addPerson(AddPersonFeature.State())
                     return .none
                 case .settingsButtonTapped:
                     state.destination = .settings(SettingsFeature.State())
@@ -185,6 +184,15 @@ public struct AppView: View {
             )
         ) { store in
             SettingsView(store: store)
+                .presentationDragIndicator(.visible)
+        }
+        .sheet(
+            item: $store.scope(
+                state: \.destination?.addPerson,
+                action: \.destination.addPerson
+            )
+        ) { store in
+            AddPersonView(store: store)
                 .presentationDragIndicator(.visible)
         }
         .navigationViewStyle(.stack)
