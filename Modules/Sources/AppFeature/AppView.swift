@@ -138,7 +138,7 @@ public struct AppView: View {
                         store: store.scope(
                             state: \.filteredPeople,
                             action: \.people
-                        ).first!
+                        ).first! // TODO: fix this. Add an activePerson
                     )
                     .toolbar {
                         ToolbarItem(placement: .topBarLeading) {

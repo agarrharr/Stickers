@@ -25,7 +25,7 @@ public struct PersonFeature {
             self.id = id
             self.name = name
             self.charts = charts
-            self.activeChartID = charts.first!.id // TODO: Don't force unwrap
+            self.activeChartID = charts.first?.id ?? UUID()
         }
     }
     
@@ -68,27 +68,38 @@ public struct PersonView: View {
     
     public var body: some View {
         VStack {
-            TabView(
-                selection:  $store.activeChartID.sending(\.selectChart),
-                content:  {
-                    ForEach(store.scope(state: \.charts, action: \.charts)) { store in
-                        VStack {
-                            ChartView(store: store)
-                            Spacer()
-                            Text(chartName)
-                            Text("^[\(totalStickers) stickers](inflect: true, partOfSpeech: nount)")
-                            Spacer()
-                                .frame(height: 60)
-                        }
-                        .tabItem {
-                            Text(store.name)
-                        }
-                        .tag(store.state.id)
-                    }
+            if store.charts.count == 0 {
+                Spacer()
+                Text("It looks like \(store.name) doesn't have any charts yet.")
+                Button {
+                    
+                } label: {
+                    Text("Add one")
                 }
-            )
-            
-            Spacer()
+                Spacer()
+            } else {
+                TabView(
+                    selection:  $store.activeChartID.sending(\.selectChart),
+                    content:  {
+                        ForEach(store.scope(state: \.charts, action: \.charts)) { store in
+                            VStack {
+                                ChartView(store: store)
+                                Spacer()
+                                Text(chartName)
+                                Text("^[\(totalStickers) stickers](inflect: true, partOfSpeech: nount)")
+                                Spacer()
+                                    .frame(height: 60)
+                            }
+                            .tabItem {
+                                Text(store.name)
+                            }
+                            .tag(store.state.id)
+                        }
+                    }
+                )
+                
+                Spacer()
+            }
         }
         .navigationTitle(store.name)
         .navigationBarTitleDisplayMode(.inline)
