@@ -52,10 +52,11 @@ let person3 = PersonFeature.State(name: "Daughter", charts: [chart31])
 
 @main
 struct StickersApp: App {
+    let state = AppFeature.State()
     
     var body: some Scene {
         WindowGroup {
-            AppView(store: Store(initialState: AppFeature.State()) {
+            AppView(store: Store(initialState: state) {
                 AppFeature()._printChanges()
             })
         }

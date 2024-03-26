@@ -1,6 +1,7 @@
 import ComposableArchitecture
 import SwiftUI
 
+import AddChartFeature
 import AddPersonFeature
 import ChartFeature
 import PersonFeature
@@ -21,6 +22,7 @@ public struct AppFeature {
     public enum Destination {
         case settings(SettingsFeature)
         case addPerson(AddPersonFeature)
+        case addChart(AddChartFeature)
     }
     
     @ObservableState
@@ -74,7 +76,22 @@ public struct AppFeature {
                     )
                     return .none
                 }
+            case let .destination(.presented(.addPerson(.delegate(action)))):
+                switch action {
+                case let .onPersonAdded(name):
+                    // TODO
+                    return .none
+                }
+            case let .destination(.presented(.addChart(.delegate(action)))):
+                switch action {
+                case let .onChartAdded(name):
+                    // TODO
+                    return .none
+                }
             case .destination:
+                return .none
+            case let .people(.element(id: _, action: .delegate(action))):
+                state.destination = .addChart(AddChartFeature.State())
                 return .none
             case .people:
                 return .none
@@ -193,6 +210,15 @@ public struct AppView: View {
             )
         ) { store in
             AddPersonView(store: store)
+                .presentationDragIndicator(.visible)
+        }
+        .sheet(
+            item: $store.scope(
+                state: \.destination?.addChart,
+                action: \.destination.addChart
+            )
+        ) { store in
+            AddChartView(store: store)
                 .presentationDragIndicator(.visible)
         }
         .navigationViewStyle(.stack)

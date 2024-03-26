@@ -32,6 +32,18 @@ public struct PersonFeature {
     public enum Action: Sendable {
         case charts(IdentifiedActionOf<ChartFeature>)
         case selectChart(UUID)
+        case view(ViewAction)
+        case delegate(DelegateAction)
+        
+        @CasePathable
+        public enum ViewAction {
+            case addChartButtonTapped
+        }
+        
+        @CasePathable
+        public enum DelegateAction {
+            case onAddChartButtonTapped
+        }
     }
     
     public var body: some Reducer<State, Action> {
@@ -41,6 +53,13 @@ public struct PersonFeature {
                 return .none
             case let .selectChart(chartID):
                 state.activeChartID = chartID
+                return .none
+            case let .view(action):
+                switch action {
+                case .addChartButtonTapped:
+                    return .send(.delegate(.onAddChartButtonTapped))
+                }
+            case .delegate:
                 return .none
             }
         }
@@ -72,7 +91,7 @@ public struct PersonView: View {
                 Spacer()
                 Text("It looks like \(store.name) doesn't have any charts yet.")
                 Button {
-                    
+                    store.send(.view(.addChartButtonTapped))
                 } label: {
                     Text("Add one")
                 }
