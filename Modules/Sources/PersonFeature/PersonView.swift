@@ -11,7 +11,7 @@ public struct PersonFeature {
         public var id: UUID
         public var name: String
         public var charts: IdentifiedArrayOf<ChartFeature.State>
-        var activeChartID: UUID
+        public var activeChartID: UUID
         
         public mutating func addSticker() {
             charts[id: activeChartID]?.addSticker()
@@ -20,12 +20,14 @@ public struct PersonFeature {
         public init(
             id: UUID = UUID(),
             name: String,
-            charts: IdentifiedArrayOf<ChartFeature.State>
+            charts: IdentifiedArrayOf<ChartFeature.State>,
+            activeChartID: UUID? = nil
+            
         ) {
             self.id = id
             self.name = name
             self.charts = charts
-            self.activeChartID = charts.first?.id ?? UUID()
+            self.activeChartID = activeChartID ?? charts.first?.id ?? UUID()
         }
     }
     

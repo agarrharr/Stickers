@@ -77,12 +77,12 @@ public struct AppFeature {
                 switch action {
                 case let .onChartAdded(name):
                     guard let id = state.activePersonID else { return .none }
-                    state.people[id: id]?.charts.append(
-                        ChartFeature.State(
-                            name: name,
-                            stickers: []
-                        )
+                    let chart = ChartFeature.State(
+                        name: name,
+                        stickers: []
                     )
+                    state.people[id: id]?.charts.append(chart)
+                    state.people[id: id]?.activeChartID = chart.id
                     return .none
                 }
             case .destination:
