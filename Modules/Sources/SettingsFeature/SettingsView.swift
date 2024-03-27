@@ -101,8 +101,10 @@ public struct SettingsView: View {
         } destination: { store in
             switch store.state {
             case .people:
-                PeopleSettingsView()
-                    .navigationTitle("People")
+                PeopleSettingsView(store: Store(initialState: PeopleSettingsFeature.State()) {
+                    PeopleSettingsFeature()
+                })
+                .navigationTitle("People")
             case .charts:
                 Text("List of charts")
                     .navigationTitle("Charts")

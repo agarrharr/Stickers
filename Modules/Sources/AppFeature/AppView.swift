@@ -8,10 +8,10 @@ import PersonFeature
 import SettingsFeature
 import StickerFeature
 
+// TODO: extract out these functions to a shared module
 func getAppSandboxDirectory() -> URL {
     FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
 }
-
 func getPeopleJSONURL() -> URL {
     getAppSandboxDirectory().appendingPathComponent("people.json")
 }
