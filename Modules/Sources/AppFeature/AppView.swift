@@ -68,24 +68,21 @@ public struct AppFeature {
             case let .destination(.presented(.addPerson(.delegate(action)))):
                 switch action {
                 case let .onPersonAdded(name):
-                    state.people.append(
-                        PersonFeature.State(
-                            name: name,
-                            charts: []
-                        )
-                    )
-                    return .none
-                }
-            case let .destination(.presented(.addPerson(.delegate(action)))):
-                switch action {
-                case let .onPersonAdded(name):
-                    // TODO
+                    let person = PersonFeature.State(name: name, charts: [])
+                    state.people.append(person)
+                    state.activePersonID = person.id
                     return .none
                 }
             case let .destination(.presented(.addChart(.delegate(action)))):
                 switch action {
                 case let .onChartAdded(name):
-                    // TODO
+                    guard let id = state.activePersonID else { return .none }
+                    state.people[id: id]?.charts.append(
+                        ChartFeature.State(
+                            name: name,
+                            stickers: []
+                        )
+                    )
                     return .none
                 }
             case .destination:
@@ -211,6 +208,7 @@ public struct AppView: View {
         ) { store in
             AddPersonView(store: store)
                 .presentationDragIndicator(.visible)
+                .presentationDetents([.medium])
         }
         .sheet(
             item: $store.scope(
@@ -219,7 +217,8 @@ public struct AppView: View {
             )
         ) { store in
             AddChartView(store: store)
-                .presentationDragIndicator(.visible)
+               .presentationDragIndicator(.visible)
+               .presentationDetents([.medium])
         }
         .navigationViewStyle(.stack)
     }

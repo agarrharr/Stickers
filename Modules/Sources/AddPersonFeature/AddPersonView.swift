@@ -23,7 +23,7 @@ public struct AddPersonFeature {
         
         @CasePathable
         public enum DelegateAction: Sendable {
-            case onPersonAdded(String)
+            case onPersonAdded(name: String)
         }
     }
     
@@ -37,7 +37,7 @@ public struct AddPersonFeature {
                 switch action {
                 case .addButtonTapped:
                     return .run { [name = state.name] send in
-                        await send(.delegate(.onPersonAdded(name)))
+                        await send(.delegate(.onPersonAdded(name: name)))
                         await dismiss()
                     }
                 }

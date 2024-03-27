@@ -38,6 +38,7 @@ public struct PersonFeature {
         @CasePathable
         public enum ViewAction {
             case addChartButtonTapped
+            case onTabChange
         }
         
         @CasePathable
@@ -58,6 +59,9 @@ public struct PersonFeature {
                 switch action {
                 case .addChartButtonTapped:
                     return .send(.delegate(.onAddChartButtonTapped))
+                case .onTabChange:
+                    state.activeChartID = state.charts.first?.id ?? UUID()
+                    return .none
                 }
             case .delegate:
                 return .none
@@ -75,7 +79,7 @@ public struct PersonView: View {
     @Bindable var store: StoreOf<PersonFeature>
     
     private var chartName: String {
-        store.charts[id: store.activeChartID]?.name ?? "Chart"
+        store.charts[id: store.activeChartID]?.name ?? "Unknown chart name"
     }
     private var totalStickers: Int {
         store.charts[id: store.activeChartID]?.stickers.count ?? 0
@@ -89,12 +93,16 @@ public struct PersonView: View {
         VStack {
             if store.charts.count == 0 {
                 Spacer()
+                    .frame(height: 50)
+                
                 Text("It looks like \(store.name) doesn't have any charts yet.")
+                
                 Button {
                     store.send(.view(.addChartButtonTapped))
                 } label: {
                     Text("Add one")
                 }
+                
                 Spacer()
             } else {
                 TabView(
@@ -124,6 +132,9 @@ public struct PersonView: View {
         .navigationBarTitleDisplayMode(.inline)
         .tabViewStyle(.page)
         .indexViewStyle(.page(backgroundDisplayMode: .always))
+        .onChange(of: store.activeChartID) {
+            store.send(.view(.onTabChange))
+        }
     }
 }
 
