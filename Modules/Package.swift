@@ -19,6 +19,9 @@ let package = Package(
             name: "ChartFeature",
             targets: ["ChartFeature"]),
         .library(
+            name: "PeopleFeature",
+            targets: ["PeopleFeature"]),
+        .library(
             name: "PersonFeature",
             targets: ["PersonFeature"]),
         .library(
@@ -49,18 +52,24 @@ let package = Package(
         .target(
             name: "AppFeature",
             dependencies: [
-                "AddChartFeature",
-                "AddPersonFeature",
-                "ChartFeature",
-                "PersonFeature",
+                "PeopleFeature",
                 "SettingsFeature",
-                "StickerFeature",
                 .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
             ]
         ),
         .target(
             name: "ChartFeature",
             dependencies: [
+                "StickerFeature",
+                .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+            ]
+        ),
+        .target(
+            name: "PeopleFeature",
+            dependencies: [
+                "AddChartFeature",
+                "AddPersonFeature",
+                "PersonFeature",
                 "StickerFeature",
                 .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
             ]
