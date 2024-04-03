@@ -29,7 +29,7 @@ public struct AppFeature {
     @ObservableState
     public struct State: Equatable {
         @Presents var destination: Destination.State?
-        @Shared(.fileStorage(getPeopleJSONURL())) var people: IdentifiedArrayOf<PersonFeature.State> = []
+        @Shared var people: IdentifiedArrayOf<PersonFeature.State>
         var activePersonID: UUID?
         var selectedTab = 1
 
@@ -39,10 +39,12 @@ public struct AppFeature {
 
         public init(
             destination: Destination.State? = nil,
+            people: IdentifiedArrayOf<PersonFeature.State> = [],
             activePersonID: UUID? = nil
         ) {
             self.destination = destination
-            self.activePersonID = activePersonID ?? people.first?.id
+            self._people = Shared(wrappedValue: people, .fileStorage(getPeopleJSONURL()))
+            self.activePersonID = activePersonID ?? self.people.first?.id
         }
     }
 
@@ -261,43 +263,46 @@ public struct AppView: View {
 }
 
 #Preview {
-//    let chart11 = ChartFeature.State(
-//        name: "Chores",
-//        reward: Reward(name: "Fishing rod"),
-//        stickers: [
-//            StickerFeature.State(sticker: Sticker(imageName: "face-0"))
-//        ]
-//    )
-//    let chart12 = ChartFeature.State(
-//        name: "Homework",
-//        reward: Reward(name: "Fishing rod"),
-//        stickers: [
-//            StickerFeature.State(sticker: Sticker(imageName: "face-0"))
-//        ]
-//    )
-//    let chart21 = ChartFeature.State(
-//        name: "Calm body",
-//        reward: Reward(name: "Batting cages"),
-//        stickers: [
-//            StickerFeature.State(sticker: Sticker(imageName: "face-0"))
-//        ]
-//    )
-//    let chart31 = ChartFeature.State(
-//        name: "Homework",
-//        reward: Reward(name: "Batting cages"),
-//        stickers: [
-//            StickerFeature.State(sticker: Sticker(imageName: "face-0"))
-//        ]
-//    )
-//
-//    let person1 = PersonFeature.State(name: "Blob", charts: [chart11, chart12])
-//    let person2 = PersonFeature.State(name: "Son", charts: [chart21])
-//    let person3 = PersonFeature.State(name: "Daughter", charts: [chart31])
+    let chart11 = ChartFeature.State(
+        name: "Chores",
+        reward: Reward(name: "Fishing rod"),
+        stickers: [
+            StickerFeature.State(sticker: Sticker(imageName: "face-0"))
+        ]
+    )
+    let chart12 = ChartFeature.State(
+        name: "Homework",
+        reward: Reward(name: "Fishing rod"),
+        stickers: [
+            StickerFeature.State(sticker: Sticker(imageName: "face-0"))
+        ]
+    )
+    let chart21 = ChartFeature.State(
+        name: "Calm body",
+        reward: Reward(name: "Batting cages"),
+        stickers: [
+            StickerFeature.State(sticker: Sticker(imageName: "face-0")),
+            StickerFeature.State(sticker: Sticker(imageName: "face-1"))
+        ]
+    )
+    let chart31 = ChartFeature.State(
+        name: "Homework",
+        reward: Reward(name: "Batting cages"),
+        stickers: [
+            StickerFeature.State(sticker: Sticker(imageName: "face-0")),
+            StickerFeature.State(sticker: Sticker(imageName: "face-1")),
+            StickerFeature.State(sticker: Sticker(imageName: "face-2"))
+        ]
+    )
 
-    AppView(
+    let person1 = PersonFeature.State(name: "Blob", charts: [chart11, chart12])
+    let person2 = PersonFeature.State(name: "Son", charts: [chart21])
+    let person3 = PersonFeature.State(name: "Daughter", charts: [chart31])
+
+    return AppView(
         store: Store(
             initialState: AppFeature.State(
-                //                people: [person1, person2, person3]
+                people: [person1, person2, person3]
             )
         ) {
             AppFeature()
