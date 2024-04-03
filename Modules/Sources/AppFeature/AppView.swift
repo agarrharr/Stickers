@@ -2,20 +2,24 @@ import ComposableArchitecture
 import SwiftUI
 
 import PeopleFeature
+import SettingsFeature
 
 @Reducer
 public struct AppFeature {
     @ObservableState
     public struct State: Equatable {
         var people: PeopleFeature.State
+        var settings: SettingsFeature.State
         
         public init() {
             self.people = PeopleFeature.State()
+            self.settings = SettingsFeature.State()
         }
     }
 
     public enum Action: Sendable {
         case people(PeopleFeature.Action)
+        case settings(SettingsFeature.Action)
     }
 
     public var body: some Reducer<State, Action> {
@@ -23,11 +27,17 @@ public struct AppFeature {
             switch action {
             case .people:
                 return .none
+            case .settings:
+                return .none
             }
         }
         
         Scope(state: \.people, action: \.people) {
             PeopleFeature()
+        }
+        
+        Scope(state: \.settings, action: \.settings) {
+            SettingsFeature()
         }
     }
 
@@ -58,7 +68,7 @@ public struct AppView: View {
                     Label("Rewards", systemImage: "gift.fill")
                 }
             
-            Text("Settings")
+            SettingsView(store: store.scope(state: \.settings, action: \.settings))
                 .tabItem {
                     Label("Settings", systemImage: "gear")
                 }
