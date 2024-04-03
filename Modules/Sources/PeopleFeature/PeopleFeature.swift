@@ -57,7 +57,7 @@ public struct PeopleFeature {
             case addPersonButtonTapped
             case addStickerButtonTapped
             case personTapped(UUID)
-            case redeemButtonTapped
+            case addChartButtonTapped
         }
     }
 
@@ -105,7 +105,7 @@ public struct PeopleFeature {
                 case let .personTapped(personID):
                     state.activePersonID = personID
                     return .none
-                case .redeemButtonTapped:
+                case .addChartButtonTapped:
                     // TODO:
                     return .none
                 }
@@ -228,10 +228,10 @@ public struct PeopleView: View {
 
         var body: some View {
             Button {
-                store.send(.view(.redeemButtonTapped))
+                store.send(.view(.addChartButtonTapped))
             } label: {
-                Image(systemName: "gift")
-                    .accessibilityLabel("Redeem stickers")
+                Image(systemName: "plus")
+                    .accessibilityLabel("Add Chart")
             }
         }
     }
