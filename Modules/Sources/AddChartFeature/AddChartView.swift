@@ -18,6 +18,7 @@ public struct AddChartFeature {
         @CasePathable
         public enum ViewAction: Sendable {
             case addButtonTapped
+            case cancelButtonTapped
         }
 
         @CasePathable
@@ -37,6 +38,10 @@ public struct AddChartFeature {
                 case .addButtonTapped:
                     return .run { [name = state.name] send in
                         await send(.delegate(.onChartAdded(name)))
+                        await dismiss()
+                    }
+                case .cancelButtonTapped:
+                    return .run { _ in
                         await dismiss()
                     }
                 }
@@ -73,6 +78,13 @@ public struct AddChartView: View {
             .navigationTitle("Add Chart")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItemGroup(placement: .topBarLeading) {
+                    Button {
+                        store.send(.view(.cancelButtonTapped))
+                    } label: {
+                        Text("Cancel")
+                    }
+                }
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Button {
                         store.send(.view(.addButtonTapped))
