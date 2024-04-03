@@ -3,7 +3,6 @@ import SwiftUI
 
 import PeopleFeature
 
-
 @Reducer
 public struct AppFeature {
     @ObservableState
@@ -43,12 +42,27 @@ public struct AppView: View {
     }
 
     public var body: some View {
-        PeopleView(
-            store: self.store.scope(
-                state: \.people,
-                action: \.people
+        TabView {
+            PeopleView(
+                store: self.store.scope(
+                    state: \.people,
+                    action: \.people
+                )
             )
-        )
+            .tabItem {
+                Label("Charts", systemImage: "person.crop.rectangle.stack.fill")
+            }
+            
+            Text("Rewards")
+                .tabItem {
+                    Label("Rewards", systemImage: "gift.fill")
+                }
+            
+            Text("Settings")
+                .tabItem {
+                    Label("Settings", systemImage: "gear")
+                }
+        }
     }
 }
 
