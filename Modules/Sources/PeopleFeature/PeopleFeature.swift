@@ -29,7 +29,7 @@ public struct PeopleFeature {
         @Presents var destination: Destination.State?
         @Shared var people: IdentifiedArrayOf<PersonFeature.State>
         var activePersonID: UUID?
-        
+
         var selectedTab = 1
 
         var filteredPeople: IdentifiedArrayOf<PersonFeature.State> {
@@ -42,7 +42,7 @@ public struct PeopleFeature {
             activePersonID: UUID? = nil
         ) {
             self.destination = destination
-            self._people = Shared(wrappedValue: people, .fileStorage(getPeopleJSONURL()))
+            _people = Shared(wrappedValue: people, .fileStorage(getPeopleJSONURL()))
             self.activePersonID = activePersonID ?? self.people.first?.id
         }
     }
@@ -88,7 +88,10 @@ public struct PeopleFeature {
             case .destination:
                 return .none
             case let .people(.element(id: _, action: .delegate(action))):
-                state.destination = .addChart(AddChartFeature.State())
+                switch action {
+                case .onAddChartButtonTapped:
+                    state.destination = .addChart(AddChartFeature.State())
+                }
                 return .none
             case .people:
                 return .none
@@ -106,7 +109,7 @@ public struct PeopleFeature {
                     state.activePersonID = personID
                     return .none
                 case .addChartButtonTapped:
-                    // TODO:
+                    state.destination = .addChart(AddChartFeature.State())
                     return .none
                 }
             }
@@ -122,7 +125,7 @@ public struct PeopleFeature {
 
 public struct PeopleView: View {
     @Bindable var store: StoreOf<PeopleFeature>
-    
+
     public init(store: StoreOf<PeopleFeature>) {
         self.store = store
     }
@@ -242,14 +245,14 @@ public struct PeopleView: View {
         name: "Chores",
         reward: Reward(name: "Fishing rod"),
         stickers: [
-            StickerFeature.State(sticker: Sticker(imageName: "face-0"))
+            StickerFeature.State(sticker: Sticker(imageName: "face-0")),
         ]
     )
     let chart12 = ChartFeature.State(
         name: "Homework",
         reward: Reward(name: "Fishing rod"),
         stickers: [
-            StickerFeature.State(sticker: Sticker(imageName: "face-0"))
+            StickerFeature.State(sticker: Sticker(imageName: "face-0")),
         ]
     )
     let chart21 = ChartFeature.State(
@@ -257,7 +260,7 @@ public struct PeopleView: View {
         reward: Reward(name: "Batting cages"),
         stickers: [
             StickerFeature.State(sticker: Sticker(imageName: "face-0")),
-            StickerFeature.State(sticker: Sticker(imageName: "face-1"))
+            StickerFeature.State(sticker: Sticker(imageName: "face-1")),
         ]
     )
     let chart31 = ChartFeature.State(
@@ -266,7 +269,7 @@ public struct PeopleView: View {
         stickers: [
             StickerFeature.State(sticker: Sticker(imageName: "face-0")),
             StickerFeature.State(sticker: Sticker(imageName: "face-1")),
-            StickerFeature.State(sticker: Sticker(imageName: "face-2"))
+            StickerFeature.State(sticker: Sticker(imageName: "face-2")),
         ]
     )
 
