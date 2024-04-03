@@ -122,14 +122,14 @@ public struct PeopleFeature {
 
 public struct PeopleView: View {
     @Bindable var store: StoreOf<PeopleFeature>
-
+    
     public init(store: StoreOf<PeopleFeature>) {
         self.store = store
     }
 
     public var body: some View {
         NavigationView {
-            VStack {
+            ZStack(alignment: .bottomTrailing) {
                 if store.activePersonID == nil {
                     VStack {
                         Spacer()
@@ -161,20 +161,20 @@ public struct PeopleView: View {
                     }
                 }
 
-                HStack {
-                    Spacer()
-
-                    Button {
-                        store.send(.view(.addStickerButtonTapped))
-                    } label: {
-                        Image(systemName: "plus")
-                            .imageScale(.large)
-                            .accessibilityLabel("Add sticker")
-                    }
-
-                    Spacer()
+                Button(action: {
+                    store.send(.view(.addStickerButtonTapped))
+                }) {
+                    Image(systemName: "plus")
+                        .resizable()
+                        .scaledToFit()
                         .frame(width: 20)
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(Color.accentColor)
+                        .clipShape(Circle())
+                        .shadow(radius: 5)
                 }
+                .padding(20)
             }
         }
         .sheet(
