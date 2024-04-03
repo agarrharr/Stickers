@@ -12,17 +12,17 @@ public struct PersonFeature {
         public var name: String
         public var charts: IdentifiedArrayOf<ChartFeature.State>
         public var activeChartID: UUID
-        
+
         public mutating func addSticker() {
             charts[id: activeChartID]?.addSticker()
         }
-        
+
         public init(
             id: UUID = UUID(),
             name: String,
             charts: IdentifiedArrayOf<ChartFeature.State>,
             activeChartID: UUID? = nil
-            
+
         ) {
             self.id = id
             self.name = name
@@ -30,25 +30,24 @@ public struct PersonFeature {
             self.activeChartID = activeChartID ?? charts.first?.id ?? UUID()
         }
     }
-    
+
     public enum Action: Sendable {
         case charts(IdentifiedActionOf<ChartFeature>)
         case selectChart(UUID)
         case view(ViewAction)
         case delegate(DelegateAction)
-        
+
         @CasePathable
         public enum ViewAction {
             case addChartButtonTapped
-            case onTabChange
         }
-        
+
         @CasePathable
         public enum DelegateAction {
             case onAddChartButtonTapped
         }
     }
-    
+
     public var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
@@ -61,9 +60,6 @@ public struct PersonFeature {
                 switch action {
                 case .addChartButtonTapped:
                     return .send(.delegate(.onAddChartButtonTapped))
-                case .onTabChange:
-                    state.activeChartID = state.charts.first?.id ?? UUID()
-                    return .none
                 }
             case .delegate:
                 return .none
@@ -73,43 +69,44 @@ public struct PersonFeature {
             ChartFeature()
         }
     }
-    
+
     public init() {}
 }
 
 public struct PersonView: View {
     @Bindable var store: StoreOf<PersonFeature>
-    
+
     private var chartName: String {
         store.charts[id: store.activeChartID]?.name ?? "Unknown chart name"
     }
+
     private var totalStickers: Int {
         store.charts[id: store.activeChartID]?.stickers.count ?? 0
     }
-    
+
     public init(store: StoreOf<PersonFeature>) {
         self.store = store
     }
-    
+
     public var body: some View {
         VStack {
             if store.charts.count == 0 {
                 Spacer()
                     .frame(height: 50)
-                
+
                 Text("It looks like \(store.name) doesn't have any charts yet.")
-                
+
                 Button {
                     store.send(.view(.addChartButtonTapped))
                 } label: {
                     Text("Add one")
                 }
-                
+
                 Spacer()
             } else {
                 TabView(
-                    selection:  $store.activeChartID.sending(\.selectChart),
-                    content:  {
+                    selection: $store.activeChartID.sending(\.selectChart),
+                    content: {
                         ForEach(store.scope(state: \.charts, action: \.charts)) { store in
                             VStack {
                                 ChartView(store: store)
@@ -126,7 +123,7 @@ public struct PersonView: View {
                         }
                     }
                 )
-                
+
                 Spacer()
             }
         }
@@ -134,9 +131,6 @@ public struct PersonView: View {
         .navigationBarTitleDisplayMode(.inline)
         .tabViewStyle(.page)
         .indexViewStyle(.page(backgroundDisplayMode: .always))
-        .onChange(of: store.activeChartID) {
-            store.send(.view(.onTabChange))
-        }
     }
 }
 
@@ -151,7 +145,7 @@ public struct PersonView: View {
                         stickers: [
                             StickerFeature.State(
                                 sticker: Sticker(imageName: "face-0")
-                            )
+                            ),
                         ]
                     ),
                     ChartFeature.State(
@@ -159,9 +153,9 @@ public struct PersonView: View {
                         stickers: [
                             StickerFeature.State(
                                 sticker: Sticker(imageName: "face-0")
-                            )
+                            ),
                         ]
-                    )
+                    ),
                 ]
             )
         ) {

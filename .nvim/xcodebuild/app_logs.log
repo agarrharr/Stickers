@@ -1,0 +1,244 @@
+received action:
+  AppFeature.Action.view(
+    .personTapped(UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9))
+  )
+  AppFeature.State(
+    _destination: nil,
+    _people: […],
+-   _activePersonID: UUID(D9FD5B01-F229-4FDE-BAE5-730E0EEA77DE),
++   _activePersonID: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+    _selectedTab: 1
+  )
+
+received action:
+  AppFeature.Action.people(
+    .element(
+      id: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+      action: .selectChart(UUID(2D4C73F0-344D-4D19-B878-308B254791C3))
+    )
+  )
+  AppFeature.State(
+    _destination: nil,
+    _people: [
+      … (4 unchanged),
+      [4]: PersonFeature.State(
+        _id: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+        _name: "King Kong",
+        _charts: […],
+-       _activeChartID: UUID(B088CCBB-FAE5-4083-9AA5-E8BE60713D9F)
++       _activeChartID: UUID(2D4C73F0-344D-4D19-B878-308B254791C3)
+      )
+    ],
+    _activePersonID: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+    _selectedTab: 1
+  )
+
+received action:
+  AppFeature.Action.people(
+    .element(
+      id: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+      action: .selectChart(UUID(B088CCBB-FAE5-4083-9AA5-E8BE60713D9F))
+    )
+  )
+  AppFeature.State(
+    _destination: nil,
+    _people: [
+      … (4 unchanged),
+      [4]: PersonFeature.State(
+        _id: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+        _name: "King Kong",
+        _charts: […],
+-       _activeChartID: UUID(2D4C73F0-344D-4D19-B878-308B254791C3)
++       _activeChartID: UUID(B088CCBB-FAE5-4083-9AA5-E8BE60713D9F)
+      )
+    ],
+    _activePersonID: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+    _selectedTab: 1
+  )
+
+received action:
+  AppFeature.Action.people(
+    .element(
+      id: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+      action: .selectChart(UUID(2D4C73F0-344D-4D19-B878-308B254791C3))
+    )
+  )
+  AppFeature.State(
+    _destination: nil,
+    _people: [
+      … (4 unchanged),
+      [4]: PersonFeature.State(
+        _id: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+        _name: "King Kong",
+        _charts: […],
+-       _activeChartID: UUID(B088CCBB-FAE5-4083-9AA5-E8BE60713D9F)
++       _activeChartID: UUID(2D4C73F0-344D-4D19-B878-308B254791C3)
+      )
+    ],
+    _activePersonID: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+    _selectedTab: 1
+  )
+
+received action:
+  AppFeature.Action.people(
+    .element(
+      id: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+      action: .selectChart(UUID(B088CCBB-FAE5-4083-9AA5-E8BE60713D9F))
+    )
+  )
+  AppFeature.State(
+    _destination: nil,
+    _people: [
+      … (4 unchanged),
+      [4]: PersonFeature.State(
+        _id: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+        _name: "King Kong",
+        _charts: […],
+-       _activeChartID: UUID(2D4C73F0-344D-4D19-B878-308B254791C3)
++       _activeChartID: UUID(B088CCBB-FAE5-4083-9AA5-E8BE60713D9F)
+      )
+    ],
+    _activePersonID: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+    _selectedTab: 1
+  )
+
+received action:
+  AppFeature.Action.people(
+    .element(
+      id: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+      action: .selectChart(UUID(2D4C73F0-344D-4D19-B878-308B254791C3))
+    )
+  )
+  AppFeature.State(
+    _destination: nil,
+    _people: [
+      … (4 unchanged),
+      [4]: PersonFeature.State(
+        _id: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+        _name: "King Kong",
+        _charts: […],
+-       _activeChartID: UUID(B088CCBB-FAE5-4083-9AA5-E8BE60713D9F)
++       _activeChartID: UUID(2D4C73F0-344D-4D19-B878-308B254791C3)
+      )
+    ],
+    _activePersonID: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+    _selectedTab: 1
+  )
+
+received action:
+  AppFeature.Action.view(
+    .personTapped(UUID(D9FD5B01-F229-4FDE-BAE5-730E0EEA77DE))
+  )
+  AppFeature.State(
+    _destination: nil,
+    _people: […],
+-   _activePersonID: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
++   _activePersonID: UUID(D9FD5B01-F229-4FDE-BAE5-730E0EEA77DE),
+    _selectedTab: 1
+  )
+
+received action:
+  AppFeature.Action.view(
+    .personTapped(UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9))
+  )
+  AppFeature.State(
+    _destination: nil,
+    _people: […],
+-   _activePersonID: UUID(D9FD5B01-F229-4FDE-BAE5-730E0EEA77DE),
++   _activePersonID: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+    _selectedTab: 1
+  )
+
+received action:
+  AppFeature.Action.people(
+    .element(
+      id: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+      action: .selectChart(UUID(B088CCBB-FAE5-4083-9AA5-E8BE60713D9F))
+    )
+  )
+  AppFeature.State(
+    _destination: nil,
+    _people: [
+      … (4 unchanged),
+      [4]: PersonFeature.State(
+        _id: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+        _name: "King Kong",
+        _charts: […],
+-       _activeChartID: UUID(2D4C73F0-344D-4D19-B878-308B254791C3)
++       _activeChartID: UUID(B088CCBB-FAE5-4083-9AA5-E8BE60713D9F)
+      )
+    ],
+    _activePersonID: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+    _selectedTab: 1
+  )
+
+received action:
+  AppFeature.Action.people(
+    .element(
+      id: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+      action: .selectChart(UUID(2D4C73F0-344D-4D19-B878-308B254791C3))
+    )
+  )
+  AppFeature.State(
+    _destination: nil,
+    _people: [
+      … (4 unchanged),
+      [4]: PersonFeature.State(
+        _id: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+        _name: "King Kong",
+        _charts: […],
+-       _activeChartID: UUID(B088CCBB-FAE5-4083-9AA5-E8BE60713D9F)
++       _activeChartID: UUID(2D4C73F0-344D-4D19-B878-308B254791C3)
+      )
+    ],
+    _activePersonID: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+    _selectedTab: 1
+  )
+
+received action:
+  AppFeature.Action.view(
+    .personTapped(UUID(730FD52A-EB2F-4A10-A545-6CC9825D2333))
+  )
+  AppFeature.State(
+    _destination: nil,
+    _people: […],
+-   _activePersonID: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
++   _activePersonID: UUID(730FD52A-EB2F-4A10-A545-6CC9825D2333),
+    _selectedTab: 1
+  )
+
+received action:
+  AppFeature.Action.view(
+    .personTapped(UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9))
+  )
+  AppFeature.State(
+    _destination: nil,
+    _people: […],
+-   _activePersonID: UUID(730FD52A-EB2F-4A10-A545-6CC9825D2333),
++   _activePersonID: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+    _selectedTab: 1
+  )
+
+received action:
+  AppFeature.Action.people(
+    .element(
+      id: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+      action: .selectChart(UUID(B088CCBB-FAE5-4083-9AA5-E8BE60713D9F))
+    )
+  )
+  AppFeature.State(
+    _destination: nil,
+    _people: [
+      … (4 unchanged),
+      [4]: PersonFeature.State(
+        _id: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+        _name: "King Kong",
+        _charts: […],
+-       _activeChartID: UUID(2D4C73F0-344D-4D19-B878-308B254791C3)
++       _activeChartID: UUID(B088CCBB-FAE5-4083-9AA5-E8BE60713D9F)
+      )
+    ],
+    _activePersonID: UUID(BB691A21-DE3F-4F5F-82E6-FCCDC71879A9),
+    _selectedTab: 1
+  )
+

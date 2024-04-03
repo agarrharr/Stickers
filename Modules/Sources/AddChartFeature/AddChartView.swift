@@ -6,29 +6,28 @@ public struct AddChartFeature {
     @ObservableState
     public struct State: Equatable {
         var name = ""
-        
-        public init() {
-        }
+
+        public init() {}
     }
-    
+
     public enum Action: BindableAction, Sendable {
         case binding(BindingAction<State>)
         case view(ViewAction)
         case delegate(DelegateAction)
-        
+
         @CasePathable
         public enum ViewAction: Sendable {
             case addButtonTapped
         }
-        
+
         @CasePathable
         public enum DelegateAction: Sendable {
             case onChartAdded(String)
         }
     }
-    
+
     @Dependency(\.dismiss) var dismiss
-    
+
     public var body: some Reducer<State, Action> {
         BindingReducer()
         Reduce { state, action in
@@ -48,17 +47,17 @@ public struct AddChartFeature {
             }
         }
     }
-    
+
     public init() {}
 }
 
 public struct AddChartView: View {
     @Bindable var store: StoreOf<AddChartFeature>
-    
+
     public init(store: StoreOf<AddChartFeature>) {
         self.store = store
     }
-    
+
     public var body: some View {
         NavigationView {
             List {
@@ -69,7 +68,6 @@ public struct AddChartView: View {
                     } label: {
                         Text("Name")
                     }
-                    
                 }
             }
             .navigationTitle("Add Chart")

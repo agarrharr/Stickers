@@ -12,6 +12,7 @@ import StickerFeature
 func getAppSandboxDirectory() -> URL {
     FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
 }
+
 func getPeopleJSONURL() -> URL {
     getAppSandboxDirectory().appendingPathComponent("people.json")
 }
@@ -24,32 +25,32 @@ public struct AppFeature {
         case addPerson(AddPersonFeature)
         case addChart(AddChartFeature)
     }
-    
+
     @ObservableState
     public struct State: Equatable {
         @Presents var destination: Destination.State?
         @Shared(.fileStorage(getPeopleJSONURL())) var people: IdentifiedArrayOf<PersonFeature.State> = []
         var activePersonID: UUID?
         var selectedTab = 1
-        
+
         var filteredPeople: IdentifiedArrayOf<PersonFeature.State> {
-            self.people.filter { $0.id == activePersonID }
+            people.filter { $0.id == activePersonID }
         }
-        
+
         public init(
             destination: Destination.State? = nil,
             activePersonID: UUID? = nil
         ) {
             self.destination = destination
-            self.activePersonID = activePersonID ?? self.people.first?.id
+            self.activePersonID = activePersonID ?? people.first?.id
         }
     }
-    
+
     public enum Action: Sendable {
         case destination(PresentationAction<Destination.Action>)
         case view(ViewAction)
         case people(IdentifiedActionOf<PersonFeature>)
-        
+
         @CasePathable
         public enum ViewAction: Sendable {
             case addPersonButtonTapped
@@ -59,11 +60,9 @@ public struct AppFeature {
             case redeemButtonTapped
         }
     }
-    
+
     public var body: some Reducer<State, Action> {
-        Reduce {
-            state,
-            action in
+        Reduce { state, action in
             switch action {
             case let .destination(.presented(.addPerson(.delegate(action)))):
                 switch action {
@@ -73,6 +72,7 @@ public struct AppFeature {
                     state.activePersonID = person.id
                     return .none
                 }
+
             case let .destination(.presented(.addChart(.delegate(action)))):
                 switch action {
                 case let .onChartAdded(name):
@@ -109,7 +109,7 @@ public struct AppFeature {
                     state.activePersonID = personID
                     return .none
                 case .redeemButtonTapped:
-                    // TODO
+                    // TODO:
                     return .none
                 }
             }
@@ -119,31 +119,31 @@ public struct AppFeature {
             PersonFeature()
         }
     }
-    
+
     public init() {}
 }
 
 public struct AppView: View {
     @Bindable var store: StoreOf<AppFeature>
-    
+
     public init(store: StoreOf<AppFeature>) {
         self.store = store
     }
-    
+
     public var body: some View {
         NavigationView {
             VStack {
                 if store.activePersonID == nil {
                     VStack {
                         Spacer()
-                        
+
                         Text("No people added yet")
-                        Button{
+                        Button {
                             store.send(.view(.addPersonButtonTapped))
                         } label: {
                             Text("Add a person")
                         }
-                        
+
                         Spacer()
                     }
                     .navigationTitle("Stickers")
@@ -163,11 +163,11 @@ public struct AppView: View {
                         }
                     }
                 }
-                
+
                 HStack {
                     Spacer()
                         .frame(width: 20)
-                    
+
                     Button {
                         store.send(.view(.settingsButtonTapped))
                     } label: {
@@ -175,9 +175,9 @@ public struct AppView: View {
                             .imageScale(.large)
                             .accessibilityLabel("Settings")
                     }
-                    
+
                     Spacer()
-                    
+
                     Button {
                         store.send(.view(.addStickerButtonTapped))
                     } label: {
@@ -185,7 +185,7 @@ public struct AppView: View {
                             .imageScale(.large)
                             .accessibilityLabel("Add sticker")
                     }
-                    
+
                     Spacer()
                         .frame(width: 20)
                 }
@@ -217,12 +217,12 @@ public struct AppView: View {
             )
         ) { store in
             AddChartView(store: store)
-               .presentationDragIndicator(.visible)
-               .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
+                .presentationDetents([.medium])
         }
         .navigationViewStyle(.stack)
     }
-    
+
     struct ProfileButton: View {
         var store: StoreOf<AppFeature>
 
@@ -245,10 +245,10 @@ public struct AppView: View {
             }
         }
     }
-    
+
     struct AddButton: View {
         var store: StoreOf<AppFeature>
-        
+
         var body: some View {
             Button {
                 store.send(.view(.redeemButtonTapped))
@@ -289,15 +289,15 @@ public struct AppView: View {
 //            StickerFeature.State(sticker: Sticker(imageName: "face-0"))
 //        ]
 //    )
-//    
+//
 //    let person1 = PersonFeature.State(name: "Blob", charts: [chart11, chart12])
 //    let person2 = PersonFeature.State(name: "Son", charts: [chart21])
 //    let person3 = PersonFeature.State(name: "Daughter", charts: [chart31])
-    
-    return AppView(
+
+    AppView(
         store: Store(
             initialState: AppFeature.State(
-//                people: [person1, person2, person3]
+                //                people: [person1, person2, person3]
             )
         ) {
             AppFeature()
@@ -313,5 +313,4 @@ public struct AppView: View {
             AppFeature()
         }
     )
-   
 }

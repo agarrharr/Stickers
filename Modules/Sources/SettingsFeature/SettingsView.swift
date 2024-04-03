@@ -12,22 +12,22 @@ public struct SettingsFeature {
         @ReducerCaseIgnored
         case rewards
     }
-    
+
     @ObservableState
     public struct State: Equatable {
         var path = StackState<Path.State>()
-        
+
         public init(path: StackState<Path.State> = StackState<Path.State>()) {
             self.path = path
         }
     }
-    
+
     public enum Action: Sendable {
         case path(StackAction<Path.State, Path.Action>)
     }
-    
+
     public var body: some ReducerOf<Self> {
-        Reduce { state, action in
+        Reduce { _, action in
             switch action {
             case .path:
                 return .none
@@ -35,13 +35,13 @@ public struct SettingsFeature {
         }
         .forEach(\.path, action: \.path)
     }
-    
+
     public init() {}
 }
 
 public struct SettingsView: View {
     @Bindable var store: StoreOf<SettingsFeature>
-    
+
     // Why am I initially hiding the list?
     // It's because of a bug with SwiftUI
     // I want to have a large title, but if
@@ -49,13 +49,13 @@ public struct SettingsView: View {
     // So I wait a split second to show the list
     // https://developer.apple.com/forums/thread/737787
     @State private var showList: Bool = false
-    
+
     public init(store: StoreOf<SettingsFeature>) {
         self.store = store
     }
-    
+
     @Environment(\.sizeCategory) var sizeCategory
-    
+
     public var body: some View {
         NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
             VStack {
@@ -119,14 +119,14 @@ public struct SettingsView: View {
             }
         }
     }
-    
+
     var cornerRadius: CGFloat {
-            switch sizeCategory {
-            case .extraSmall, .small: 4
-            case .medium: 6
-            default: 8
-            }
+        switch sizeCategory {
+        case .extraSmall, .small: 4
+        case .medium: 6
+        default: 8
         }
+    }
 }
 
 #Preview {

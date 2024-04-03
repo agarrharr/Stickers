@@ -1,0 +1,30 @@
+{
+  "errors" : [
+
+  ],
+  "values" : [
+    {
+      "disabledTests" : [
+
+      ],
+      "enabledTests" : [
+        {
+          "identifier" : "StickersTests/StickersTests/testExample"
+        },
+        {
+          "identifier" : "StickersTests/StickersTests/testPerformanceExample"
+        },
+        {
+          "identifier" : "StickersUITests/StickersUITests/testExample"
+        },
+        {
+          "identifier" : "StickersUITests/StickersUITests/testLaunchPerformance"
+        },
+        {
+          "identifier" : "StickersUITests/StickersUITestsLaunchTests/testLaunch"
+        }
+      ],
+      "testPlan" : "Stickers"
+    }
+  ]
+}
