@@ -11,7 +11,7 @@ public enum BackgroundColor: String {
     case gray
     case black
     case brown
-    
+
     public var color: Color {
         switch self {
         case .yellow: .yellow
@@ -90,7 +90,7 @@ public struct AddChartFeature {
 public struct AddChartView: View {
     @Bindable var store: StoreOf<AddChartFeature>
 
-    let colors: [BackgroundColor] = [.yellow, .orange, .red, .purple, .blue, .green, .gray, .blue, .brown]
+    let colors: [BackgroundColor] = [.yellow, .orange, .red, .purple, .blue, .green, .gray, .black, .brown]
     
     public init(store: StoreOf<AddChartFeature>) {
         self.store = store
@@ -109,7 +109,7 @@ public struct AddChartView: View {
                 }
                 Section("Color") {
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))]) {
-                            ForEach(colors, id: \.self.rawValue) { color in
+                            ForEach(colors, id: \.self) { color in
                                 Button {
                                     store.send(.view(.colorButtonTapped(color)))
                                     print(color.rawValue)
@@ -118,7 +118,6 @@ public struct AddChartView: View {
                                         Circle()
                                             .fill(color.color)
                                             .frame(width: 40)
-                                            //.padding(5)
                                         if store.color == color {
                                             Circle()
                                                 .stroke(color.color, lineWidth: 4)
