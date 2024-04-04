@@ -75,8 +75,9 @@ public struct PeopleFeature {
 
             case let .destination(.presented(.addChart(.delegate(action)))):
                 switch action {
-                case let .onChartAdded(name):
+                case let .onChartAdded(name, color):
                     guard let id = state.activePersonID else { return .none }
+                    // TODO: use the color
                     let chart = ChartFeature.State(
                         name: name,
                         stickers: []
@@ -198,7 +199,7 @@ public struct PeopleView: View {
         ) { store in
             AddChartView(store: store)
                 .presentationDragIndicator(.visible)
-                .presentationDetents([.medium])
+                .presentationDetents([.medium, .large])
         }
         .navigationViewStyle(.stack)
     }
