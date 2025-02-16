@@ -7,15 +7,6 @@ import ChartFeature
 import PersonFeature
 import StickerFeature
 
-// TODO: extract out these functions to a shared module
-func getAppSandboxDirectory() -> URL {
-    FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-}
-
-func getPeopleJSONURL() -> URL {
-    getAppSandboxDirectory().appendingPathComponent("people.json")
-}
-
 @Reducer
 public struct PeopleFeature {
     @Reducer(state: .equatable, action: .sendable)
@@ -27,7 +18,7 @@ public struct PeopleFeature {
     @ObservableState
     public struct State: Equatable {
         @Presents var destination: Destination.State?
-        @Shared var people: IdentifiedArrayOf<PersonFeature.State>
+        @Shared(.people) var people
         var activePersonID: UUID?
 
         var selectedTab = 1
@@ -38,11 +29,11 @@ public struct PeopleFeature {
 
         public init(
             destination: Destination.State? = nil,
-            people: IdentifiedArrayOf<PersonFeature.State> = [],
+//            people: IdentifiedArrayOf<PersonFeature.State> = [],
             activePersonID: UUID? = nil
         ) {
             self.destination = destination
-            _people = Shared(wrappedValue: people, .fileStorage(getPeopleJSONURL()))
+//            self._people = Shared(wrappedValue: people, .people)
             self.activePersonID = activePersonID ?? self.people.first?.id
         }
     }
@@ -68,22 +59,27 @@ public struct PeopleFeature {
                 switch action {
                 case let .onPersonAdded(name):
                     let person = PersonFeature.State(name: name, charts: [])
-                    state.people.append(person)
+                    state.$people.withLock {
+                        $0.append(person)
+                    }
                     state.activePersonID = person.id
                     return .none
                 }
 
             case let .destination(.presented(.addChart(.delegate(action)))):
                 switch action {
-                case let .onChartAdded(name, color):
+                case let .onChartAdded(name, _):
                     guard let id = state.activePersonID else { return .none }
                     // TODO: use the color
                     let chart = ChartFeature.State(
                         name: name,
                         stickers: []
                     )
-                    state.people[id: id]?.charts.append(chart)
-                    state.people[id: id]?.activeChartID = chart.id
+                    state.$people.withLock {
+                        $0[id: id]?.charts.append(chart) }
+                    state.$people.withLock {
+                        $0[id: id]?.activeChartID = chart.id
+                    }
                     return .none
                 }
             case .destination:
@@ -103,7 +99,9 @@ public struct PeopleFeature {
                     return .none
                 case .addStickerButtonTapped:
                     if let activePersonID = state.activePersonID {
-                        state.people[id: activePersonID]?.addSticker()
+                        state.$people.withLock {
+                            $0[id: activePersonID]?.addSticker()
+                        }
                     }
                     return .none
                 case let .personTapped(personID):
@@ -277,13 +275,10 @@ public struct PeopleView: View {
     let person1 = PersonFeature.State(name: "Blob", charts: [chart11, chart12])
     let person2 = PersonFeature.State(name: "Son", charts: [chart21])
     let person3 = PersonFeature.State(name: "Daughter", charts: [chart31])
+    @Shared(.people) var people = [person1, person2, person3]
 
-    return PeopleView(
-        store: Store(
-            initialState: PeopleFeature.State(
-                people: [person1, person2, person3]
-            )
-        ) {
+    PeopleView(
+        store: Store(initialState: PeopleFeature.State()) {
             PeopleFeature()
         }
     )

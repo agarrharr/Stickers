@@ -7,7 +7,7 @@ import StickerFeature
 @Reducer
 public struct PersonFeature {
     @ObservableState
-    public struct State: Codable, Equatable, Identifiable {
+    public struct State: Codable, Equatable, Identifiable, Sendable {
         public var id: UUID
         public var name: String
         public var charts: IdentifiedArrayOf<ChartFeature.State>
@@ -71,6 +71,23 @@ public struct PersonFeature {
     }
 
     public init() {}
+}
+
+import Sharing
+
+public extension SharedReaderKey
+where Self == FileStorageKey<IdentifiedArrayOf<PersonFeature.State>>.Default {
+  static var people: Self {
+    Self[.fileStorage(getPeopleJSONURL()), default: []]
+  }
+}
+
+func getAppSandboxDirectory() -> URL {
+    FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+}
+
+func getPeopleJSONURL() -> URL {
+    getAppSandboxDirectory().appendingPathComponent("people.json")
 }
 
 public struct PersonView: View {
