@@ -59,7 +59,7 @@ public struct PeopleFeature {
                 switch action {
                 case let .onPersonAdded(name):
                     let person = PersonFeature.State(name: name, charts: [])
-                    state.$people.withLock {
+                    _ = state.$people.withLock {
                         $0.append(person)
                     }
                     state.activePersonID = person.id
@@ -75,9 +75,10 @@ public struct PeopleFeature {
                         name: name,
                         stickers: []
                     )
-                    state.$people.withLock {
-                        $0[id: id]?.charts.append(chart) }
-                    state.$people.withLock {
+                    _ = state.$people.withLock {
+                        $0[id: id]?.charts.append(chart)
+                    }
+                    _ = state.$people.withLock {
                         $0[id: id]?.activeChartID = chart.id
                     }
                     return .none

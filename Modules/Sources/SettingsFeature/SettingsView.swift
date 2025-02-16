@@ -3,7 +3,7 @@ import SwiftUI
 
 @Reducer
 public struct SettingsFeature {
-    @Reducer(state: .equatable, action: .sendable)
+    @Reducer
     public enum Path {
         @ReducerCaseIgnored
         case people
@@ -38,6 +38,9 @@ public struct SettingsFeature {
 
     public init() {}
 }
+
+extension SettingsFeature.Path.State: Equatable, Sendable {}
+extension SettingsFeature.Path.Action: Sendable {}
 
 public struct SettingsView: View {
     @Bindable var store: StoreOf<SettingsFeature>

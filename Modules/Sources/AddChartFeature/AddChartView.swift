@@ -1,7 +1,7 @@
 import ComposableArchitecture
 import SwiftUI
 
-public enum BackgroundColor: String {
+public enum BackgroundColor: String, Sendable {
     case yellow
     case orange
     case red

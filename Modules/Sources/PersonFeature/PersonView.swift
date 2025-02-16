@@ -38,12 +38,12 @@ public struct PersonFeature {
         case delegate(DelegateAction)
 
         @CasePathable
-        public enum ViewAction {
+        public enum ViewAction: Sendable {
             case addChartButtonTapped
         }
 
         @CasePathable
-        public enum DelegateAction {
+        public enum DelegateAction: Sendable {
             case onAddChartButtonTapped
         }
     }

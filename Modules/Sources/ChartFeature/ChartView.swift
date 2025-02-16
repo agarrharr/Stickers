@@ -3,7 +3,7 @@ import SwiftUI
 
 import StickerFeature
 
-public struct Reward: Codable, Equatable {
+public struct Reward: Codable, Equatable, Sendable {
     public var name: String
     
     public init(name: String) {
@@ -30,7 +30,7 @@ public struct Behavior: Codable, Equatable, Identifiable, Sendable {
 @Reducer
 public struct ChartFeature {
     @ObservableState
-    public struct State: Codable, Equatable, Identifiable {
+    public struct State: Codable, Equatable, Identifiable, Sendable {
         public let id: UUID
         public var name: String
         public var reward: Reward?
