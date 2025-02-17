@@ -2,7 +2,7 @@ import ComposableArchitecture
 import SwiftUI
 
 @Reducer
-public struct AddPersonFeature {
+public struct AddPersonFeature: Sendable {
     @ObservableState
     public struct State: Equatable {
         var name = ""
