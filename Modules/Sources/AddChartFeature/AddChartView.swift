@@ -66,11 +66,11 @@ public struct AddChartFeature {
                 case .addButtonTapped:
                     return .run { [name = state.name, color = state.color] send in
                         await send(.delegate(.onChartAdded(name, color)))
-                        await dismiss()
+//                        await dismiss()
                     }
                 case .cancelButtonTapped:
                     return .run { _ in
-                        await dismiss()
+//                        await dismiss()
                     }
                 case let .colorButtonTapped(color):
                     state.color = color

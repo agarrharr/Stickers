@@ -8,33 +8,33 @@ import SettingsFeature
 public struct AppFeature {
     @ObservableState
     public struct State: Equatable {
-        var people: PeopleFeature.State
+//        var people: PeopleFeature.State
         var settings: SettingsFeature.State
         
         public init() {
-            self.people = PeopleFeature.State()
+//            self.people = PeopleFeature.State()
             self.settings = SettingsFeature.State()
         }
     }
 
     public enum Action: Sendable {
-        case people(PeopleFeature.Action)
+//        case people(PeopleFeature.Action)
         case settings(SettingsFeature.Action)
     }
 
     public var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
-            case .people:
-                return .none
+//            case .people:
+//                return .none
             case .settings:
                 return .none
             }
         }
         
-        Scope(state: \.people, action: \.people) {
-            PeopleFeature()
-        }
+//        Scope(state: \.people, action: \.people) {
+//            PeopleFeature()
+//        }
         
         Scope(state: \.settings, action: \.settings) {
             SettingsFeature()
@@ -53,12 +53,9 @@ public struct AppView: View {
 
     public var body: some View {
         TabView {
-            PeopleView(
-                store: self.store.scope(
-                    state: \.people,
-                    action: \.people
-                )
-            )
+            PeopleView(store: Store(initialState: PeopleFeature.State()) {
+                PeopleFeature()
+            })
             .tabItem {
                 Label("Charts", systemImage: "person.crop.rectangle.stack.fill")
             }

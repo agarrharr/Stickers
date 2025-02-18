@@ -2,16 +2,22 @@ import ComposableArchitecture
 @preconcurrency import NonEmpty
 import SwiftUI
 
-public struct Sticker: Codable, Equatable, Sendable {
+public struct Sticker: Identifiable, Equatable, Sendable, Codable {
+    public var id: UUID
     public var imageName: String
     
-    public init(imageName: String) {
+    public init(id: UUID = UUID(), imageName: String) {
+        self.id = id
         self.imageName = imageName
     }
 }
 
-public struct StickerPack: Codable, Equatable, Sendable {
+public struct StickerPack: Equatable, Sendable, Codable {
     public var stickers: NonEmpty<[Sticker]>
+    
+    public init(stickers: NonEmpty<[Sticker]>) {
+        self.stickers = stickers
+    }
 }
 
 public let defaultStickerPack = StickerPack(
@@ -60,12 +66,10 @@ public let catStickerPack = StickerPack(
 @Reducer
 public struct StickerFeature {
     @ObservableState
-    public struct State: Codable, Equatable, Identifiable, Sendable {
-        public var id: UUID
+    public struct State: Equatable, Sendable {
         public var sticker: Sticker
         
-        public init(id: UUID = UUID(), sticker: Sticker) {
-            self.id = id
+        public init(sticker: Sticker) {
             self.sticker = sticker
         }
     }
@@ -102,8 +106,7 @@ public struct StickerView: View {
                 sticker: defaultStickerPack.stickers.first
             )
         ) {
-                StickerFeature()
-                
-            }
+            StickerFeature()
+        }
     )
 }

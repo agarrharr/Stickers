@@ -14,13 +14,13 @@ func getPeopleJSONURL() -> URL {
 public struct PeopleSettingsFeature {
     @ObservableState
     public struct State: Equatable {
-        @Shared(.fileStorage(getPeopleJSONURL())) var people: IdentifiedArrayOf<PersonFeature.State> = []
+        @Shared(.people) var people
         
         public init() {}
     }
     
     public enum Action: Sendable {
-        case people(IdentifiedActionOf<PersonFeature>)
+//        case people(IdentifiedActionOf<PersonFeature>)
     }
     
     public var body: some ReducerOf<Self> {
@@ -35,7 +35,7 @@ struct PeopleSettingsView: View {
     
     var body: some View {
         List {
-            ForEach(store.people, id: \.id) { person in
+            ForEach(Array(store.people)) { person in
                 Text(person.name)
             }
         }

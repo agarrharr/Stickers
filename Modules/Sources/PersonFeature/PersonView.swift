@@ -1,38 +1,40 @@
 import ComposableArchitecture
+import NonEmpty
 import SwiftUI
 
 import ChartFeature
 import StickerFeature
 
+public struct Person: Identifiable, Equatable, Sendable, Codable {
+    public var id: UUID
+    public var name: String
+    public var charts: IdentifiedArrayOf<Chart>
+}
+
 @Reducer
 public struct PersonFeature {
     @ObservableState
-    public struct State: Codable, Equatable, Identifiable, Sendable {
-        public var id: UUID
-        public var name: String
-        public var charts: IdentifiedArrayOf<ChartFeature.State>
+    public struct State: Equatable, Sendable {
+        @Shared var person: Person
         public var activeChartID: UUID
 
-        public mutating func addSticker() {
-            charts[id: activeChartID]?.addSticker()
-        }
+//        public mutating func addSticker() {
+//            person.charts[id: activeChartID]?.addSticker()
+//        }
 
         public init(
-            id: UUID = UUID(),
-            name: String,
-            charts: IdentifiedArrayOf<ChartFeature.State>,
-            activeChartID: UUID? = nil
+            person: Shared<Person>,
+            activeChartID: UUID//? = nil
 
         ) {
-            self.id = id
-            self.name = name
-            self.charts = charts
-            self.activeChartID = activeChartID ?? charts.first?.id ?? UUID()
+            self._person = person
+            // TODO: allow optional and assign the id of the first chart
+            self.activeChartID = activeChartID
         }
     }
 
     public enum Action: Sendable {
-        case charts(IdentifiedActionOf<ChartFeature>)
+//        case charts(IdentifiedActionOf<Chart>)
         case selectChart(UUID)
         case view(ViewAction)
         case delegate(DelegateAction)
@@ -51,8 +53,8 @@ public struct PersonFeature {
     public var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
-            case .charts:
-                return .none
+//            case .charts:
+//                return .none
             case let .selectChart(chartID):
                 state.activeChartID = chartID
                 return .none
@@ -65,9 +67,9 @@ public struct PersonFeature {
                 return .none
             }
         }
-        .forEach(\.charts, action: \.charts) {
-            ChartFeature()
-        }
+//        .forEach(\.charts, action: \.charts) {
+//            ChartFeature()
+//        }
     }
 
     public init() {}
@@ -76,7 +78,7 @@ public struct PersonFeature {
 import Sharing
 
 public extension SharedReaderKey
-where Self == FileStorageKey<IdentifiedArrayOf<PersonFeature.State>>.Default {
+where Self == FileStorageKey<IdentifiedArrayOf<Person>>.Default {
   static var people: Self {
     Self[.fileStorage(getPeopleJSONURL()), default: []]
   }
@@ -94,11 +96,11 @@ public struct PersonView: View {
     @Bindable var store: StoreOf<PersonFeature>
 
     private var chartName: String {
-        store.charts[id: store.activeChartID]?.name ?? "Unknown chart name"
+        store.person.charts[id: store.activeChartID]?.name ?? "Unknown chart name"
     }
 
     private var totalStickers: Int {
-        store.charts[id: store.activeChartID]?.stickers.count ?? 0
+        store.person.charts[id: store.activeChartID]?.stickers.count ?? 0
     }
 
     public init(store: StoreOf<PersonFeature>) {
@@ -107,11 +109,11 @@ public struct PersonView: View {
 
     public var body: some View {
         VStack {
-            if store.charts.count == 0 {
+            if store.person.charts.count == 0 {
                 Spacer()
                     .frame(height: 50)
 
-                Text("It looks like \(store.name) doesn't have any charts yet.")
+                Text("It looks like \(store.person.name) doesn't have any charts yet.")
 
                 Button {
                     store.send(.view(.addChartButtonTapped))
@@ -124,19 +126,24 @@ public struct PersonView: View {
                 TabView(
                     selection: $store.activeChartID.sending(\.selectChart),
                     content: {
-                        ForEach(store.scope(state: \.charts, action: \.charts)) { store in
+                        ForEach(Array(store.$person.charts)) { $chart in
                             VStack {
-                                ChartView(store: store)
+                                ChartView(store: Store(initialState: ChartFeature.State(chart: $chart)) {
+                                    ChartFeature()
+                                })
                                 Spacer()
+                                
                                 Text(chartName)
+                                
                                 Text("^[\(totalStickers) stickers](inflect: true, partOfSpeech: nount)")
+                                
                                 Spacer()
                                     .frame(height: 60)
                             }
                             .tabItem {
-                                Text(store.name)
+                                Text(chart.name)
                             }
-                            .tag(store.state.id)
+                            .tag(chart.id)
                         }
                     }
                 )
@@ -144,39 +151,46 @@ public struct PersonView: View {
                 Spacer()
             }
         }
-        .navigationTitle(store.name)
+        .navigationTitle(store.person.name)
         .navigationBarTitleDisplayMode(.inline)
         .tabViewStyle(.page)
         .indexViewStyle(.page(backgroundDisplayMode: .always))
     }
 }
 
-#Preview {
-    NavigationView {
-        PersonView(store: Store(
-            initialState: PersonFeature.State(
-                name: "Blob",
-                charts: [
-                    ChartFeature.State(
-                        name: "Chores",
-                        stickers: [
-                            StickerFeature.State(
-                                sticker: Sticker(imageName: "face-0")
-                            ),
-                        ]
-                    ),
-                    ChartFeature.State(
-                        name: "Homework",
-                        stickers: [
-                            StickerFeature.State(
-                                sticker: Sticker(imageName: "face-0")
-                            ),
-                        ]
-                    ),
-                ]
-            )
-        ) {
-            PersonFeature()
-        })
-    }
-}
+//#Preview {
+//    NavigationView {
+//        let chartId = UUID()
+//        PersonView(
+//            store: Store(
+//                initialState: PersonFeature.State(
+//                    person: Shared(value: Person(
+//                        id: UUID(),
+//                        name: "Blob",
+//                        charts: [
+//                            Chart(
+//                                id: chartId,
+//                                name: "Chores",
+//                                behaviors: [],
+//                                stickers: [
+//                                    Sticker(imageName: "face-0"),
+//                                ],
+//                                stickerPack: StickerPack(stickers: NonEmpty<Sticker>(Sticker(imageName: "face-0")))
+//                            ),
+////                            Chart(
+////                                name: "Homework",
+////                                stickers: [
+////                                    StickerFeature.State(
+////                                        sticker: Sticker(imageName: "face-0")
+////                                    ),
+////                                ]
+////                            ),
+//                        ]
+//                    )),
+//                    activeChartID: chartId
+//                )
+//        ) {
+//            PersonFeature()
+//        })
+//    }
+//}

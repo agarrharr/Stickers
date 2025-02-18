@@ -23,17 +23,15 @@ public struct PeopleFeature {
 
         var selectedTab = 1
 
-        var filteredPeople: IdentifiedArrayOf<PersonFeature.State> {
+        var filteredPeople: IdentifiedArrayOf<Person> {
             people.filter { $0.id == activePersonID }
         }
 
         public init(
             destination: Destination.State? = nil,
-//            people: IdentifiedArrayOf<PersonFeature.State> = [],
             activePersonID: UUID? = nil
         ) {
             self.destination = destination
-//            self._people = Shared(wrappedValue: people, .people)
             self.activePersonID = activePersonID ?? self.people.first?.id
         }
     }
@@ -41,7 +39,7 @@ public struct PeopleFeature {
     public enum Action: Sendable {
         case destination(PresentationAction<Destination.Action>)
         case view(ViewAction)
-        case people(IdentifiedActionOf<PersonFeature>)
+//        case people(IdentifiedActionOf<PersonFeature>)
 
         @CasePathable
         public enum ViewAction: Sendable {
@@ -58,11 +56,11 @@ public struct PeopleFeature {
             case let .destination(.presented(.addPerson(.delegate(action)))):
                 switch action {
                 case let .onPersonAdded(name):
-                    let person = PersonFeature.State(name: name, charts: [])
-                    _ = state.$people.withLock {
-                        $0.append(person)
-                    }
-                    state.activePersonID = person.id
+//                    let person = PersonFeature.State(name: name, charts: [])
+//                    _ = state.$people.withLock {
+//                        $0.append(person)
+//                    }
+//                    state.activePersonID = person.id
                     return .none
                 }
 
@@ -71,28 +69,28 @@ public struct PeopleFeature {
                 case let .onChartAdded(name, _):
                     guard let id = state.activePersonID else { return .none }
                     // TODO: use the color
-                    let chart = ChartFeature.State(
-                        name: name,
-                        stickers: []
-                    )
-                    _ = state.$people.withLock {
-                        $0[id: id]?.charts.append(chart)
-                    }
-                    _ = state.$people.withLock {
-                        $0[id: id]?.activeChartID = chart.id
-                    }
+//                    let chart = ChartFeature.State(
+//                        name: name,
+//                        stickers: []
+//                    )
+//                    _ = state.$people.withLock {
+//                        $0[id: id]?.charts.append(chart)
+//                    }
+//                    _ = state.$people.withLock {
+//                        $0[id: id]?.activeChartID = chart.id
+//                    }
                     return .none
                 }
             case .destination:
                 return .none
-            case let .people(.element(id: _, action: .delegate(action))):
-                switch action {
-                case .onAddChartButtonTapped:
-                    state.destination = .addChart(AddChartFeature.State())
-                }
-                return .none
-            case .people:
-                return .none
+//            case let .people(.element(id: _, action: .delegate(action))):
+//                switch action {
+//                case .onAddChartButtonTapped:
+//                    state.destination = .addChart(AddChartFeature.State())
+//                }
+//                return .none
+//            case .people:
+//                return .none
             case let .view(action):
                 switch action {
                 case .addPersonButtonTapped:
@@ -100,9 +98,9 @@ public struct PeopleFeature {
                     return .none
                 case .addStickerButtonTapped:
                     if let activePersonID = state.activePersonID {
-                        state.$people.withLock {
-                            $0[id: activePersonID]?.addSticker()
-                        }
+//                        state.$people.withLock {
+//                            $0[id: activePersonID]?.addSticker()
+//                        }
                     }
                     return .none
                 case let .personTapped(personID):
@@ -115,9 +113,9 @@ public struct PeopleFeature {
             }
         }
         .ifLet(\.$destination, action: \.destination)
-        .forEach(\.people, action: \.people) {
-            PersonFeature()
-        }
+//        .forEach(\.people, action: \.people) {
+//            PersonFeature()
+//        }
     }
 
     public init() {}
@@ -133,7 +131,28 @@ public struct PeopleView: View {
     public var body: some View {
         NavigationView {
             ZStack(alignment: .bottomTrailing) {
-                if store.activePersonID == nil {
+                if let activePersonID = store.activePersonID {
+                    if let person = Shared(store.$people[id: activePersonID]) {
+                        PersonView(
+                            store: Store(
+                                initialState: PersonFeature.State(
+                                    person: person,
+                                    activeChartID: UUID() // TODO: fix
+                                )
+                            ) {
+                                PersonFeature()
+                            }
+                        )
+                        .toolbar {
+                            ToolbarItem(placement: .topBarLeading) {
+                                ProfileButton(store: store)
+                            }
+                            ToolbarItem(placement: .topBarTrailing) {
+                                AddButton(store: store)
+                            }
+                        }
+                    }
+                } else {
                     VStack {
                         Spacer()
 
@@ -147,21 +166,6 @@ public struct PeopleView: View {
                         Spacer()
                     }
                     .navigationTitle("Stickers")
-                } else {
-                    PersonView(
-                        store: store.scope(
-                            state: \.filteredPeople,
-                            action: \.people
-                        ).first! // TODO: fix this. Add an activePerson
-                    )
-                    .toolbar {
-                        ToolbarItem(placement: .topBarLeading) {
-                            ProfileButton(store: store)
-                        }
-                        ToolbarItem(placement: .topBarTrailing) {
-                            AddButton(store: store)
-                        }
-                    }
                 }
 
                 Button(action: {
@@ -240,57 +244,57 @@ public struct PeopleView: View {
     }
 }
 
-#Preview {
-    let chart11 = ChartFeature.State(
-        name: "Chores",
-        reward: Reward(name: "Fishing rod"),
-        stickers: [
-            StickerFeature.State(sticker: Sticker(imageName: "face-0")),
-        ]
-    )
-    let chart12 = ChartFeature.State(
-        name: "Homework",
-        reward: Reward(name: "Fishing rod"),
-        stickers: [
-            StickerFeature.State(sticker: Sticker(imageName: "face-0")),
-        ]
-    )
-    let chart21 = ChartFeature.State(
-        name: "Calm body",
-        reward: Reward(name: "Batting cages"),
-        stickers: [
-            StickerFeature.State(sticker: Sticker(imageName: "face-0")),
-            StickerFeature.State(sticker: Sticker(imageName: "face-1")),
-        ]
-    )
-    let chart31 = ChartFeature.State(
-        name: "Homework",
-        reward: Reward(name: "Batting cages"),
-        stickers: [
-            StickerFeature.State(sticker: Sticker(imageName: "face-0")),
-            StickerFeature.State(sticker: Sticker(imageName: "face-1")),
-            StickerFeature.State(sticker: Sticker(imageName: "face-2")),
-        ]
-    )
-
-    let person1 = PersonFeature.State(name: "Blob", charts: [chart11, chart12])
-    let person2 = PersonFeature.State(name: "Son", charts: [chart21])
-    let person3 = PersonFeature.State(name: "Daughter", charts: [chart31])
-    @Shared(.people) var people = [person1, person2, person3]
-
-    PeopleView(
-        store: Store(initialState: PeopleFeature.State()) {
-            PeopleFeature()
-        }
-    )
-}
-
-#Preview("Empty state") {
-    PeopleView(
-        store: Store(
-            initialState: PeopleFeature.State()
-        ) {
-            PeopleFeature()
-        }
-    )
-}
+//#Preview {
+//    let chart11 = ChartFeature.State(
+//        name: "Chores",
+//        reward: Reward(name: "Fishing rod"),
+//        stickers: [
+//            StickerFeature.State(sticker: Sticker(imageName: "face-0")),
+//        ]
+//    )
+//    let chart12 = ChartFeature.State(
+//        name: "Homework",
+//        reward: Reward(name: "Fishing rod"),
+//        stickers: [
+//            StickerFeature.State(sticker: Sticker(imageName: "face-0")),
+//        ]
+//    )
+//    let chart21 = ChartFeature.State(
+//        name: "Calm body",
+//        reward: Reward(name: "Batting cages"),
+//        stickers: [
+//            StickerFeature.State(sticker: Sticker(imageName: "face-0")),
+//            StickerFeature.State(sticker: Sticker(imageName: "face-1")),
+//        ]
+//    )
+//    let chart31 = ChartFeature.State(
+//        name: "Homework",
+//        reward: Reward(name: "Batting cages"),
+//        stickers: [
+//            StickerFeature.State(sticker: Sticker(imageName: "face-0")),
+//            StickerFeature.State(sticker: Sticker(imageName: "face-1")),
+//            StickerFeature.State(sticker: Sticker(imageName: "face-2")),
+//        ]
+//    )
+//
+//    let person1 = PersonFeature.State(name: "Blob", charts: [chart11, chart12])
+//    let person2 = PersonFeature.State(name: "Son", charts: [chart21])
+//    let person3 = PersonFeature.State(name: "Daughter", charts: [chart31])
+//    @Shared(.people) var people = [person1, person2, person3]
+//
+//    PeopleView(
+//        store: Store(initialState: PeopleFeature.State()) {
+//            PeopleFeature()
+//        }
+//    )
+//}
+//
+//#Preview("Empty state") {
+//    PeopleView(
+//        store: Store(
+//            initialState: PeopleFeature.State()
+//        ) {
+//            PeopleFeature()
+//        }
+//    )
+//}

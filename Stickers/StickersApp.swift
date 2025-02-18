@@ -8,11 +8,11 @@ import StickerFeature
 
 @main
 struct StickersApp: App {
-    let state = AppFeature.State()
+    static let state = AppFeature.State()
 
     var body: some Scene {
         WindowGroup {
-            AppView(store: Store(initialState: state) {
+            AppView(store: Store(initialState: Self.state) {
                 AppFeature()._printChanges()
             })
         }

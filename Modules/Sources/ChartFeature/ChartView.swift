@@ -1,7 +1,26 @@
 import ComposableArchitecture
+import NonEmpty
 import SwiftUI
 
 import StickerFeature
+
+public struct Chart: Identifiable, Equatable, Sendable, Codable {
+    public var id: UUID
+    public var name: String
+    public var reward: Reward?
+    public var behaviors: [Behavior]
+    public var stickers: IdentifiedArrayOf<Sticker>
+    public var stickerPack: StickerPack
+    
+    public init(id: UUID = UUID(), name: String, reward: Reward? = nil, behaviors: [Behavior], stickers: IdentifiedArrayOf<Sticker>, stickerPack: StickerPack) {
+        self.id = id
+        self.name = name
+        self.reward = reward
+        self.behaviors = behaviors
+        self.stickers = stickers
+        self.stickerPack = stickerPack
+    }
+}
 
 public struct Reward: Codable, Equatable, Sendable {
     public var name: String
@@ -30,54 +49,32 @@ public struct Behavior: Codable, Equatable, Identifiable, Sendable {
 @Reducer
 public struct ChartFeature {
     @ObservableState
-    public struct State: Codable, Equatable, Identifiable, Sendable {
-        public let id: UUID
-        public var name: String
-        public var reward: Reward?
-        public var behaviors: [Behavior]
-        public var stickers: IdentifiedArrayOf<StickerFeature.State>
-        public var stickerPack: StickerPack
+    public struct State: Equatable, Sendable {
+        @Shared public var chart: Chart
         
-        public init(
-            id: UUID = UUID(),
-            name: String,
-            reward: Reward? = nil,
-            behaviors: [Behavior] = [],
-            stickers: IdentifiedArrayOf<StickerFeature.State>,
-            stickerPack: StickerPack = defaultStickerPack
-        ) {
-            self.id = id
-            self.name = name
-            self.reward = reward
-            self.behaviors = behaviors
-            self.stickers = stickers
-            self.stickerPack = stickerPack
+        public init(chart: Shared<Chart>) {
+            self._chart = chart
         }
         
-        public mutating func addSticker() {
-            let sticker = stickerPack.stickers.randomElement()
-            self.stickers.append(StickerFeature.State(
-                sticker: sticker
-            ))
-        }
+//        public mutating func addSticker() {
+//            let sticker = chart.stickerPack.stickers.randomElement()
+//            _ = $chart.withLock {
+//                $0.stickers.append(sticker)
+//            }
+//        }
     }
 
     public enum Action: Sendable {
         case binding(BindingAction<State>)
-        case stickers(IdentifiedActionOf<StickerFeature>)
     }
 
     public var body: some ReducerOf<Self> {
+        // TODO: BindingReducer?
         Reduce { state, action in
             switch action {
             case .binding:
                 return .none
-            case .stickers:
-                return .none
             }
-        }
-        .forEach(\.stickers, action: \.stickers) {
-            StickerFeature()
         }
     }
 
@@ -95,8 +92,12 @@ public struct ChartView: View {
         VStack {
             ScrollView {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))], spacing: 20) {
-                    ForEach(store.scope(state: \.stickers, action: \.stickers), id: \.self) { store in
-                        StickerView(store: store)
+                    ForEach(store.chart.stickers) { sticker in
+                        StickerView(
+                            store: Store(initialState: StickerFeature.State(sticker: sticker)) {
+                                StickerFeature()
+                            }
+                        )
                     }
                 }
                 .padding(.horizontal)
@@ -110,19 +111,23 @@ public struct ChartView: View {
         ChartView(
             store: Store(
                 initialState: ChartFeature.State(
-                    name: "Chores",
-                    reward: Reward(name: "Fishing rod"),
-                    stickers:
-                        [
-                            StickerFeature.State(sticker: Sticker(imageName: "face-0")),
-                            StickerFeature.State(sticker: Sticker(imageName: "face-1")),
-                            StickerFeature.State(sticker: Sticker(imageName: "face-2")),
-                            StickerFeature.State(sticker: Sticker(imageName: "face-3")),
-                            StickerFeature.State(sticker: Sticker(imageName: "face-4")),
-                            StickerFeature.State(sticker: Sticker(imageName: "face-5")),
-                            StickerFeature.State(sticker: Sticker(imageName: "face-6")),
-                            StickerFeature.State(sticker: Sticker(imageName: "face-7"))
-                        ]
+                    chart: Shared(value: Chart(
+                        id: UUID(),
+                        name: "Chores",
+                        reward: Reward(name: "Fishing rod"),
+                        behaviors: [],
+                        stickers: [
+                            Sticker(imageName: "face-0"),
+                            Sticker(imageName: "face-1"),
+                            Sticker(imageName: "face-2"),
+                            Sticker(imageName: "face-3"),
+                            Sticker(imageName: "face-4"),
+                            Sticker(imageName: "face-5"),
+                            Sticker(imageName: "face-6"),
+                            Sticker(imageName: "face-7")
+                        ],
+                        stickerPack: StickerPack(stickers: NonEmpty<[Sticker]>(Sticker(id: UUID(), imageName: "face-0")))
+                    ))
                 )
             ) {
                 ChartFeature()
