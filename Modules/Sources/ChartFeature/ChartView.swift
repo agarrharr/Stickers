@@ -1,136 +1,9 @@
 import ComposableArchitecture
 import NonEmpty
-import Sharing
 import SwiftUI
 
+import Models
 import StickerFeature
-
-public struct Chart: Identifiable, Equatable, Sendable, Codable {
-    public var id: UUID
-    public var name: String
-    public var reward: Reward?
-    public var behaviors: [Behavior]
-    public var stickers: IdentifiedArrayOf<Sticker>
-    public var stickerPack: StickerPack
-    
-    public init(id: UUID = UUID(), name: String, reward: Reward? = nil, behaviors: [Behavior], stickers: IdentifiedArrayOf<Sticker>, stickerPack: StickerPack) {
-        self.id = id
-        self.name = name
-        self.reward = reward
-        self.behaviors = behaviors
-        self.stickers = stickers
-        self.stickerPack = stickerPack
-    }
-}
-
-public struct Reward: Codable, Equatable, Sendable {
-    public var name: String
-    
-    public init(name: String) {
-        self.name = name
-    }
-}
-
-public struct Behavior: Codable, Equatable, Identifiable, Sendable {
-    public var id: UUID
-    public var name: String
-    public var amount: Int
-    
-    public init(
-        id: UUID = UUID(),
-        name: String,
-        amount: Int
-    ) {
-        self.id = id
-        self.name = name
-        self.amount = amount
-    }
-}
-
-@Reducer
-public struct ChartFeature {
-    @ObservableState
-    public struct State: Equatable, Sendable {
-        @Shared public var chart: Chart
-        var showSettings = false
-
-        public init(chart: Shared<Chart>) {
-            self._chart = chart
-        }
-    }
-
-    public enum Action: Sendable {
-        case addStickerButtonTapped
-        case quickActionTapped(Behavior.ID)
-        case settingsButtonTapped
-        case settingsDismissed
-        case nameChanged(String)
-        case addBehaviorButtonTapped
-        case removeBehavior(Behavior.ID)
-        case behaviorNameChanged(Behavior.ID, String)
-        case behaviorAmountChanged(Behavior.ID, Int)
-    }
-
-    public var body: some ReducerOf<Self> {
-        Reduce { state, action in
-            switch action {
-            case .addStickerButtonTapped:
-                let sticker = state.chart.stickerPack.stickers.randomElement()!
-                _ = state.$chart.withLock { $0.stickers.append(Sticker(imageName: sticker.imageName)) }
-                return .none
-
-            case let .quickActionTapped(behaviorID):
-                guard let behavior = state.chart.behaviors.first(where: { $0.id == behaviorID }) else { return .none }
-                let pack = state.chart.stickerPack
-                state.$chart.withLock { chart in
-                    for _ in 0..<behavior.amount {
-                        let sticker = pack.stickers.randomElement()!
-                        chart.stickers.append(Sticker(imageName: sticker.imageName))
-                    }
-                }
-                return .none
-
-            case .settingsButtonTapped:
-                state.showSettings = true
-                return .none
-
-            case .settingsDismissed:
-                state.showSettings = false
-                return .none
-
-            case let .nameChanged(name):
-                state.$chart.withLock { $0.name = name }
-                return .none
-
-            case .addBehaviorButtonTapped:
-                state.$chart.withLock { $0.behaviors.append(Behavior(name: "", amount: 1)) }
-                return .none
-
-            case let .removeBehavior(id):
-                state.$chart.withLock { $0.behaviors.removeAll { $0.id == id } }
-                return .none
-
-            case let .behaviorNameChanged(id, name):
-                state.$chart.withLock { chart in
-                    if let index = chart.behaviors.firstIndex(where: { $0.id == id }) {
-                        chart.behaviors[index].name = name
-                    }
-                }
-                return .none
-
-            case let .behaviorAmountChanged(id, amount):
-                state.$chart.withLock { chart in
-                    if let index = chart.behaviors.firstIndex(where: { $0.id == id }) {
-                        chart.behaviors[index].amount = amount
-                    }
-                }
-                return .none
-            }
-        }
-    }
-
-    public init() {}
-}
 
 public struct ChartView: View {
     @Bindable var store: StoreOf<ChartFeature>
@@ -163,13 +36,13 @@ public struct ChartView: View {
             }
             ToolbarSpacer(.fixed, placement: .topBarTrailing)
             ToolbarItemGroup(placement: .topBarTrailing) {
-                if !store.chart.behaviors.isEmpty {
+                if !store.chart.quickActions.isEmpty {
                     Menu {
-                        ForEach(store.chart.behaviors) { behavior in
+                        ForEach(store.chart.quickActions) { quickAction in
                             Button {
-                                store.send(.quickActionTapped(behavior.id))
+                                store.send(.quickActionTapped(quickAction.id))
                             } label: {
-                                Text("\(behavior.name) +\(behavior.amount)")
+                                Text("\(quickAction.name) +\(quickAction.amount)")
                             }
                         }
                     } label: {
@@ -214,22 +87,22 @@ struct ChartSettingsView: View {
                     }
                 }
                 Section("Quick Actions") {
-                    ForEach(store.chart.behaviors) { behavior in
+                    ForEach(store.chart.quickActions) { quickAction in
                         HStack {
                             TextField("Name", text: Binding(
-                                get: { behavior.name },
-                                set: { store.send(.behaviorNameChanged(behavior.id, $0)) }
+                                get: { quickAction.name },
+                                set: { store.send(.quickActionNameChanged(quickAction.id, $0)) }
                             ))
                             Stepper(
-                                "+\(behavior.amount)",
+                                "+\(quickAction.amount)",
                                 value: Binding(
-                                    get: { behavior.amount },
-                                    set: { store.send(.behaviorAmountChanged(behavior.id, $0)) }
+                                    get: { quickAction.amount },
+                                    set: { store.send(.quickActionAmountChanged(quickAction.id, $0)) }
                                 ),
                                 in: 1...99
                             )
                             Button(role: .destructive) {
-                                store.send(.removeBehavior(behavior.id))
+                                store.send(.removeQuickAction(quickAction.id))
                             } label: {
                                 Image(systemName: "trash")
                             }
@@ -237,7 +110,7 @@ struct ChartSettingsView: View {
                         }
                     }
                     Button {
-                        store.send(.addBehaviorButtonTapped)
+                        store.send(.addQuickActionButtonTapped)
                     } label: {
                         Label("Add New", systemImage: "plus")
                     }
@@ -256,21 +129,6 @@ struct ChartSettingsView: View {
     }
 }
 
-public extension SharedReaderKey
-where Self == FileStorageKey<IdentifiedArrayOf<Chart>>.Default {
-    static var charts: Self {
-        Self[.fileStorage(getChartsJSONURL()), default: []]
-    }
-}
-
-func getAppSandboxDirectory() -> URL {
-    FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-}
-
-func getChartsJSONURL() -> URL {
-    getAppSandboxDirectory().appendingPathComponent("charts.json")
-}
-
 #Preview {
     NavigationStack {
         ChartView(
@@ -279,10 +137,9 @@ func getChartsJSONURL() -> URL {
                     chart: Shared(value: Chart(
                         id: UUID(),
                         name: "Chores",
-                        reward: Reward(name: "Fishing rod"),
-                        behaviors: [
-                            Behavior(name: "Take out the trash", amount: 5),
-                            Behavior(name: "Do homework", amount: 3),
+                        quickActions: [
+                            QuickAction(name: "Take out the trash", amount: 5),
+                            QuickAction(name: "Do homework", amount: 3),
                         ],
                         stickers: [
                             Sticker(imageName: "face-0"),
@@ -294,7 +151,6 @@ func getChartsJSONURL() -> URL {
                             Sticker(imageName: "face-6"),
                             Sticker(imageName: "face-7")
                         ],
-                        stickerPack: StickerPack(stickers: NonEmpty<[Sticker]>(Sticker(id: UUID(), imageName: "face-0")))
                     ))
                 )
             ) {

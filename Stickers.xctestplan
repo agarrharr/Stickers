@@ -1,0 +1,45 @@
+{
+  "configurations" : [
+    {
+      "id" : "6A1B2C3D-4E5F-6A7B-8C9D-0E1F2A3B4C5D",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:Stickers.xcodeproj",
+      "identifier" : "991C8EFD2B8FEC6100B227BA",
+      "name" : "Stickers"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:Modules",
+        "identifier" : "AddChartFeatureTests",
+        "name" : "AddChartFeatureTests"
+      }
+    },
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:Modules",
+        "identifier" : "ChartFeatureTests",
+        "name" : "ChartFeatureTests"
+      }
+    },
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:Modules",
+        "identifier" : "ChartsFeatureTests",
+        "name" : "ChartsFeatureTests"
+      }
+    }
+  ],
+  "version" : 1
+}
