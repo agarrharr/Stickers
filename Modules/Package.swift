@@ -26,8 +26,8 @@ let package = Package(
             targets: ["StickerFeature"]),
     ],
     dependencies: [
-        .package(url: "https://www.github.com/pointfreeco/swift-composable-architecture", from: "1.17.1"),
-        .package(url: "https://www.github.com/pointfreeco/swift-dependencies", from: "1.10.1"),
+        .package(url: "https://github.com/pointfreeco/swift-composable-architecture", from: "1.17.1"),
+        .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.10.1"),
         .package(url: "https://github.com/pointfreeco/swift-identified-collections", from: "1.1.1"),
         .package(url: "https://github.com/pointfreeco/swift-nonempty", from: "0.4.0"),
     ],
