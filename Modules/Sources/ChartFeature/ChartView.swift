@@ -1,5 +1,6 @@
 import ComposableArchitecture
 import NonEmpty
+import Sharing
 import SwiftUI
 
 import StickerFeature
@@ -104,6 +105,21 @@ public struct ChartView: View {
             }
         }
     }
+}
+
+public extension SharedReaderKey
+where Self == FileStorageKey<IdentifiedArrayOf<Chart>>.Default {
+    static var charts: Self {
+        Self[.fileStorage(getChartsJSONURL()), default: []]
+    }
+}
+
+func getAppSandboxDirectory() -> URL {
+    FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+}
+
+func getChartsJSONURL() -> URL {
+    getAppSandboxDirectory().appendingPathComponent("charts.json")
 }
 
 #Preview {

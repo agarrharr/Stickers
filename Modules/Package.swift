@@ -10,23 +10,14 @@ let package = Package(
             name: "AddChartFeature",
             targets: ["AddChartFeature"]),
         .library(
-            name: "AddPersonFeature",
-            targets: ["AddPersonFeature"]),
-        .library(
             name: "AppFeature",
             targets: ["AppFeature"]),
         .library(
             name: "ChartFeature",
             targets: ["ChartFeature"]),
         .library(
-            name: "PeopleFeature",
-            targets: ["PeopleFeature"]),
-        .library(
-            name: "PersonFeature",
-            targets: ["PersonFeature"]),
-        .library(
-            name: "SettingsFeature",
-            targets: ["SettingsFeature"]),
+            name: "ChartsFeature",
+            targets: ["ChartsFeature"]),
         .library(
             name: "StickerFeature",
             targets: ["StickerFeature"]),
@@ -43,16 +34,9 @@ let package = Package(
             ]
         ),
         .target(
-            name: "AddPersonFeature",
-            dependencies: [
-                .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
-            ]
-        ),
-        .target(
             name: "AppFeature",
             dependencies: [
-                "PeopleFeature",
-                "SettingsFeature",
+                "ChartsFeature",
                 .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
             ]
         ),
@@ -64,26 +48,10 @@ let package = Package(
             ]
         ),
         .target(
-            name: "PeopleFeature",
+            name: "ChartsFeature",
             dependencies: [
                 "AddChartFeature",
-                "AddPersonFeature",
-                "PersonFeature",
-                "StickerFeature",
-                .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
-            ]
-        ),
-        .target(
-            name: "PersonFeature",
-            dependencies: [
                 "ChartFeature",
-                .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
-            ]
-        ),
-        .target(
-            name: "SettingsFeature",
-            dependencies: [
-                "PersonFeature",
                 .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
             ]
         ),

@@ -172,6 +172,7 @@ public struct AddChartView: View {
             initialState: AddChartFeature.State()
         ) {
             AddChartFeature()
+                ._printChanges()
         })
     }
 }
