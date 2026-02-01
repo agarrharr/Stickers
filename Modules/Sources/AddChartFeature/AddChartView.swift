@@ -1,6 +1,18 @@
 import ComposableArchitecture
 import SwiftUI
 
+public struct QuickAction: Equatable, Identifiable, Sendable {
+    public var id: UUID
+    public var name: String
+    public var amount: Int
+
+    public init(id: UUID = UUID(), name: String = "", amount: Int = 1) {
+        self.id = id
+        self.name = name
+        self.amount = amount
+    }
+}
+
 public enum BackgroundColor: String, Sendable {
     case yellow
     case orange
@@ -33,6 +45,7 @@ public struct AddChartFeature {
     public struct State: Equatable {
         var name = ""
         var color: BackgroundColor = .yellow
+        var quickActions: IdentifiedArrayOf<QuickAction> = []
 
         public init() {}
     }
@@ -47,11 +60,15 @@ public struct AddChartFeature {
             case addButtonTapped
             case cancelButtonTapped
             case colorButtonTapped(BackgroundColor)
+            case addQuickActionButtonTapped
+            case removeQuickAction(QuickAction.ID)
+            case quickActionNameChanged(QuickAction.ID, String)
+            case quickActionAmountChanged(QuickAction.ID, Int)
         }
 
         @CasePathable
         public enum DelegateAction: Sendable {
-            case onChartAdded(String, BackgroundColor)
+            case onChartAdded(String, BackgroundColor, IdentifiedArrayOf<QuickAction>)
         }
     }
 
@@ -64,9 +81,8 @@ public struct AddChartFeature {
             case let .view(action):
                 switch action {
                 case .addButtonTapped:
-                    return .run { [name = state.name, color = state.color] send in
-                        await send(.delegate(.onChartAdded(name, color)))
-//                        await dismiss()
+                    return .run { [name = state.name, color = state.color, quickActions = state.quickActions] send in
+                        await send(.delegate(.onChartAdded(name, color, quickActions)))
                     }
                 case .cancelButtonTapped:
                     return .run { _ in
@@ -74,6 +90,18 @@ public struct AddChartFeature {
                     }
                 case let .colorButtonTapped(color):
                     state.color = color
+                    return .none
+                case .addQuickActionButtonTapped:
+                    state.quickActions.append(QuickAction())
+                    return .none
+                case let .removeQuickAction(id):
+                    state.quickActions.remove(id: id)
+                    return .none
+                case let .quickActionNameChanged(id, name):
+                    state.quickActions[id: id]?.name = name
+                    return .none
+                case let .quickActionAmountChanged(id, amount):
+                    state.quickActions[id: id]?.amount = amount
                     return .none
                 }
             case .delegate:
@@ -131,15 +159,32 @@ public struct AddChartView: View {
                         }
                 }
                 Section("Quick Actions") {
-                    HStack {
-                        Text("Take out the trash")
-                        Spacer()
-                        Text("+5")
+                    ForEach(store.quickActions) { action in
+                        HStack {
+                            TextField("Name", text: Binding(
+                                get: { action.name },
+                                set: { store.send(.view(.quickActionNameChanged(action.id, $0))) }
+                            ))
+                            Stepper(
+                                "+\(action.amount)",
+                                value: Binding(
+                                    get: { action.amount },
+                                    set: { store.send(.view(.quickActionAmountChanged(action.id, $0))) }
+                                ),
+                                in: 1...99
+                            )
+                            Button(role: .destructive) {
+                                store.send(.view(.removeQuickAction(action.id)))
+                            } label: {
+                                Image(systemName: "trash")
+                            }
+                            .buttonStyle(.borderless)
+                        }
                     }
                     Button {
-                        
+                        store.send(.view(.addQuickActionButtonTapped))
                     } label: {
-                        Text("Add New")
+                        Label("Add New", systemImage: "plus")
                     }
                 }
             }

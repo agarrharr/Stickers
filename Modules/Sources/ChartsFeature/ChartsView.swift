@@ -41,10 +41,11 @@ public struct ChartsFeature {
 
             case let .addChart(.presented(.delegate(action))):
                 switch action {
-                case let .onChartAdded(name, _):
+                case let .onChartAdded(name, _, quickActions):
+                    let behaviors = quickActions.map { Behavior(name: $0.name, amount: $0.amount) }
                     let chart = Chart(
                         name: name,
-                        behaviors: [],
+                        behaviors: behaviors,
                         stickers: [],
                         stickerPack: defaultStickerPack
                     )
