@@ -1,7 +1,7 @@
 import ComposableArchitecture
 import Foundation
 import NonEmpty
-import Sharing
+import SQLiteData
 
 import Models
 import StickerFeature
@@ -10,11 +10,11 @@ import StickerFeature
 public struct ChartFeature {
     @ObservableState
     public struct State: Equatable, Sendable {
-        @Shared public var chart: Chart
+        public var chartID: Chart.ID
         var showSettings = false
 
-        public init(chart: Shared<Chart>) {
-            self._chart = chart
+        public init(chartID: Chart.ID) {
+            self.chartID = chartID
         }
     }
 
@@ -30,6 +30,7 @@ public struct ChartFeature {
         case quickActionAmountChanged(QuickAction.ID, Int)
     }
 
+    @Dependency(\.defaultDatabase) var database
     @Dependency(\.withRandomNumberGenerator) var withRandomNumberGenerator
 
     public var body: some ReducerOf<Self> {
@@ -37,24 +38,37 @@ public struct ChartFeature {
             switch action {
             case .addStickerButtonTapped:
                 let imageName = withRandomNumberGenerator { generator in
-                    stickerPack.randomElement(using: &generator)!.imageName
+                    stickerPack.randomElement(using: &generator)!
                 }
-                _ = state.$chart.withLock { $0.stickers.append(Sticker(imageName: imageName)) }
-                return .none
+                let chartID = state.chartID
+                let database = database
+                return .run { _ in
+                    try database.write { db in
+                        try Sticker.insert {
+                            Sticker.Draft(chartID: chartID, imageName: imageName)
+                        }.execute(db)
+                    }
+                }
 
             case let .quickActionTapped(quickActionID):
-                guard let quickAction = state.chart.quickActions.first(where: { $0.id == quickActionID }) else { return .none }
-                let imageNames = withRandomNumberGenerator { generator in
-                    (0..<quickAction.amount).map { _ in
-                        stickerPack.randomElement(using: &generator)!.imageName
+                let chartID = state.chartID
+                let maxImageNames = withRandomNumberGenerator { generator in
+                    (0..<99).map { _ in
+                        stickerPack.randomElement(using: &generator)!
                     }
                 }
-                state.$chart.withLock { chart in
-                    for imageName in imageNames {
-                        chart.stickers.append(Sticker(imageName: imageName))
+                let database = database
+                return .run { _ in
+                    try database.write { db in
+                        guard let quickAction = try QuickAction.find(quickActionID).fetchOne(db)
+                        else { return }
+                        for imageName in maxImageNames.prefix(quickAction.amount) {
+                            try Sticker.insert {
+                                Sticker.Draft(chartID: chartID, imageName: imageName)
+                            }.execute(db)
+                        }
                     }
                 }
-                return .none
 
             case .settingsButtonTapped:
                 state.showSettings = true
@@ -65,50 +79,59 @@ public struct ChartFeature {
                 return .none
 
             case let .nameChanged(name):
-                state.$chart.withLock { $0.name = name }
-                return .none
+                let chartID = state.chartID
+                let database = database
+                return .run { _ in
+                    try database.write { db in
+                        try Chart.find(chartID)
+                            .update { $0.name = name }
+                            .execute(db)
+                    }
+                }
 
             case .addQuickActionButtonTapped:
-                 _ = state.$chart.withLock { $0.quickActions.append(QuickAction(name: "", amount: 1)) }
-                return .none
+                let chartID = state.chartID
+                let database = database
+                return .run { _ in
+                    try database.write { db in
+                        try QuickAction.insert {
+                            QuickAction.Draft(chartID: chartID)
+                        }.execute(db)
+                    }
+                }
 
             case let .removeQuickAction(id):
-                state.$chart.withLock { $0.quickActions.removeAll { $0.id == id } }
-                return .none
+                let database = database
+                return .run { _ in
+                    try database.write { db in
+                        try QuickAction.find(id)
+                            .delete()
+                            .execute(db)
+                    }
+                }
 
             case let .quickActionNameChanged(id, name):
-                state.$chart.withLock { chart in
-                    if let index = chart.quickActions.firstIndex(where: { $0.id == id }) {
-                        chart.quickActions[index].name = name
+                let database = database
+                return .run { _ in
+                    try database.write { db in
+                        try QuickAction.find(id)
+                            .update { $0.name = name }
+                            .execute(db)
                     }
                 }
-                return .none
 
             case let .quickActionAmountChanged(id, amount):
-                state.$chart.withLock { chart in
-                    if let index = chart.quickActions.firstIndex(where: { $0.id == id }) {
-                        chart.quickActions[index].amount = amount
+                let database = database
+                return .run { _ in
+                    try database.write { db in
+                        try QuickAction.find(id)
+                            .update { $0.amount = amount }
+                            .execute(db)
                     }
                 }
-                return .none
             }
         }
     }
 
     public init() {}
-}
-
-public extension SharedReaderKey
-where Self == FileStorageKey<IdentifiedArrayOf<Chart>>.Default {
-    static var charts: Self {
-        Self[.fileStorage(getChartsJSONURL()), default: []]
-    }
-}
-
-func getAppSandboxDirectory() -> URL {
-    FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-}
-
-func getChartsJSONURL() -> URL {
-    getAppSandboxDirectory().appendingPathComponent("charts.json")
 }

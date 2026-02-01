@@ -1,5 +1,6 @@
 import ComposableArchitecture
 import Dependencies
+import DependenciesTestSupport
 import Foundation
 import NonEmpty
 import Testing
@@ -17,75 +18,96 @@ private struct LCRNG: RandomNumberGenerator, @unchecked Sendable {
 }
 
 @MainActor
+@Suite(
+    .dependency(\.uuid, .incrementing)
+)
 struct ChartFeatureTests {
-    func makeChart(
+    @Dependency(\.defaultDatabase) var database
+
+    func seedChart(
         id: UUID = UUID(0),
         name: String = "Chores",
-        quickActions: IdentifiedArrayOf<QuickAction> = [],
-        stickers: IdentifiedArrayOf<Sticker> = []
-    ) -> Chart {
-        Chart(id: id, name: name, quickActions: quickActions, stickers: stickers)
-    }
-
-    @Test
-    func addStickerButtonTapped() async {
-        var gen = LCRNG(seed: 0)
-        let expectedImageName = stickerPack.randomElement(using: &gen)!.imageName
-
-        prepareDependencies {
-            $0.uuid = .incrementing
-            $0.withRandomNumberGenerator = WithRandomNumberGenerator(LCRNG(seed: 0))
-        }
-        let chart = makeChart()
-        let store = TestStore(
-            initialState: ChartFeature.State(chart: Shared(value: chart))
-        ) {
-            ChartFeature()
-        }
-
-        await store.send(.addStickerButtonTapped) {
-            $0.$chart.withLock {
-                $0.stickers = [Sticker(id: UUID(0), imageName: expectedImageName)]
+        quickActions: [QuickAction] = [],
+        stickers: [Sticker] = []
+    ) throws {
+        try database.write { db in
+            try db.seed {
+                Chart(id: id, name: name)
+            }
+            for qa in quickActions {
+                try QuickAction.insert {
+                    QuickAction.Draft(chartID: qa.chartID, name: qa.name, amount: qa.amount)
+                }.execute(db)
+            }
+            for s in stickers {
+                try Sticker.insert {
+                    Sticker.Draft(chartID: s.chartID, imageName: s.imageName)
+                }.execute(db)
             }
         }
     }
 
-    @Test
-    func quickActionTapped() async {
-        prepareDependencies {
-            $0.uuid = .incrementing
-            $0.withRandomNumberGenerator = WithRandomNumberGenerator(LCRNG(seed: 0))
+    @Test(
+        .dependency(\.withRandomNumberGenerator, WithRandomNumberGenerator(LCRNG(seed: 0)))
+    )
+    func addStickerButtonTapped() async throws {
+        var gen = LCRNG(seed: 0)
+        let expectedImageName = stickerPack.randomElement(using: &gen)!
+
+        try seedChart()
+        let store = TestStore(
+            initialState: ChartFeature.State(chartID: UUID(0))
+        ) {
+            ChartFeature()
         }
+
+        await store.send(.addStickerButtonTapped)
+
+        let stickers = try database.read { db in
+            try Sticker.where { $0.chartID.eq(UUID(0)) }.fetchAll(db)
+        }
+        #expect(stickers.count == 1)
+        #expect(stickers[0].imageName == expectedImageName)
+    }
+
+    @Test(
+        .dependency(\.withRandomNumberGenerator, WithRandomNumberGenerator(LCRNG(seed: 0)))
+    )
+    func quickActionTapped() async throws {
         var gen = LCRNG(seed: 0)
         let expectedImageNames = (0..<3).map { _ in
-            stickerPack.randomElement(using: &gen)!.imageName
+            stickerPack.randomElement(using: &gen)!
         }
 
-        let chart = makeChart(
-            quickActions: [QuickAction(name: "Chore", amount: 3)]
-        )
+        let chartID = UUID(0)
+        let quickActionID = UUID(100)
+        try database.write { db in
+            try db.seed {
+                Chart(id: chartID, name: "Chores")
+                QuickAction(id: quickActionID, chartID: chartID, name: "Chore", amount: 3)
+            }
+        }
+
         let store = TestStore(
-            initialState: ChartFeature.State(chart: Shared(value: chart))
+            initialState: ChartFeature.State(chartID: chartID)
         ) {
             ChartFeature()
         }
 
-        await store.send(.quickActionTapped(chart.quickActions[0].id)) {
-            $0.$chart.withLock {
-                $0.stickers = [
-                    Sticker(id: UUID(1), imageName: expectedImageNames[0]),
-                    Sticker(id: UUID(2), imageName: expectedImageNames[1]),
-                    Sticker(id: UUID(3), imageName: expectedImageNames[2]),
-                ]
-            }
+        await store.send(.quickActionTapped(quickActionID))
+
+        let stickers = try database.read { db in
+            try Sticker.where { $0.chartID.eq(chartID) }.fetchAll(db)
         }
+        #expect(stickers.count == 3)
+        #expect(stickers.map(\.imageName) == expectedImageNames)
     }
 
     @Test
-    func quickActionTappedWithInvalidID() async {
-        let chart = makeChart()
+    func quickActionTappedWithInvalidID() async throws {
+        try seedChart()
         let store = TestStore(
-            initialState: ChartFeature.State(chart: Shared(value: chart))
+            initialState: ChartFeature.State(chartID: UUID(0))
         ) {
             ChartFeature()
         }
@@ -94,10 +116,10 @@ struct ChartFeatureTests {
     }
 
     @Test
-    func settingsButtonTapped() async {
-        let chart = makeChart()
+    func settingsButtonTapped() async throws {
+        try seedChart()
         let store = TestStore(
-            initialState: ChartFeature.State(chart: Shared(value: chart))
+            initialState: ChartFeature.State(chartID: UUID(0))
         ) {
             ChartFeature()
         }
@@ -108,9 +130,9 @@ struct ChartFeatureTests {
     }
 
     @Test
-    func settingsDismissed() async {
-        let chart = makeChart()
-        var state = ChartFeature.State(chart: Shared(value: chart))
+    func settingsDismissed() async throws {
+        try seedChart()
+        var state = ChartFeature.State(chartID: UUID(0))
         state.showSettings = true
         let store = TestStore(initialState: state) {
             ChartFeature()
@@ -122,84 +144,107 @@ struct ChartFeatureTests {
     }
 
     @Test
-    func nameChanged() async {
-        let chart = makeChart()
+    func nameChanged() async throws {
+        try seedChart()
         let store = TestStore(
-            initialState: ChartFeature.State(chart: Shared(value: chart))
+            initialState: ChartFeature.State(chartID: UUID(0))
         ) {
             ChartFeature()
         }
 
-        await store.send(.nameChanged("Homework")) {
-            $0.$chart.withLock { $0.name = "Homework" }
+        await store.send(.nameChanged("Homework"))
+
+        let chart = try database.read { db in
+            try Chart.find(UUID(0)).fetchOne(db)
         }
+        #expect(chart?.name == "Homework")
     }
 
     @Test
-    func addQuickActionButtonTapped() async {
-        prepareDependencies {
-            $0.uuid = .incrementing
-        }
-        let chart = makeChart()
+    func addQuickActionButtonTapped() async throws {
+        try seedChart()
         let store = TestStore(
-            initialState: ChartFeature.State(chart: Shared(value: chart))
+            initialState: ChartFeature.State(chartID: UUID(0))
         ) {
             ChartFeature()
         }
 
-        await store.send(.addQuickActionButtonTapped) {
-            $0.$chart.withLock { $0.quickActions = [QuickAction(id: UUID(0), name: "", amount: 1)] }
+        await store.send(.addQuickActionButtonTapped)
+
+        let quickActions = try database.read { db in
+            try QuickAction.where { $0.chartID.eq(UUID(0)) }.fetchAll(db)
         }
+        #expect(quickActions.count == 1)
+        #expect(quickActions[0].name == "")
+        #expect(quickActions[0].amount == 1)
     }
 
     @Test
-    func removeQuickAction() async {
-        let quickActionID = UUID(1)
-        let chart = makeChart(
-            quickActions: [QuickAction(id: quickActionID, name: "Chore", amount: 5)]
-        )
+    func removeQuickAction() async throws {
+        let quickActionID = UUID(100)
+        try database.write { db in
+            try db.seed {
+                Chart(id: UUID(0), name: "Chores")
+                QuickAction(id: quickActionID, chartID: UUID(0), name: "Chore", amount: 5)
+            }
+        }
         let store = TestStore(
-            initialState: ChartFeature.State(chart: Shared(value: chart))
+            initialState: ChartFeature.State(chartID: UUID(0))
         ) {
             ChartFeature()
         }
 
-        await store.send(.removeQuickAction(quickActionID)) {
-            $0.$chart.withLock { $0.quickActions = [] }
+        await store.send(.removeQuickAction(quickActionID))
+
+        let quickActions = try database.read { db in
+            try QuickAction.where { $0.chartID.eq(UUID(0)) }.fetchAll(db)
         }
+        #expect(quickActions.isEmpty)
     }
 
     @Test
-    func quickActionNameChanged() async {
-        let quickActionID = UUID(1)
-        let chart = makeChart(
-            quickActions: [QuickAction(id: quickActionID, name: "Old", amount: 5)]
-        )
+    func quickActionNameChanged() async throws {
+        let quickActionID = UUID(100)
+        try database.write { db in
+            try db.seed {
+                Chart(id: UUID(0), name: "Chores")
+                QuickAction(id: quickActionID, chartID: UUID(0), name: "Old", amount: 5)
+            }
+        }
         let store = TestStore(
-            initialState: ChartFeature.State(chart: Shared(value: chart))
+            initialState: ChartFeature.State(chartID: UUID(0))
         ) {
             ChartFeature()
         }
 
-        await store.send(.quickActionNameChanged(quickActionID, "New")) {
-            $0.$chart.withLock { $0.quickActions[0].name = "New" }
+        await store.send(.quickActionNameChanged(quickActionID, "New"))
+
+        let qa = try database.read { db in
+            try QuickAction.find(quickActionID).fetchOne(db)
         }
+        #expect(qa?.name == "New")
     }
 
     @Test
-    func quickActionAmountChanged() async {
-        let quickActionID = UUID(1)
-        let chart = makeChart(
-            quickActions: [QuickAction(id: quickActionID, name: "Chore", amount: 1)]
-        )
+    func quickActionAmountChanged() async throws {
+        let quickActionID = UUID(100)
+        try database.write { db in
+            try db.seed {
+                Chart(id: UUID(0), name: "Chores")
+                QuickAction(id: quickActionID, chartID: UUID(0), name: "Chore", amount: 1)
+            }
+        }
         let store = TestStore(
-            initialState: ChartFeature.State(chart: Shared(value: chart))
+            initialState: ChartFeature.State(chartID: UUID(0))
         ) {
             ChartFeature()
         }
 
-        await store.send(.quickActionAmountChanged(quickActionID, 10)) {
-            $0.$chart.withLock { $0.quickActions[0].amount = 10 }
+        await store.send(.quickActionAmountChanged(quickActionID, 10))
+
+        let qa = try database.read { db in
+            try QuickAction.find(quickActionID).fetchOne(db)
         }
+        #expect(qa?.amount == 10)
     }
 }

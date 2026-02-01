@@ -1,11 +1,14 @@
 import ComposableArchitecture
+import SQLiteData
 import SwiftUI
 
 import AddChartFeature
 import ChartFeature
+import Models
 
 public struct ChartsView: View {
     @Bindable var store: StoreOf<ChartsFeature>
+    @FetchAll var charts: [Chart]
 
     public init(store: StoreOf<ChartsFeature>) {
         self.store = store
@@ -14,7 +17,7 @@ public struct ChartsView: View {
     public var body: some View {
         NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
             List {
-                ForEach(store.charts) { chart in
+                ForEach(charts) { chart in
                     Button {
                         store.send(.chartTapped(chart.id))
                     } label: {
@@ -33,7 +36,7 @@ public struct ChartsView: View {
                 }
             }
             .overlay {
-                if store.charts.isEmpty {
+                if charts.isEmpty {
                     ContentUnavailableView {
                         Label("No Charts", systemImage: "chart.bar")
                     } description: {
@@ -53,6 +56,9 @@ public struct ChartsView: View {
 }
 
 #Preview {
+    let _ = prepareDependencies {
+        try! $0.bootstrapDatabase()
+    }
     ChartsView(
         store: Store(initialState: ChartsFeature.State()) {
             ChartsFeature()

@@ -1,7 +1,9 @@
 import ComposableArchitecture
+import Dependencies
 import SwiftUI
 
 import ChartsFeature
+import Models
 
 public struct AppView: View {
     var store: StoreOf<AppFeature>
@@ -16,6 +18,9 @@ public struct AppView: View {
 }
 
 #Preview {
+    let _ = prepareDependencies {
+        try! $0.bootstrapDatabase()
+    }
     AppView(
         store: Store(initialState: AppFeature.State()) {
             AppFeature()

@@ -1,15 +1,14 @@
 import ComposableArchitecture
+import SQLiteData
 
 import AddChartFeature
 import ChartFeature
 import Models
-import StickerFeature
 
 @Reducer
 public struct ChartsFeature {
     @ObservableState
     public struct State: Equatable {
-        @Shared(.charts) var charts
         @Presents var addChart: AddChartFeature.State?
         var path = StackState<ChartFeature.State>()
 
@@ -27,6 +26,8 @@ public struct ChartsFeature {
         case path(StackActionOf<ChartFeature>)
     }
 
+    @Dependency(\.defaultDatabase) var database
+
     public var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
@@ -35,21 +36,33 @@ public struct ChartsFeature {
                 return .none
 
             case let .chartTapped(id):
-                guard let chart = Shared(state.$charts[id: id]) else { return .none }
-                state.path.append(ChartFeature.State(chart: chart))
+                state.path.append(ChartFeature.State(chartID: id))
                 return .none
 
             case let .addChart(.presented(.delegate(action))):
                 switch action {
                 case let .onChartAdded(name, _, quickActions):
-                    let chart = Chart(
-                        name: name,
-                        quickActions: quickActions,
-                        stickers: []
-                    )
-                    _ = state.$charts.withLock { $0.append(chart) }
                     state.addChart = nil
-                    return .none
+                    let database = database
+                    return .run { _ in
+                        try database.write { db in
+                            let chart = try Chart.insert {
+                                Chart.Draft(name: name)
+                            }
+                            .returning(\.self)
+                            .fetchOne(db)!
+
+                            for qa in quickActions {
+                                try QuickAction.insert {
+                                    QuickAction.Draft(
+                                        chartID: chart.id,
+                                        name: qa.name,
+                                        amount: qa.amount
+                                    )
+                                }.execute(db)
+                            }
+                        }
+                    }
                 }
 
             case .addChart:

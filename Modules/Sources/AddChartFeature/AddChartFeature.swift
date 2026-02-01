@@ -1,8 +1,24 @@
 import ComposableArchitecture
 import Dependencies
 import Foundation
+import IdentifiedCollections
 
-import Models
+public struct QuickActionInput: Identifiable, Equatable, Sendable {
+    public var id: UUID
+    public var name: String
+    public var amount: Int
+
+    public init(id: UUID, name: String = "", amount: Int = 1) {
+        self.id = id
+        self.name = name
+        self.amount = amount
+    }
+
+    public init(name: String = "", amount: Int = 1) {
+        @Dependency(\.uuid) var uuid
+        self.init(id: uuid(), name: name, amount: amount)
+    }
+}
 
 @Reducer
 public struct AddChartFeature {
@@ -10,9 +26,9 @@ public struct AddChartFeature {
     public struct State: Equatable {
         var name = ""
         var color: BackgroundColor = .yellow
-        var quickActions: IdentifiedArrayOf<QuickAction> = []
+        var quickActions: IdentifiedArrayOf<QuickActionInput> = []
 
-        public init(name: String = "", color: BackgroundColor = .yellow, quickActions: IdentifiedArrayOf<QuickAction> = []) {
+        public init(name: String = "", color: BackgroundColor = .yellow, quickActions: IdentifiedArrayOf<QuickActionInput> = []) {
             self.name = name
             self.color = color
             self.quickActions = quickActions
@@ -30,14 +46,14 @@ public struct AddChartFeature {
             case cancelButtonTapped
             case colorButtonTapped(BackgroundColor)
             case addQuickActionButtonTapped
-            case removeQuickAction(QuickAction.ID)
-            case quickActionNameChanged(QuickAction.ID, String)
-            case quickActionAmountChanged(QuickAction.ID, Int)
+            case removeQuickAction(QuickActionInput.ID)
+            case quickActionNameChanged(QuickActionInput.ID, String)
+            case quickActionAmountChanged(QuickActionInput.ID, Int)
         }
 
         @CasePathable
         public enum DelegateAction: Sendable {
-            case onChartAdded(String, BackgroundColor, IdentifiedArrayOf<QuickAction>)
+            case onChartAdded(String, BackgroundColor, [QuickActionInput])
         }
     }
 
@@ -50,7 +66,7 @@ public struct AddChartFeature {
             case let .view(action):
                 switch action {
                 case .addButtonTapped:
-                    return .run { [name = state.name, color = state.color, quickActions = state.quickActions] send in
+                    return .run { [name = state.name, color = state.color, quickActions = Array(state.quickActions)] send in
                         await send(.delegate(.onChartAdded(name, color, quickActions)))
                     }
                 case .cancelButtonTapped:
@@ -61,7 +77,7 @@ public struct AddChartFeature {
                     state.color = color
                     return .none
                 case .addQuickActionButtonTapped:
-                    state.quickActions.append(QuickAction())
+                    state.quickActions.append(QuickActionInput())
                     return .none
                 case let .removeQuickAction(id):
                     state.quickActions.remove(id: id)

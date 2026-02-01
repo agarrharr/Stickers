@@ -1,19 +1,17 @@
-import Dependencies
 import Foundation
+import SQLiteData
 
-public struct QuickAction: Codable, Equatable, Identifiable, Sendable {
-    public var id: UUID
-    public var name: String
-    public var amount: Int
+@Table
+public struct QuickAction: Equatable, Identifiable, Sendable {
+    public let id: UUID
+    public var chartID: Chart.ID
+    public var name = ""
+    public var amount = 1
 
-    public init(id: UUID, name: String = "", amount: Int = 1) {
+    public init(id: UUID, chartID: Chart.ID, name: String = "", amount: Int = 1) {
         self.id = id
+        self.chartID = chartID
         self.name = name
         self.amount = amount
-    }
-
-    public init(name: String = "", amount: Int = 1) {
-        @Dependency(\.uuid) var uuid
-        self.init(id: uuid(), name: name, amount: amount)
     }
 }

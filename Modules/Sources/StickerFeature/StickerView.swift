@@ -1,5 +1,8 @@
 import ComposableArchitecture
+import Dependencies
 import SwiftUI
+
+import Models
 
 public struct StickerView: View {
     var store: StoreOf<StickerFeature>
@@ -20,7 +23,7 @@ public struct StickerView: View {
     StickerView(
         store: Store(
             initialState: StickerFeature.State(
-                sticker: stickerPack.first
+                sticker: Sticker(id: UUID(0), chartID: UUID(0), imageName: stickerPack.first)
             )
         ) {
             StickerFeature()

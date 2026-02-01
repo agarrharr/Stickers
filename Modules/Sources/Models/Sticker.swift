@@ -1,17 +1,15 @@
-import Dependencies
 import Foundation
+import SQLiteData
 
-public struct Sticker: Identifiable, Equatable, Sendable, Codable {
-    public var id: UUID
-    public var imageName: String
+@Table
+public struct Sticker: Identifiable, Equatable, Sendable {
+    public let id: UUID
+    public var chartID: Chart.ID
+    public var imageName = ""
 
-    public init(id: UUID, imageName: String) {
+    public init(id: UUID, chartID: Chart.ID, imageName: String = "") {
         self.id = id
+        self.chartID = chartID
         self.imageName = imageName
-    }
-
-    public init(imageName: String) {
-        @Dependency(\.uuid) var uuid
-        self.init(id: uuid(), imageName: imageName)
     }
 }

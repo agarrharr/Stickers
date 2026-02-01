@@ -30,6 +30,7 @@ let package = Package(
         .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.10.1"),
         .package(url: "https://github.com/pointfreeco/swift-identified-collections", from: "1.1.1"),
         .package(url: "https://github.com/pointfreeco/swift-nonempty", from: "0.4.0"),
+        .package(url: "https://github.com/pointfreeco/sqlite-data", from: "1.0.0"),
     ],
     targets: [
         .target(
@@ -37,12 +38,14 @@ let package = Package(
             dependencies: [
                 "Models",
                 .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+                .product(name: "IdentifiedCollections", package: "swift-identified-collections"),
             ]
         ),
         .target(
             name: "AppFeature",
             dependencies: [
                 "ChartsFeature",
+                "Models",
                 .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
             ]
         ),
@@ -52,6 +55,7 @@ let package = Package(
                 "StickerFeature",
                 "Models",
                 .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+                .product(name: "SQLiteData", package: "sqlite-data"),
             ]
         ),
         .target(
@@ -60,13 +64,14 @@ let package = Package(
                 "AddChartFeature",
                 "ChartFeature",
                 .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+                .product(name: "SQLiteData", package: "sqlite-data"),
             ]
         ),
         .target(
             name: "Models",
             dependencies: [
                 .product(name: "Dependencies", package: "swift-dependencies"),
-                .product(name: "IdentifiedCollections", package: "swift-identified-collections"),
+                .product(name: "SQLiteData", package: "sqlite-data"),
             ]
         ),
         .target(
@@ -82,6 +87,7 @@ let package = Package(
             dependencies: [
                 "AddChartFeature",
                 .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+                .product(name: "DependenciesTestSupport", package: "swift-dependencies"),
             ]
         ),
         .testTarget(
@@ -90,6 +96,7 @@ let package = Package(
                 "ChartFeature",
                 "StickerFeature",
                 .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+                .product(name: "DependenciesTestSupport", package: "swift-dependencies"),
                 .product(name: "NonEmpty", package: "swift-nonempty"),
             ]
         ),
@@ -101,6 +108,7 @@ let package = Package(
                 "ChartsFeature",
                 "StickerFeature",
                 .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+                .product(name: "DependenciesTestSupport", package: "swift-dependencies"),
                 .product(name: "NonEmpty", package: "swift-nonempty"),
             ]
         ),

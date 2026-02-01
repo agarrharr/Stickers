@@ -1,9 +1,9 @@
 import ComposableArchitecture
+import DependenciesTestSupport
 import Foundation
 import Testing
 
 @testable import AddChartFeature
-import Models
 
 @MainActor
 struct AddChartFeatureTests {
@@ -13,7 +13,7 @@ struct AddChartFeatureTests {
             name: "Chores",
             color: .blue,
             quickActions: [
-                QuickAction(id: UUID(1), name: "Take out trash", amount: 5)
+                QuickActionInput(id: UUID(1), name: "Take out trash", amount: 5)
             ]
         )) {
             AddChartFeature()
@@ -68,7 +68,7 @@ struct AddChartFeatureTests {
         }
 
         await store.send(.view(.addQuickActionButtonTapped)) {
-            $0.quickActions = [QuickAction(id: UUID(0), name: "", amount: 1)]
+            $0.quickActions = [QuickActionInput(id: UUID(0), name: "", amount: 1)]
         }
     }
 
@@ -79,7 +79,7 @@ struct AddChartFeatureTests {
             initialState: AddChartFeature.State(
                 color: .blue,
                 quickActions: [
-                    QuickAction(id: UUID(1), name: "Chore", amount: 3)
+                    QuickActionInput(id: UUID(1), name: "Chore", amount: 3)
                 ]
             )
         ) {
@@ -98,7 +98,7 @@ struct AddChartFeatureTests {
             initialState: AddChartFeature.State(
                 color: .blue,
                 quickActions: [
-                    QuickAction(id: id, name: "", amount: 1)
+                    QuickActionInput(id: id, name: "", amount: 1)
                 ]
             )
         ) {
@@ -117,7 +117,7 @@ struct AddChartFeatureTests {
             initialState: AddChartFeature.State(
                 color: .blue,
                 quickActions: [
-                    QuickAction(id: id, name: "Chore", amount: 1)
+                    QuickActionInput(id: id, name: "Chore", amount: 1)
                 ]
             )
         ) {
