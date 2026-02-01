@@ -2,7 +2,9 @@ import ComposableArchitecture
 import Foundation
 import Testing
 
+import AddChartFeature
 @testable import ChartsFeature
+import ChartFeature
 import Models
 
 @MainActor
@@ -36,14 +38,16 @@ struct ChartsFeatureTests {
         ]
 
         await store.send(.addChart(.presented(.delegate(.onChartAdded("Chores", .yellow, quickActions))))) {
-            $0.charts = [
-                Chart(
-                    id: UUID(0),
-                    name: "Chores",
-                    quickActions: [QuickAction(id: UUID(99), name: "Take out trash", amount: 5)],
-                    stickers: []
-                )
-            ]
+            $0.$charts.withLock {
+                $0 = [
+                    Chart(
+                        id: UUID(0),
+                        name: "Chores",
+                        quickActions: [QuickAction(id: UUID(99), name: "Take out trash", amount: 5)],
+                        stickers: []
+                    )
+                ]
+            }
             $0.addChart = nil
         }
     }
@@ -67,7 +71,7 @@ struct ChartsFeatureTests {
 
         await store.send(.chartTapped(chartID)) {
             $0.path[id: 0] = ChartFeature.State(
-                chart: Shared($0.$charts[id: chartID]!)
+                chart: Shared($0.$charts[id: chartID])!
             )
         }
     }

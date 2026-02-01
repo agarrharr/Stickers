@@ -20,9 +20,7 @@ struct AddChartFeatureTests {
         }
 
         await store.send(.view(.addButtonTapped))
-        await store.receive(\.delegate.onChartAdded) {
-            _ = $0  // delegate action doesn't mutate state
-        }
+        await store.receive(\.delegate.onChartAdded)
     }
 
     @Test
@@ -81,7 +79,7 @@ struct AddChartFeatureTests {
             initialState: AddChartFeature.State(
                 color: .blue,
                 quickActions: [
-                    QuickAction(id: id, name: "Chore", amount: 3)
+                    QuickAction(id: UUID(1), name: "Chore", amount: 3)
                 ]
             )
         ) {
