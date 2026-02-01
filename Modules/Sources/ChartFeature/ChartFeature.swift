@@ -30,20 +30,28 @@ public struct ChartFeature {
         case quickActionAmountChanged(QuickAction.ID, Int)
     }
 
+    @Dependency(\.withRandomNumberGenerator) var withRandomNumberGenerator
+
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
             case .addStickerButtonTapped:
-                let sticker = stickerPack.randomElement()!
-                state.$chart.withLock { $0.stickers.append(Sticker(imageName: sticker.imageName)) }
+                let imageName = withRandomNumberGenerator { generator in
+                    stickerPack.randomElement(using: &generator)!.imageName
+                }
+                _ = state.$chart.withLock { $0.stickers.append(Sticker(imageName: imageName)) }
                 return .none
 
             case let .quickActionTapped(quickActionID):
                 guard let quickAction = state.chart.quickActions.first(where: { $0.id == quickActionID }) else { return .none }
+                let imageNames = withRandomNumberGenerator { generator in
+                    (0..<quickAction.amount).map { _ in
+                        stickerPack.randomElement(using: &generator)!.imageName
+                    }
+                }
                 state.$chart.withLock { chart in
-                    for _ in 0..<quickAction.amount {
-                        let sticker = stickerPack.randomElement()!
-                        chart.stickers.append(Sticker(imageName: sticker.imageName))
+                    for imageName in imageNames {
+                        chart.stickers.append(Sticker(imageName: imageName))
                     }
                 }
                 return .none
@@ -61,7 +69,7 @@ public struct ChartFeature {
                 return .none
 
             case .addQuickActionButtonTapped:
-                state.$chart.withLock { $0.quickActions.append(QuickAction(name: "", amount: 1)) }
+                 _ = state.$chart.withLock { $0.quickActions.append(QuickAction(name: "", amount: 1)) }
                 return .none
 
             case let .removeQuickAction(id):

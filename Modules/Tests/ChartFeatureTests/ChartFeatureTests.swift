@@ -1,9 +1,20 @@
 import ComposableArchitecture
+import Dependencies
 import Foundation
+import NonEmpty
 import Testing
 
 @testable import ChartFeature
 import Models
+import StickerFeature
+
+private struct LCRNG: RandomNumberGenerator, @unchecked Sendable {
+    var seed: UInt64
+    mutating func next() -> UInt64 {
+        seed = seed &* 6364136223846793005 &+ 1442695040888963407
+        return seed
+    }
+}
 
 @MainActor
 struct ChartFeatureTests {
@@ -18,8 +29,12 @@ struct ChartFeatureTests {
 
     @Test
     func addStickerButtonTapped() async {
+        var gen = LCRNG(seed: 0)
+        let expectedImageName = stickerPack.randomElement(using: &gen)!.imageName
+
         prepareDependencies {
             $0.uuid = .incrementing
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(LCRNG(seed: 0))
         }
         let chart = makeChart()
         let store = TestStore(
@@ -27,34 +42,43 @@ struct ChartFeatureTests {
         ) {
             ChartFeature()
         }
-        store.exhaustivity = .off(showSkippedAssertions: false)
 
-        await store.send(.addStickerButtonTapped)
-        #expect(store.state.chart.stickers.count == 1)
-        #expect(store.state.chart.stickers[0].id == UUID(0))
+        await store.send(.addStickerButtonTapped) {
+            $0.$chart.withLock {
+                $0.stickers = [Sticker(id: UUID(0), imageName: expectedImageName)]
+            }
+        }
     }
 
     @Test
     func quickActionTapped() async {
         prepareDependencies {
             $0.uuid = .incrementing
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(LCRNG(seed: 0))
         }
-        let quickActionID = UUID(100)
+        var gen = LCRNG(seed: 0)
+        let expectedImageNames = (0..<3).map { _ in
+            stickerPack.randomElement(using: &gen)!.imageName
+        }
+
         let chart = makeChart(
-            quickActions: [QuickAction(id: quickActionID, name: "Chore", amount: 3)]
+            quickActions: [QuickAction(name: "Chore", amount: 3)]
         )
         let store = TestStore(
             initialState: ChartFeature.State(chart: Shared(value: chart))
         ) {
             ChartFeature()
         }
-        store.exhaustivity = .off(showSkippedAssertions: false)
 
-        await store.send(.quickActionTapped(quickActionID))
-        #expect(store.state.chart.stickers.count == 3)
-        #expect(store.state.chart.stickers[0].id == UUID(0))
-        #expect(store.state.chart.stickers[1].id == UUID(1))
-        #expect(store.state.chart.stickers[2].id == UUID(2))
+        await store.send(.quickActionTapped(chart.quickActions[0].id)) {
+            $0.$chart.withLock {
+                $0.stickers = [
+                    Sticker(id: UUID(1), imageName: expectedImageNames[0]),
+                    Sticker(id: UUID(2), imageName: expectedImageNames[1]),
+                    Sticker(id: UUID(3), imageName: expectedImageNames[2]),
+                ]
+            }
+        }
     }
 
     @Test
