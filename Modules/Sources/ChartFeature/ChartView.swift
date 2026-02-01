@@ -60,6 +60,7 @@ public struct ChartFeature {
 
     public enum Action: Sendable {
         case addStickerButtonTapped
+        case quickActionTapped(Behavior.ID)
     }
 
     public var body: some ReducerOf<Self> {
@@ -68,6 +69,17 @@ public struct ChartFeature {
             case .addStickerButtonTapped:
                 let sticker = state.chart.stickerPack.stickers.randomElement()!
                 _ = state.$chart.withLock { $0.stickers.append(Sticker(imageName: sticker.imageName)) }
+                return .none
+
+            case let .quickActionTapped(behaviorID):
+                guard let behavior = state.chart.behaviors.first(where: { $0.id == behaviorID }) else { return .none }
+                let pack = state.chart.stickerPack
+                state.$chart.withLock { chart in
+                    for _ in 0..<behavior.amount {
+                        let sticker = pack.stickers.randomElement()!
+                        chart.stickers.append(Sticker(imageName: sticker.imageName))
+                    }
+                }
                 return .none
             }
         }
@@ -99,10 +111,25 @@ public struct ChartView: View {
         .navigationTitle(store.chart.name)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    store.send(.addStickerButtonTapped)
-                } label: {
-                    Image(systemName: "plus")
+                HStack {
+                    if !store.chart.behaviors.isEmpty {
+                        Menu {
+                            ForEach(store.chart.behaviors) { behavior in
+                                Button {
+                                    store.send(.quickActionTapped(behavior.id))
+                                } label: {
+                                    Text("\(behavior.name) +\(behavior.amount)")
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "bolt.fill")
+                        }
+                    }
+                    Button {
+                        store.send(.addStickerButtonTapped)
+                    } label: {
+                        Image(systemName: "plus")
+                    }
                 }
             }
         }
@@ -133,7 +160,10 @@ func getChartsJSONURL() -> URL {
                         id: UUID(),
                         name: "Chores",
                         reward: Reward(name: "Fishing rod"),
-                        behaviors: [],
+                        behaviors: [
+                            Behavior(name: "Take out the trash", amount: 5),
+                            Behavior(name: "Do homework", amount: 3),
+                        ],
                         stickers: [
                             Sticker(imageName: "face-0"),
                             Sticker(imageName: "face-1"),
