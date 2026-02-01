@@ -1,8 +1,9 @@
 import ComposableArchitecture
-import NonEmpty
+import Foundation
 import Testing
 
 @testable import ChartsFeature
+import Models
 
 @MainActor
 struct ChartsFeatureTests {
@@ -19,10 +20,11 @@ struct ChartsFeatureTests {
 
     @Test
     func addChartDelegateAddsChart() async {
+        prepareDependencies {
+            $0.uuid = .incrementing
+        }
         let store = TestStore(initialState: ChartsFeature.State()) {
             ChartsFeature()
-        } withDependencies: {
-            $0.uuid = .incrementing
         }
 
         await store.send(.addChartButtonTapped) {
@@ -30,15 +32,15 @@ struct ChartsFeatureTests {
         }
 
         let quickActions: IdentifiedArrayOf<QuickAction> = [
-            QuickAction(id: UUID(0), name: "Take out trash", amount: 5)
+            QuickAction(id: UUID(99), name: "Take out trash", amount: 5)
         ]
 
         await store.send(.addChart(.presented(.delegate(.onChartAdded("Chores", .yellow, quickActions))))) {
             $0.charts = [
                 Chart(
-                    id: $0.charts.first!.id,
+                    id: UUID(0),
                     name: "Chores",
-                    quickActions: [QuickAction(id: $0.charts.first!.quickActions.first!.id, name: "Take out trash", amount: 5)],
+                    quickActions: [QuickAction(id: UUID(99), name: "Take out trash", amount: 5)],
                     stickers: []
                 )
             ]
@@ -77,6 +79,5 @@ struct ChartsFeatureTests {
         }
 
         await store.send(.chartTapped(UUID(99)))
-        // No state change expected
     }
 }

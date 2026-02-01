@@ -35,7 +35,7 @@ public struct ChartFeature {
             switch action {
             case .addStickerButtonTapped:
                 let sticker = stickerPack.randomElement()!
-                _ = state.$chart.withLock { $0.stickers.append(Sticker(imageName: sticker.imageName)) }
+                state.$chart.withLock { $0.stickers.append(Sticker(imageName: sticker.imageName)) }
                 return .none
 
             case let .quickActionTapped(quickActionID):

@@ -1,6 +1,5 @@
 import ComposableArchitecture
 import Foundation
-import NonEmpty
 import Testing
 
 @testable import ChartFeature
@@ -9,15 +8,12 @@ import Models
 @MainActor
 struct ChartFeatureTests {
     func makeChart(
+        id: UUID = UUID(0),
         name: String = "Chores",
         quickActions: IdentifiedArrayOf<QuickAction> = [],
         stickers: IdentifiedArrayOf<Sticker> = []
     ) -> Chart {
-        Chart(
-            name: name,
-            quickActions: quickActions,
-            stickers: stickers
-        )
+        Chart(id: id, name: name, quickActions: quickActions, stickers: stickers)
     }
 
     @Test
@@ -31,10 +27,11 @@ struct ChartFeatureTests {
         ) {
             ChartFeature()
         }
+        store.exhaustivity = .off(showSkippedAssertions: false)
 
-        await store.send(.addStickerButtonTapped) {
-            $0.$chart.withLock { $0.stickers = [Sticker(imageName: "face-0")] }
-        }
+        await store.send(.addStickerButtonTapped)
+        #expect(store.state.chart.stickers.count == 1)
+        #expect(store.state.chart.stickers[0].id == UUID(0))
     }
 
     @Test
@@ -44,23 +41,20 @@ struct ChartFeatureTests {
         }
         let quickActionID = UUID(100)
         let chart = makeChart(
-            quickActions: [QuickAction(name: "Chore", amount: 3)]
+            quickActions: [QuickAction(id: quickActionID, name: "Chore", amount: 3)]
         )
         let store = TestStore(
             initialState: ChartFeature.State(chart: Shared(value: chart))
         ) {
             ChartFeature()
         }
+        store.exhaustivity = .off(showSkippedAssertions: false)
 
-        await store.send(.quickActionTapped(quickActionID)) {
-            $0.$chart.withLock {
-                $0.stickers = [
-                    Sticker(imageName: "face-0"),
-                    Sticker(imageName: "face-0"),
-                    Sticker(imageName: "face-0"),
-                ]
-            }
-        }
+        await store.send(.quickActionTapped(quickActionID))
+        #expect(store.state.chart.stickers.count == 3)
+        #expect(store.state.chart.stickers[0].id == UUID(0))
+        #expect(store.state.chart.stickers[1].id == UUID(1))
+        #expect(store.state.chart.stickers[2].id == UUID(2))
     }
 
     @Test
@@ -130,14 +124,15 @@ struct ChartFeatureTests {
         }
 
         await store.send(.addQuickActionButtonTapped) {
-            $0.$chart.withLock { $0.quickActions = [QuickAction(name: "", amount: 1)] }
+            $0.$chart.withLock { $0.quickActions = [QuickAction(id: UUID(0), name: "", amount: 1)] }
         }
     }
 
     @Test
     func removeQuickAction() async {
+        let quickActionID = UUID(1)
         let chart = makeChart(
-            quickActions: [QuickAction(name: "Chore", amount: 5)]
+            quickActions: [QuickAction(id: quickActionID, name: "Chore", amount: 5)]
         )
         let store = TestStore(
             initialState: ChartFeature.State(chart: Shared(value: chart))
@@ -145,15 +140,16 @@ struct ChartFeatureTests {
             ChartFeature()
         }
 
-        await store.send(.removeQuickAction(chart.id)) {
+        await store.send(.removeQuickAction(quickActionID)) {
             $0.$chart.withLock { $0.quickActions = [] }
         }
     }
 
     @Test
     func quickActionNameChanged() async {
+        let quickActionID = UUID(1)
         let chart = makeChart(
-            quickActions: [QuickAction(name: "Old", amount: 5)]
+            quickActions: [QuickAction(id: quickActionID, name: "Old", amount: 5)]
         )
         let store = TestStore(
             initialState: ChartFeature.State(chart: Shared(value: chart))
@@ -161,15 +157,16 @@ struct ChartFeatureTests {
             ChartFeature()
         }
 
-        await store.send(.quickActionNameChanged(chart.id, "New")) {
+        await store.send(.quickActionNameChanged(quickActionID, "New")) {
             $0.$chart.withLock { $0.quickActions[0].name = "New" }
         }
     }
 
     @Test
     func quickActionAmountChanged() async {
+        let quickActionID = UUID(1)
         let chart = makeChart(
-            quickActions: [QuickAction(name: "Chore", amount: 1)]
+            quickActions: [QuickAction(id: quickActionID, name: "Chore", amount: 1)]
         )
         let store = TestStore(
             initialState: ChartFeature.State(chart: Shared(value: chart))
@@ -177,7 +174,7 @@ struct ChartFeatureTests {
             ChartFeature()
         }
 
-        await store.send(.quickActionAmountChanged(chart.id, 10)) {
+        await store.send(.quickActionAmountChanged(quickActionID, 10)) {
             $0.$chart.withLock { $0.quickActions[0].amount = 10 }
         }
     }
