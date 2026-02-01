@@ -56,24 +56,18 @@ public struct ChartFeature {
         public init(chart: Shared<Chart>) {
             self._chart = chart
         }
-        
-//        public mutating func addSticker() {
-//            let sticker = chart.stickerPack.stickers.randomElement()
-//            _ = $chart.withLock {
-//                $0.stickers.append(sticker)
-//            }
-//        }
     }
 
     public enum Action: Sendable {
-        case binding(BindingAction<State>)
+        case addStickerButtonTapped
     }
 
     public var body: some ReducerOf<Self> {
-        // TODO: BindingReducer?
         Reduce { state, action in
             switch action {
-            case .binding:
+            case .addStickerButtonTapped:
+                let sticker = state.chart.stickerPack.stickers.randomElement()!
+                _ = state.$chart.withLock { $0.stickers.append(Sticker(imageName: sticker.imageName)) }
                 return .none
             }
         }
@@ -90,18 +84,26 @@ public struct ChartView: View {
     }
     
     public var body: some View {
-        VStack {
-            ScrollView {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))], spacing: 20) {
-                    ForEach(store.chart.stickers) { sticker in
-                        StickerView(
-                            store: Store(initialState: StickerFeature.State(sticker: sticker)) {
-                                StickerFeature()
-                            }
-                        )
-                    }
+        ScrollView {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))], spacing: 20) {
+                ForEach(store.chart.stickers) { sticker in
+                    StickerView(
+                        store: Store(initialState: StickerFeature.State(sticker: sticker)) {
+                            StickerFeature()
+                        }
+                    )
                 }
-                .padding(.horizontal)
+            }
+            .padding(.horizontal)
+        }
+        .navigationTitle(store.chart.name)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    store.send(.addStickerButtonTapped)
+                } label: {
+                    Image(systemName: "plus")
+                }
             }
         }
     }
@@ -123,7 +125,7 @@ func getChartsJSONURL() -> URL {
 }
 
 #Preview {
-    Section {
+    NavigationStack {
         ChartView(
             store: Store(
                 initialState: ChartFeature.State(
