@@ -63,3 +63,14 @@ extension DependencyValues {
         defaultDatabase = database
     }
 }
+
+extension DatabaseWriter {
+    public func seed() throws {
+        try write { db in
+            try db.seed {
+                Chart.Draft(name: "Chores")
+                Chart.Draft(name: "Work")
+            }
+        }
+    }
+}
