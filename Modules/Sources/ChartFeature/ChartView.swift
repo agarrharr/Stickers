@@ -135,7 +135,6 @@ struct ChartSettingsView: View {
             store: Store(
                 initialState: ChartFeature.State(
                     chart: Shared(value: Chart(
-                        id: UUID(),
                         name: "Chores",
                         quickActions: [
                             QuickAction(name: "Take out the trash", amount: 5),
