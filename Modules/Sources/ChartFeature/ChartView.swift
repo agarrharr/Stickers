@@ -155,30 +155,31 @@ public struct ChartView: View {
         .navigationTitle(store.chart.name)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                HStack {
-                    Button {
-                        store.send(.settingsButtonTapped)
-                    } label: {
-                        Image(systemName: "gear")
-                    }
-                    if !store.chart.behaviors.isEmpty {
-                        Menu {
-                            ForEach(store.chart.behaviors) { behavior in
-                                Button {
-                                    store.send(.quickActionTapped(behavior.id))
-                                } label: {
-                                    Text("\(behavior.name) +\(behavior.amount)")
-                                }
+                Button {
+                    store.send(.settingsButtonTapped)
+                } label: {
+                    Image(systemName: "gear")
+                }
+            }
+            ToolbarSpacer(.fixed, placement: .topBarTrailing)
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                if !store.chart.behaviors.isEmpty {
+                    Menu {
+                        ForEach(store.chart.behaviors) { behavior in
+                            Button {
+                                store.send(.quickActionTapped(behavior.id))
+                            } label: {
+                                Text("\(behavior.name) +\(behavior.amount)")
                             }
-                        } label: {
-                            Image(systemName: "bolt.fill")
                         }
-                    }
-                    Button {
-                        store.send(.addStickerButtonTapped)
                     } label: {
-                        Image(systemName: "plus")
+                        Image(systemName: "bolt.fill")
                     }
+                }
+                Button {
+                    store.send(.addStickerButtonTapped)
+                } label: {
+                    Image(systemName: "plus")
                 }
             }
         }
