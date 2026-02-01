@@ -62,7 +62,7 @@ struct ChartsFeatureTests {
             stickers: []
         )
 
-        var state = ChartsFeature.State()
+        let state = ChartsFeature.State()
         state.$charts.withLock { $0.append(chart) }
 
         let store = TestStore(initialState: state) {
