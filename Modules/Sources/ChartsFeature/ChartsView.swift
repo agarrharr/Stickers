@@ -8,7 +8,7 @@ import Models
 
 public struct ChartsView: View {
     @Bindable var store: StoreOf<ChartsFeature>
-    @FetchAll var charts: [Chart]
+    @FetchAll(animation: .default) var charts: [Chart]
 
     public init(store: StoreOf<ChartsFeature>) {
         self.store = store
