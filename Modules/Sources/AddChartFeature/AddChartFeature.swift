@@ -57,8 +57,6 @@ public struct AddChartFeature {
         }
     }
 
-    @Dependency(\.dismiss) var dismiss
-
     public var body: some Reducer<State, Action> {
         BindingReducer()
         Reduce { state, action in
@@ -71,7 +69,8 @@ public struct AddChartFeature {
                     }
                 case .cancelButtonTapped:
                     return .run { _ in
-//                        await dismiss()
+                        @Dependency(\.dismiss) var dismiss
+                        await dismiss()
                     }
                 case let .colorButtonTapped(color):
                     state.color = color
