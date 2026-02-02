@@ -10,6 +10,8 @@ import Models
 public struct ChartsFeature {
     @ObservableState
     public struct State: Equatable {
+        @FetchAll(animation: .default) var charts: [Chart]
+        
         @Presents var addChart: AddChartFeature.State?
         var path = StackState<ChartFeature.State>()
 

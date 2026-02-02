@@ -6,11 +6,34 @@ import SQLiteData
 import Models
 import StickerFeature
 
+public struct ChartDataRequest: FetchKeyRequest {
+    var chartID: Chart.ID
+
+    public struct Value: Equatable, Sendable {
+        var chart: Chart?
+        var stickers: [Sticker] = []
+        var quickActions: [QuickAction] = []
+    }
+
+    public func fetch(_ db: Database) throws -> Value {
+        try Value(
+            chart: Chart.find(chartID).fetchOne(db),
+            stickers: Sticker.where { $0.chartID.eq(chartID) }.fetchAll(db),
+            quickActions: QuickAction.where { $0.chartID.eq(chartID) }.fetchAll(db)
+        )
+    }
+}
+
 @Reducer
 public struct ChartFeature {
     @ObservableState
     public struct State: Equatable, Sendable {
         public var chartID: Chart.ID
+        var chart: Chart?
+        var stickers: [Sticker] = []
+        var quickActions: [QuickAction] = []
+        var isLoading = false
+        
         var showSettings = false
 
         public init(chartID: Chart.ID) {
@@ -20,6 +43,7 @@ public struct ChartFeature {
 
     public enum Action: Sendable {
         case addStickerButtonTapped
+        case chartDataResponse(ChartDataRequest.Value)
         case quickActionTapped(QuickAction.ID)
         case settingsButtonTapped
         case settingsDismissed
@@ -28,6 +52,7 @@ public struct ChartFeature {
         case removeQuickAction(QuickAction.ID)
         case quickActionNameChanged(QuickAction.ID, String)
         case quickActionAmountChanged(QuickAction.ID, Int)
+        case task
     }
 
     @Dependency(\.defaultDatabase) var database
@@ -49,6 +74,14 @@ public struct ChartFeature {
                         }.execute(db)
                     }
                 }
+                
+            case let .chartDataResponse(value):
+                state.isLoading = false
+                state.chart = value.chart
+                state.stickers = value.stickers
+                state.quickActions = value.quickActions
+                
+                return .none
 
             case let .quickActionTapped(quickActionID):
                 let chartID = state.chartID
@@ -128,6 +161,18 @@ public struct ChartFeature {
                             .update { $0.amount = amount }
                             .execute(db)
                     }
+                }
+                
+            case .task:
+                state.isLoading = true
+                let request = ChartDataRequest(chartID: state.chartID)
+                
+                let database = database
+                return .run { send in
+                    let value = try await database.read { db in
+                        try request.fetch(db)
+                    }
+                    await send(.chartDataResponse(value))
                 }
             }
         }

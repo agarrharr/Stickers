@@ -7,27 +7,8 @@ import SwiftUI
 import Models
 import StickerFeature
 
-struct ChartDataRequest: FetchKeyRequest {
-    var chartID: Chart.ID
-
-    struct Value: Equatable, Sendable {
-        var chart: Chart?
-        var stickers: [Sticker] = []
-        var quickActions: [QuickAction] = []
-    }
-
-    func fetch(_ db: Database) throws -> Value {
-        try Value(
-            chart: Chart.find(chartID).fetchOne(db),
-            stickers: Sticker.where { $0.chartID.eq(chartID) }.fetchAll(db),
-            quickActions: QuickAction.where { $0.chartID.eq(chartID) }.fetchAll(db)
-        )
-    }
-}
-
 public struct ChartView: View {
     @Bindable var store: StoreOf<ChartFeature>
-    @Fetch var chartData = ChartDataRequest.Value()
 
     public init(store: StoreOf<ChartFeature>) {
         self.store = store
@@ -36,7 +17,7 @@ public struct ChartView: View {
     public var body: some View {
         ScrollView {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))], spacing: 20) {
-                ForEach(chartData.stickers) { sticker in
+                ForEach(store.state.stickers) { sticker in
                     StickerView(
                         store: Store(initialState: StickerFeature.State(sticker: sticker)) {
                             StickerFeature()
@@ -46,7 +27,7 @@ public struct ChartView: View {
             }
             .padding(.horizontal)
         }
-        .navigationTitle(chartData.chart?.name ?? "")
+        .navigationTitle(store.state.chart?.name ?? "")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
@@ -57,9 +38,9 @@ public struct ChartView: View {
             }
             ToolbarSpacer(.fixed, placement: .topBarTrailing)
             ToolbarItemGroup(placement: .topBarTrailing) {
-                if !chartData.quickActions.isEmpty {
+                if !store.state.quickActions.isEmpty {
                     Menu {
-                        ForEach(chartData.quickActions) { quickAction in
+                        ForEach(store.state.quickActions) { quickAction in
                             Button {
                                 store.send(.quickActionTapped(quickAction.id))
                             } label: {
@@ -88,17 +69,13 @@ public struct ChartView: View {
             ChartSettingsView(store: store)
         }
         .task {
-            try? await $chartData.load(
-                ChartDataRequest(chartID: store.chartID),
-                animation: .default
-            )
+            store.send(.task)
         }
     }
 }
 
 struct ChartSettingsView: View {
     var store: StoreOf<ChartFeature>
-    @Fetch var chartData = ChartDataRequest.Value()
 
     var body: some View {
         NavigationView {
@@ -106,7 +83,7 @@ struct ChartSettingsView: View {
                 Section {
                     LabeledContent {
                         TextField("Chart name", text: Binding(
-                            get: { chartData.chart?.name ?? "" },
+                            get: { store.state.chart?.name ?? "" },
                             set: { store.send(.nameChanged($0)) }
                         ))
                         .multilineTextAlignment(.trailing)
@@ -115,7 +92,7 @@ struct ChartSettingsView: View {
                     }
                 }
                 Section("Quick Actions") {
-                    ForEach(chartData.quickActions) { quickAction in
+                    ForEach(store.state.quickActions) { quickAction in
                         HStack {
                             TextField("Name", text: Binding(
                                 get: { quickAction.name },
@@ -153,12 +130,6 @@ struct ChartSettingsView: View {
                     }
                 }
             }
-        }
-        .task {
-            try? await $chartData.load(
-                ChartDataRequest(chartID: store.chartID),
-                animation: .default
-            )
         }
     }
 }
