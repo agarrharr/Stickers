@@ -24,6 +24,9 @@ public struct ChartsView: View {
                         Text(chart.name)
                     }
                 }
+                .onDelete { offsets in
+                    store.send(.chartsDeleteRequested(offsets))
+                }
             }
             .navigationTitle("Charts")
             .toolbar {

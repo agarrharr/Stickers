@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import Foundation
 import SQLiteData
 
 import AddChartFeature
@@ -22,6 +23,7 @@ public struct ChartsFeature {
     public enum Action: Sendable {
         case addChartButtonTapped
         case chartTapped(Chart.ID)
+        case chartsDeleteRequested(IndexSet)
         case addChart(PresentationAction<AddChartFeature.Action>)
         case path(StackActionOf<ChartFeature>)
     }
@@ -38,6 +40,20 @@ public struct ChartsFeature {
             case let .chartTapped(id):
                 state.path.append(ChartFeature.State(chartID: id))
                 return .none
+                
+            case let .chartsDeleteRequested(offsets):
+                let database = database
+                return .run { _ in
+                    @FetchAll var charts: [Chart]
+                    
+                    withErrorReporting {
+                        try database.write { db in
+                            try Chart.find(offsets.map { charts[$0].id })
+                                .delete()
+                                .execute(db)
+                        }
+                    }
+                }
 
             case let .addChart(.presented(.delegate(action))):
                 switch action {
