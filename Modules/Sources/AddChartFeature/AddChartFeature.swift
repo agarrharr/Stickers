@@ -23,7 +23,7 @@ public struct QuickActionInput: Identifiable, Equatable, Sendable {
 @Reducer
 public struct AddChartFeature {
     @ObservableState
-    public struct State: Equatable {
+    public struct State: Equatable, Sendable {
         var name = ""
         var color: BackgroundColor = .yellow
         var quickActions: IdentifiedArrayOf<QuickActionInput> = []
@@ -46,6 +46,7 @@ public struct AddChartFeature {
             case cancelButtonTapped
             case colorButtonTapped(BackgroundColor)
             case addQuickActionButtonTapped
+            case nameChanged(String)
             case removeQuickAction(QuickActionInput.ID)
             case quickActionNameChanged(QuickActionInput.ID, String)
             case quickActionAmountChanged(QuickActionInput.ID, Int)
@@ -77,6 +78,9 @@ public struct AddChartFeature {
                     return .none
                 case .addQuickActionButtonTapped:
                     state.quickActions.append(QuickActionInput())
+                    return .none
+                case let .nameChanged(name):
+                    state.name = name
                     return .none
                 case let .removeQuickAction(id):
                     state.quickActions.remove(id: id)

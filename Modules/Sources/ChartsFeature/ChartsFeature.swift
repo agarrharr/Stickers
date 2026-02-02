@@ -10,8 +10,6 @@ import Models
 public struct ChartsFeature {
     @ObservableState
     public struct State: Equatable {
-        @FetchAll(animation: .default) var charts: [Chart]
-        
         @Presents var addChart: AddChartFeature.State?
         var path = StackState<ChartFeature.State>()
 
@@ -24,7 +22,7 @@ public struct ChartsFeature {
 
     public enum Action: Sendable {
         case addChartButtonTapped
-        case chartTapped(Chart.ID)
+        case chartTapped(Chart)
         case chartsDeleteRequested(IndexSet)
         case addChart(PresentationAction<AddChartFeature.Action>)
         case path(StackActionOf<ChartFeature>)
@@ -39,8 +37,8 @@ public struct ChartsFeature {
                 state.addChart = AddChartFeature.State()
                 return .none
 
-            case let .chartTapped(id):
-                state.path.append(ChartFeature.State(chartID: id))
+            case let .chartTapped(chart):
+                state.path.append(ChartFeature.State(chart: chart))
                 return .none
                 
             case let .chartsDeleteRequested(offsets):

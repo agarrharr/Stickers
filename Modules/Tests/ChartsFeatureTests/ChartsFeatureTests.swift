@@ -45,13 +45,13 @@ struct ChartsFeatureTests {
             $0.addChart = nil
         }
 
-        let charts = try database.read { db in
+        let charts = try await database.read { db in
             try Chart.all.fetchAll(db)
         }
         #expect(charts.count == 1)
         #expect(charts[0].name == "Chores")
 
-        let dbQuickActions = try database.read { db in
+        let dbQuickActions = try await database.read { db in
             try QuickAction.where { $0.chartID.eq(charts[0].id) }.fetchAll(db)
         }
         #expect(dbQuickActions.count == 1)
@@ -61,10 +61,10 @@ struct ChartsFeatureTests {
 
     @Test
     func chartTapped() async throws {
-        let chartID = UUID(100)
-        try database.write { db in
+        let chart = Chart(id: UUID(100), name: "Chores")
+        try await database.write { db in
             try db.seed {
-                Chart(id: chartID, name: "Chores")
+                chart
             }
         }
 
@@ -72,19 +72,20 @@ struct ChartsFeatureTests {
             ChartsFeature()
         }
 
-        await store.send(.chartTapped(chartID)) {
-            $0.path[id: 0] = ChartFeature.State(chartID: chartID)
+        await store.send(.chartTapped(chart)) {
+            $0.path[id: 0] = ChartFeature.State(chart: chart)
         }
     }
 
     @Test
-    func chartTappedWithInvalidID() async {
+    func chartTappedWithInvalidChart() async {
+        let randomChart = Chart(id: UUID())
         let store = TestStore(initialState: ChartsFeature.State()) {
             ChartsFeature()
         }
 
-        await store.send(.chartTapped(UUID(99))) {
-            $0.path[id: 0] = ChartFeature.State(chartID: UUID(99))
+        await store.send(.chartTapped(randomChart)) {
+            $0.path[id: 0] = ChartFeature.State(chart: randomChart)
         }
     }
 }

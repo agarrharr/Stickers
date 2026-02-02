@@ -6,44 +6,21 @@ import SQLiteData
 import Models
 import StickerFeature
 
-public struct ChartDataRequest: FetchKeyRequest {
-    var chartID: Chart.ID
-
-    public struct Value: Equatable, Sendable {
-        var chart: Chart?
-        var stickers: [Sticker] = []
-        var quickActions: [QuickAction] = []
-    }
-
-    public func fetch(_ db: Database) throws -> Value {
-        try Value(
-            chart: Chart.find(chartID).fetchOne(db),
-            stickers: Sticker.where { $0.chartID.eq(chartID) }.fetchAll(db),
-            quickActions: QuickAction.where { $0.chartID.eq(chartID) }.fetchAll(db)
-        )
-    }
-}
-
 @Reducer
 public struct ChartFeature {
     @ObservableState
     public struct State: Equatable, Sendable {
-        public var chartID: Chart.ID
-        var chart: Chart?
-        var stickers: [Sticker] = []
-        var quickActions: [QuickAction] = []
-        var isLoading = false
+        public var chart: Chart
         
         var showSettings = false
 
-        public init(chartID: Chart.ID) {
-            self.chartID = chartID
+        public init(chart: Chart) {
+            self.chart = chart
         }
     }
 
     public enum Action: Sendable {
         case addStickerButtonTapped
-        case chartDataResponse(ChartDataRequest.Value)
         case quickActionTapped(QuickAction.ID)
         case settingsButtonTapped
         case settingsDismissed
@@ -52,7 +29,6 @@ public struct ChartFeature {
         case removeQuickAction(QuickAction.ID)
         case quickActionNameChanged(QuickAction.ID, String)
         case quickActionAmountChanged(QuickAction.ID, Int)
-        case task
     }
 
     @Dependency(\.defaultDatabase) var database
@@ -65,7 +41,7 @@ public struct ChartFeature {
                 let imageName = withRandomNumberGenerator { generator in
                     stickerPack.randomElement(using: &generator)!
                 }
-                let chartID = state.chartID
+                let chartID = state.chart.id
                 let database = database
                 return .run { _ in
                     try database.write { db in
@@ -75,16 +51,8 @@ public struct ChartFeature {
                     }
                 }
                 
-            case let .chartDataResponse(value):
-                state.isLoading = false
-                state.chart = value.chart
-                state.stickers = value.stickers
-                state.quickActions = value.quickActions
-                
-                return .none
-
             case let .quickActionTapped(quickActionID):
-                let chartID = state.chartID
+                let chartID = state.chart.id
                 let maxImageNames = withRandomNumberGenerator { generator in
                     (0..<99).map { _ in
                         stickerPack.randomElement(using: &generator)!
@@ -112,18 +80,18 @@ public struct ChartFeature {
                 return .none
 
             case let .nameChanged(name):
-                let chartID = state.chartID
+                let chartID = state.chart.id
                 let database = database
                 return .run { _ in
-                    try database.write { db in
+                    try await database.write { db in
                         try Chart.find(chartID)
                             .update { $0.name = name }
                             .execute(db)
                     }
                 }
-
+                
             case .addQuickActionButtonTapped:
-                let chartID = state.chartID
+                let chartID = state.chart.id
                 let database = database
                 return .run { _ in
                     try database.write { db in
@@ -146,7 +114,7 @@ public struct ChartFeature {
             case let .quickActionNameChanged(id, name):
                 let database = database
                 return .run { _ in
-                    try database.write { db in
+                    try await database.write { db in
                         try QuickAction.find(id)
                             .update { $0.name = name }
                             .execute(db)
@@ -156,24 +124,24 @@ public struct ChartFeature {
             case let .quickActionAmountChanged(id, amount):
                 let database = database
                 return .run { _ in
-                    try database.write { db in
+                    try await database.write { db in
                         try QuickAction.find(id)
                             .update { $0.amount = amount }
                             .execute(db)
                     }
                 }
                 
-            case .task:
-                state.isLoading = true
-                let request = ChartDataRequest(chartID: state.chartID)
-                
-                let database = database
-                return .run { send in
-                    let value = try await database.read { db in
-                        try request.fetch(db)
-                    }
-                    await send(.chartDataResponse(value))
-                }
+//            case .task:
+//                state.isLoading = true
+//                let request = ChartDataRequest(chartID: state.chartID)
+//                
+//                let database = database
+//                return .run { send in
+//                    let value = try await database.read { db in
+//                        try request.fetch(db)
+//                    }
+//                    await send(.chartDataResponse(value))
+//                }
             }
         }
     }

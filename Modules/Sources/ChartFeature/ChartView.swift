@@ -7,17 +7,45 @@ import SwiftUI
 import Models
 import StickerFeature
 
+//public struct ChartDataRequest: FetchKeyRequest {
+//    var chartID: Chart.ID
+//
+//    public struct Value: Equatable, Sendable {
+//        var chart: Chart?
+//        var stickers: [Sticker] = []
+//        var quickActions: [QuickAction] = []
+//    }
+//
+//    public func fetch(_ db: Database) throws -> Value {
+//        try Value(
+//            chart: Chart.find(chartID).fetchOne(db),
+//            stickers: Sticker.where { $0.chartID.eq(chartID) }.fetchAll(db),
+//            quickActions: QuickAction.where { $0.chartID.eq(chartID) }.fetchAll(db)
+//        )
+//    }
+//}
+
 public struct ChartView: View {
+    @FetchAll var stickers: [Sticker]
+    @FetchAll var quickActions: [QuickAction]
     @Bindable var store: StoreOf<ChartFeature>
 
     public init(store: StoreOf<ChartFeature>) {
         self.store = store
+        _stickers = FetchAll(
+            Sticker.where { $0.chartID.eq(store.chart.id) },
+            animation: .default
+        )
+        _quickActions = FetchAll(
+            QuickAction.where { $0.chartID.eq(store.chart.id) },
+            animation: .default
+        )
     }
 
     public var body: some View {
         ScrollView {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))], spacing: 20) {
-                ForEach(store.state.stickers) { sticker in
+                ForEach(stickers) { sticker in
                     StickerView(
                         store: Store(initialState: StickerFeature.State(sticker: sticker)) {
                             StickerFeature()
@@ -27,7 +55,7 @@ public struct ChartView: View {
             }
             .padding(.horizontal)
         }
-        .navigationTitle(store.state.chart?.name ?? "")
+        .navigationTitle(store.chart.name)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
@@ -38,9 +66,9 @@ public struct ChartView: View {
             }
             ToolbarSpacer(.fixed, placement: .topBarTrailing)
             ToolbarItemGroup(placement: .topBarTrailing) {
-                if !store.state.quickActions.isEmpty {
+                if !quickActions.isEmpty {
                     Menu {
-                        ForEach(store.state.quickActions) { quickAction in
+                        ForEach(quickActions) { quickAction in
                             Button {
                                 store.send(.quickActionTapped(quickAction.id))
                             } label: {
@@ -68,14 +96,20 @@ public struct ChartView: View {
         ) {
             ChartSettingsView(store: store)
         }
-        .task {
-            store.send(.task)
-        }
     }
 }
 
 struct ChartSettingsView: View {
-    var store: StoreOf<ChartFeature>
+    @FetchAll var quickActions: [QuickAction]
+    @Bindable var store: StoreOf<ChartFeature>
+
+    init(store: StoreOf<ChartFeature>) {
+        self.store = store
+        _quickActions = FetchAll(
+            QuickAction.where { $0.chartID.eq(store.chart.id) },
+            animation: .default
+        )
+    }
 
     var body: some View {
         NavigationView {
@@ -83,16 +117,18 @@ struct ChartSettingsView: View {
                 Section {
                     LabeledContent {
                         TextField("Chart name", text: Binding(
-                            get: { store.state.chart?.name ?? "" },
+                            get: { store.chart.name },
                             set: { store.send(.nameChanged($0)) }
                         ))
-                        .multilineTextAlignment(.trailing)
+//                        TextField("Chart name", text: $store.chart.name)
+//                        TextField("Chart name", text: $store.chart.name.sending(\.nameChanged))
+                            .multilineTextAlignment(.trailing)
                     } label: {
                         Text("Name")
                     }
                 }
                 Section("Quick Actions") {
-                    ForEach(store.state.quickActions) { quickAction in
+                    ForEach(quickActions) { quickAction in
                         HStack {
                             TextField("Name", text: Binding(
                                 get: { quickAction.name },
@@ -137,26 +173,12 @@ struct ChartSettingsView: View {
 #Preview {
     let _ = prepareDependencies {
         try! $0.bootstrapDatabase()
-        try! $0.defaultDatabase.write { db in
-            try db.seed {
-                Chart(id: UUID(0), name: "Chores")
-                QuickAction(id: UUID(1), chartID: UUID(0), name: "Take out the trash", amount: 5)
-                QuickAction(id: UUID(2), chartID: UUID(0), name: "Do homework", amount: 3)
-                Sticker(id: UUID(3), chartID: UUID(0), imageName: "face-0")
-                Sticker(id: UUID(4), chartID: UUID(0), imageName: "face-1")
-                Sticker(id: UUID(5), chartID: UUID(0), imageName: "face-2")
-                Sticker(id: UUID(6), chartID: UUID(0), imageName: "face-3")
-                Sticker(id: UUID(7), chartID: UUID(0), imageName: "face-4")
-                Sticker(id: UUID(8), chartID: UUID(0), imageName: "face-5")
-                Sticker(id: UUID(9), chartID: UUID(0), imageName: "face-6")
-                Sticker(id: UUID(10), chartID: UUID(0), imageName: "face-7")
-            }
-        }
+        try! $0.defaultDatabase.seed()
     }
     NavigationStack {
         ChartView(
             store: Store(
-                initialState: ChartFeature.State(chartID: UUID(0))
+                initialState: ChartFeature.State(chart: Chart(id: UUID(0), name: "Chores"))
             ) {
                 ChartFeature()
             }

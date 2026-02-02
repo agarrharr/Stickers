@@ -68,8 +68,19 @@ extension DatabaseWriter {
     public func seed() throws {
         try write { db in
             try db.seed {
-                Chart.Draft(name: "Chores")
-                Chart.Draft(name: "Work")
+                Chart.Draft(id: UUID(0), name: "Chores")
+                Chart.Draft(id: UUID(1), name: "Work")
+                
+                QuickAction.Draft(id: UUID(1), chartID: UUID(0), name: "Take out the trash", amount: 5)
+                QuickAction.Draft(id: UUID(2), chartID: UUID(0), name: "Do homework", amount: 3)
+                Sticker.Draft(id: UUID(3), chartID: UUID(0), imageName: "face-0")
+                Sticker.Draft(id: UUID(4), chartID: UUID(0), imageName: "face-1")
+                Sticker.Draft(id: UUID(5), chartID: UUID(0), imageName: "face-2")
+                Sticker.Draft(id: UUID(6), chartID: UUID(0), imageName: "face-3")
+                Sticker.Draft(id: UUID(7), chartID: UUID(0), imageName: "face-4")
+                Sticker.Draft(id: UUID(8), chartID: UUID(0), imageName: "face-5")
+                Sticker.Draft(id: UUID(9), chartID: UUID(0), imageName: "face-6")
+                Sticker.Draft(id: UUID(10), chartID: UUID(0), imageName: "face-7")
             }
         }
     }

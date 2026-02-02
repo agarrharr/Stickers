@@ -8,6 +8,7 @@ import Models
 
 public struct ChartsView: View {
     @Bindable var store: StoreOf<ChartsFeature>
+    @FetchAll(animation: .default) var charts: [Chart]
 
     public init(store: StoreOf<ChartsFeature>) {
         self.store = store
@@ -16,9 +17,9 @@ public struct ChartsView: View {
     public var body: some View {
         NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
             List {
-                ForEach(store.charts) { chart in
+                ForEach(charts) { chart in
                     Button {
-                        store.send(.chartTapped(chart.id))
+                        store.send(.chartTapped(chart))
                     } label: {
                         Text(chart.name)
                     }
@@ -38,7 +39,7 @@ public struct ChartsView: View {
                 }
             }
             .overlay {
-                if store.charts.isEmpty {
+                if charts.isEmpty {
                     ContentUnavailableView {
                         Label("No Charts", systemImage: "chart.bar")
                     } description: {
