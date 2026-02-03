@@ -19,7 +19,10 @@ private struct LCRNG: RandomNumberGenerator, @unchecked Sendable {
 
 @MainActor
 @Suite(
-    .dependency(\.uuid, .incrementing)
+    .dependencies {
+        $0.uuid = .incrementing
+        try $0.bootstrapDatabase()
+    }
 )
 struct ChartFeatureTests {
     @Dependency(\.defaultDatabase) var database
@@ -56,14 +59,14 @@ struct ChartFeatureTests {
 
         try seedChart()
         let store = TestStore(
-            initialState: ChartFeature.State(chartID: UUID(0))
+            initialState: ChartFeature.State(chart: Chart(id: UUID(0), name: "Chores"))
         ) {
             ChartFeature()
         }
 
         await store.send(.addStickerButtonTapped)
 
-        let stickers = try database.read { db in
+        let stickers = try await database.read { db in
             try Sticker.where { $0.chartID.eq(UUID(0)) }.fetchAll(db)
         }
         #expect(stickers.count == 1)
@@ -81,7 +84,7 @@ struct ChartFeatureTests {
 
         let chartID = UUID(0)
         let quickActionID = UUID(100)
-        try database.write { db in
+        try await database.write { db in
             try db.seed {
                 Chart(id: chartID, name: "Chores")
                 QuickAction(id: quickActionID, chartID: chartID, name: "Chore", amount: 3)
@@ -89,25 +92,27 @@ struct ChartFeatureTests {
         }
 
         let store = TestStore(
-            initialState: ChartFeature.State(chartID: chartID)
+            initialState: ChartFeature.State(chart: Chart(id: chartID, name: "Chores"))
         ) {
             ChartFeature()
         }
 
         await store.send(.quickActionTapped(quickActionID))
 
-        let stickers = try database.read { db in
+        let stickers = try await database.read { db in
             try Sticker.where { $0.chartID.eq(chartID) }.fetchAll(db)
         }
         #expect(stickers.count == 3)
         #expect(stickers.map(\.imageName) == expectedImageNames)
     }
 
-    @Test
+    @Test(
+        .dependency(\.withRandomNumberGenerator, WithRandomNumberGenerator(LCRNG(seed: 0)))
+    )
     func quickActionTappedWithInvalidID() async throws {
         try seedChart()
         let store = TestStore(
-            initialState: ChartFeature.State(chartID: UUID(0))
+            initialState: ChartFeature.State(chart: Chart(id: UUID(0), name: "Chores"))
         ) {
             ChartFeature()
         }
@@ -119,7 +124,7 @@ struct ChartFeatureTests {
     func settingsButtonTapped() async throws {
         try seedChart()
         let store = TestStore(
-            initialState: ChartFeature.State(chartID: UUID(0))
+            initialState: ChartFeature.State(chart: Chart(id: UUID(0), name: "Chores"))
         ) {
             ChartFeature()
         }
@@ -132,7 +137,7 @@ struct ChartFeatureTests {
     @Test
     func settingsDismissed() async throws {
         try seedChart()
-        var state = ChartFeature.State(chartID: UUID(0))
+        var state = ChartFeature.State(chart: Chart(id: UUID(0), name: "Chores"))
         state.showSettings = true
         let store = TestStore(initialState: state) {
             ChartFeature()
@@ -147,14 +152,14 @@ struct ChartFeatureTests {
     func nameChanged() async throws {
         try seedChart()
         let store = TestStore(
-            initialState: ChartFeature.State(chartID: UUID(0))
+            initialState: ChartFeature.State(chart: Chart(id: UUID(0), name: "Chores"))
         ) {
             ChartFeature()
         }
 
         await store.send(.nameChanged("Homework"))
 
-        let chart = try database.read { db in
+        let chart = try await database.read { db in
             try Chart.find(UUID(0)).fetchOne(db)
         }
         #expect(chart?.name == "Homework")
@@ -164,14 +169,14 @@ struct ChartFeatureTests {
     func addQuickActionButtonTapped() async throws {
         try seedChart()
         let store = TestStore(
-            initialState: ChartFeature.State(chartID: UUID(0))
+            initialState: ChartFeature.State(chart: Chart(id: UUID(0), name: "Chores"))
         ) {
             ChartFeature()
         }
 
         await store.send(.addQuickActionButtonTapped)
 
-        let quickActions = try database.read { db in
+        let quickActions = try await database.read { db in
             try QuickAction.where { $0.chartID.eq(UUID(0)) }.fetchAll(db)
         }
         #expect(quickActions.count == 1)
@@ -182,21 +187,21 @@ struct ChartFeatureTests {
     @Test
     func removeQuickAction() async throws {
         let quickActionID = UUID(100)
-        try database.write { db in
+        try await database.write { db in
             try db.seed {
                 Chart(id: UUID(0), name: "Chores")
                 QuickAction(id: quickActionID, chartID: UUID(0), name: "Chore", amount: 5)
             }
         }
         let store = TestStore(
-            initialState: ChartFeature.State(chartID: UUID(0))
+            initialState: ChartFeature.State(chart: Chart(id: UUID(0), name: "Chores"))
         ) {
             ChartFeature()
         }
 
         await store.send(.removeQuickAction(quickActionID))
 
-        let quickActions = try database.read { db in
+        let quickActions = try await database.read { db in
             try QuickAction.where { $0.chartID.eq(UUID(0)) }.fetchAll(db)
         }
         #expect(quickActions.isEmpty)
@@ -205,21 +210,21 @@ struct ChartFeatureTests {
     @Test
     func quickActionNameChanged() async throws {
         let quickActionID = UUID(100)
-        try database.write { db in
+        try await database.write { db in
             try db.seed {
                 Chart(id: UUID(0), name: "Chores")
                 QuickAction(id: quickActionID, chartID: UUID(0), name: "Old", amount: 5)
             }
         }
         let store = TestStore(
-            initialState: ChartFeature.State(chartID: UUID(0))
+            initialState: ChartFeature.State(chart: Chart(id: UUID(0), name: "Chores"))
         ) {
             ChartFeature()
         }
 
         await store.send(.quickActionNameChanged(quickActionID, "New"))
 
-        let qa = try database.read { db in
+        let qa = try await database.read { db in
             try QuickAction.find(quickActionID).fetchOne(db)
         }
         #expect(qa?.name == "New")
@@ -228,21 +233,21 @@ struct ChartFeatureTests {
     @Test
     func quickActionAmountChanged() async throws {
         let quickActionID = UUID(100)
-        try database.write { db in
+        try await database.write { db in
             try db.seed {
                 Chart(id: UUID(0), name: "Chores")
                 QuickAction(id: quickActionID, chartID: UUID(0), name: "Chore", amount: 1)
             }
         }
         let store = TestStore(
-            initialState: ChartFeature.State(chartID: UUID(0))
+            initialState: ChartFeature.State(chart: Chart(id: UUID(0), name: "Chores"))
         ) {
             ChartFeature()
         }
 
         await store.send(.quickActionAmountChanged(quickActionID, 10))
 
-        let qa = try database.read { db in
+        let qa = try await database.read { db in
             try QuickAction.find(quickActionID).fetchOne(db)
         }
         #expect(qa?.amount == 10)

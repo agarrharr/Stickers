@@ -11,7 +11,10 @@ import Models
 
 @MainActor
 @Suite(
-    .dependency(\.uuid, .incrementing)
+    .dependencies {
+        $0.uuid = .incrementing
+        try $0.bootstrapDatabase()
+    }
 )
 struct ChartsFeatureTests {
     @Dependency(\.defaultDatabase) var database
