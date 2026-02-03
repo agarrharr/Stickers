@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import CustomDump
 import Dependencies
 import DependenciesTestSupport
 import Foundation
@@ -51,15 +52,14 @@ struct ChartsFeatureTests {
         let charts = try await database.read { db in
             try Chart.all.fetchAll(db)
         }
-        #expect(charts.count == 1)
-        #expect(charts[0].name == "Chores")
+        expectNoDifference(charts, [Chart(id: UUID(0), name: "Chores")])
 
         let dbQuickActions = try await database.read { db in
-            try QuickAction.where { $0.chartID.eq(charts[0].id) }.fetchAll(db)
+            try QuickAction.where { $0.chartID.eq(UUID(0)) }.fetchAll(db)
         }
-        #expect(dbQuickActions.count == 1)
-        #expect(dbQuickActions[0].name == "Take out trash")
-        #expect(dbQuickActions[0].amount == 5)
+        expectNoDifference(dbQuickActions, [
+            QuickAction(id: UUID(1), chartID: UUID(0), name: "Take out trash", amount: 5),
+        ])
     }
 
     @Test
@@ -81,14 +81,22 @@ struct ChartsFeatureTests {
     }
 
     @Test
-    func chartTappedWithInvalidChart() async {
-        let randomChart = Chart(id: UUID())
+    func chartsDeleteRequested() async throws {
+        try await database.write { db in
+            try db.seed {
+                Chart(id: UUID(-1), name: "Chores")
+                Chart(id: UUID(-2), name: "Work")
+            }
+        }
         let store = TestStore(initialState: ChartsFeature.State()) {
             ChartsFeature()
         }
 
-        await store.send(.chartTapped(randomChart)) {
-            $0.path[id: 0] = ChartFeature.State(chart: randomChart)
+        await store.send(.chartsDeleteRequested(IndexSet(integer: 0)))
+
+        let charts = try await database.read { db in
+            try Chart.all.fetchAll(db)
         }
+        expectNoDifference(charts, [Chart(id: UUID(-2), name: "Work")])
     }
 }

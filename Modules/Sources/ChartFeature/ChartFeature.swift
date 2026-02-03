@@ -1,3 +1,4 @@
+import CloudKit
 import ComposableArchitecture
 import Foundation
 import NonEmpty
@@ -11,7 +12,7 @@ public struct ChartFeature {
     @ObservableState
     public struct State: Equatable, Sendable {
         public var chart: Chart
-        
+        var sharedRecord: SharedRecord?
         var showSettings = false
 
         public init(chart: Chart) {
@@ -24,6 +25,9 @@ public struct ChartFeature {
         case quickActionTapped(QuickAction.ID)
         case settingsButtonTapped
         case settingsDismissed
+        case shareButtonTapped
+        case shareResponse(SharedRecord)
+        case shareDismissed
         case nameChanged(String)
         case addQuickActionButtonTapped
         case removeQuickAction(QuickAction.ID)
@@ -32,6 +36,7 @@ public struct ChartFeature {
     }
 
     @Dependency(\.defaultDatabase) var database
+    @Dependency(\.defaultSyncEngine) var syncEngine
     @Dependency(\.withRandomNumberGenerator) var withRandomNumberGenerator
 
     public var body: some ReducerOf<Self> {
@@ -77,6 +82,28 @@ public struct ChartFeature {
 
             case .settingsDismissed:
                 state.showSettings = false
+                return .none
+
+            case .shareButtonTapped:
+                let chart = state.chart
+                let syncEngine = syncEngine
+                return .run { send in
+                    do {
+                        let sharedRecord = try await syncEngine.share(record: chart) {
+                            $0[CKShare.SystemFieldKey.title] = chart.name
+                        }
+                        await send(.shareResponse(sharedRecord))
+                    } catch {
+                        print("Share error: \(error)")
+                    }
+                }
+
+            case let .shareResponse(sharedRecord):
+                state.sharedRecord = sharedRecord
+                return .none
+
+            case .shareDismissed:
+                state.sharedRecord = nil
                 return .none
 
             case let .nameChanged(name):

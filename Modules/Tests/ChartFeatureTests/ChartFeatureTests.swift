@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import CustomDump
 import Dependencies
 import DependenciesTestSupport
 import Foundation
@@ -50,8 +51,9 @@ struct ChartFeatureTests {
         let stickers = try await database.read { db in
             try Sticker.where { $0.chartID.eq(UUID(-1)) }.fetchAll(db)
         }
-        #expect(stickers.count == 1)
-        #expect(stickers[0].imageName == expectedImageName)
+        expectNoDifference(stickers, [
+            Sticker(id: UUID(0), chartID: UUID(-1), imageName: expectedImageName),
+        ])
     }
 
     @Test(
@@ -83,8 +85,11 @@ struct ChartFeatureTests {
         let stickers = try await database.read { db in
             try Sticker.where { $0.chartID.eq(chartID) }.fetchAll(db)
         }
-        #expect(stickers.count == 3)
-        #expect(stickers.map(\.imageName) == expectedImageNames)
+        expectNoDifference(stickers, [
+            Sticker(id: UUID(0), chartID: chartID, imageName: expectedImageNames[0]),
+            Sticker(id: UUID(1), chartID: chartID, imageName: expectedImageNames[1]),
+            Sticker(id: UUID(2), chartID: chartID, imageName: expectedImageNames[2]),
+        ])
     }
 
     @Test(
@@ -154,7 +159,7 @@ struct ChartFeatureTests {
         let chart = try await database.read { db in
             try Chart.find(UUID(-1)).fetchOne(db)
         }
-        #expect(chart?.name == "Homework")
+        expectNoDifference(chart, Chart(id: UUID(-1), name: "Homework"))
     }
 
     @Test
@@ -175,9 +180,9 @@ struct ChartFeatureTests {
         let quickActions = try await database.read { db in
             try QuickAction.where { $0.chartID.eq(UUID(-1)) }.fetchAll(db)
         }
-        #expect(quickActions.count == 1)
-        #expect(quickActions[0].name == "")
-        #expect(quickActions[0].amount == 1)
+        expectNoDifference(quickActions, [
+            QuickAction(id: UUID(0), chartID: UUID(-1), name: "", amount: 1),
+        ])
     }
 
     @Test
@@ -223,7 +228,7 @@ struct ChartFeatureTests {
         let qa = try await database.read { db in
             try QuickAction.find(quickActionID).fetchOne(db)
         }
-        #expect(qa?.name == "New")
+        expectNoDifference(qa, QuickAction(id: UUID(-1), chartID: UUID(-1), name: "New", amount: 5))
     }
 
     @Test
@@ -246,6 +251,6 @@ struct ChartFeatureTests {
         let qa = try await database.read { db in
             try QuickAction.find(quickActionID).fetchOne(db)
         }
-        #expect(qa?.amount == 10)
+        expectNoDifference(qa, QuickAction(id: UUID(-1), chartID: UUID(-1), name: "Chore", amount: 10))
     }
 }

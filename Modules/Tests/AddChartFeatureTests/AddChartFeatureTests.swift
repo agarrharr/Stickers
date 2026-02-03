@@ -128,4 +128,20 @@ struct AddChartFeatureTests {
             $0.quickActions[id: id]?.amount = 10
         }
     }
+
+    @Test
+    func nameChanged() async {
+        let store = TestStore(
+            initialState: AddChartFeature.State(
+                color: .blue,
+                quickActions: []
+            )
+        ) {
+            AddChartFeature()
+        }
+
+        await store.send(.view(.nameChanged("Chores"))) {
+            $0.name = "Chores"
+        }
+    }
 }

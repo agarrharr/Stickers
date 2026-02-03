@@ -61,6 +61,10 @@ extension DependencyValues {
 
         try migrator.migrate(database)
         defaultDatabase = database
+        defaultSyncEngine = try SyncEngine(
+            for: database,
+            tables: Chart.self, QuickAction.self, Sticker.self
+        )
     }
 }
 

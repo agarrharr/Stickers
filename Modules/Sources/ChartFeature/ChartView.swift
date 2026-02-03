@@ -64,6 +64,13 @@ public struct ChartView: View {
                     Image(systemName: "gear")
                 }
             }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    store.send(.shareButtonTapped)
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                }
+            }
             ToolbarSpacer(.fixed, placement: .topBarTrailing)
             ToolbarItemGroup(placement: .topBarTrailing) {
                 if !quickActions.isEmpty {
@@ -95,6 +102,14 @@ public struct ChartView: View {
             )
         ) {
             ChartSettingsView(store: store)
+        }
+        .sheet(
+            item: Binding(
+                get: { store.sharedRecord },
+                set: { _ in store.send(.shareDismissed) }
+            )
+        ) { sharedRecord in
+            CloudSharingView(sharedRecord: sharedRecord)
         }
     }
 }
