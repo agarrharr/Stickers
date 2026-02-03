@@ -64,7 +64,7 @@ struct ChartsFeatureTests {
 
     @Test
     func chartTapped() async throws {
-        let chart = Chart(id: UUID(100), name: "Chores")
+        let chart = Chart(id: UUID(-1), name: "Chores")
         try await database.write { db in
             try db.seed {
                 chart
