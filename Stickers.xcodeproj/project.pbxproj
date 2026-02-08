@@ -10,6 +10,9 @@
 		991C8F022B8FEC6100B227BA /* StickersApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 991C8F012B8FEC6100B227BA /* StickersApp.swift */; };
 		991C8F062B8FEC6300B227BA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 991C8F052B8FEC6300B227BA /* Assets.xcassets */; };
 		99349C782B98DE2A0085D6F3 /* AppFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 99349C772B98DE2A0085D6F3 /* AppFeature */; };
+		9D0000012C10000000000001 /* StickersApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 991C8F012B8FEC6100B227BA /* StickersApp.swift */; };
+		9D0000012C10000000000002 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 991C8F052B8FEC6300B227BA /* Assets.xcassets */; };
+		9D0000012C10000000000003 /* AppFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 99349C772B98DE2A0085D6F3 /* AppFeature */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +23,8 @@
 		992A2EAA2B98ECA400062D22 /* ci_pre_xcodebuild.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = ci_pre_xcodebuild.sh; sourceTree = "<group>"; };
 		993D5EE52B990DD800BA500F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		99ICLOUD012C0700000000001 /* Stickers.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Stickers.entitlements; sourceTree = "<group>"; };
+		9D0000012C10000000000011 /* StickersDev.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StickersDev.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9D0000012C10000000000012 /* StickersDev.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = StickersDev.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -28,6 +33,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				99349C782B98DE2A0085D6F3 /* AppFeature in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9D0000012C10000000000021 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9D0000012C10000000000003 /* AppFeature in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -49,6 +62,7 @@
 			isa = PBXGroup;
 			children = (
 				991C8EFE2B8FEC6100B227BA /* Stickers.app */,
+				9D0000012C10000000000011 /* StickersDev.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -58,6 +72,7 @@
 			children = (
 				993D5EE52B990DD800BA500F /* Info.plist */,
 				99ICLOUD012C0700000000001 /* Stickers.entitlements */,
+				9D0000012C10000000000012 /* StickersDev.entitlements */,
 				991C8F012B8FEC6100B227BA /* StickersApp.swift */,
 				991C8F052B8FEC6300B227BA /* Assets.xcassets */,
 			);
@@ -102,6 +117,26 @@
 			productReference = 991C8EFE2B8FEC6100B227BA /* Stickers.app */;
 			productType = "com.apple.product-type.application";
 		};
+		9D0000012C10000000000031 /* StickersDev */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9D0000012C10000000000043 /* Build configuration list for PBXNativeTarget "StickersDev" */;
+			buildPhases = (
+				9D0000012C10000000000023 /* Sources */,
+				9D0000012C10000000000021 /* Frameworks */,
+				9D0000012C10000000000022 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = StickersDev;
+			packageProductDependencies = (
+				99349C772B98DE2A0085D6F3 /* AppFeature */,
+			);
+			productName = StickersDev;
+			productReference = 9D0000012C10000000000011 /* StickersDev.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -113,6 +148,9 @@
 				LastUpgradeCheck = 1520;
 				TargetAttributes = {
 					991C8EFD2B8FEC6100B227BA = {
+						CreatedOnToolsVersion = 15.2;
+					};
+					9D0000012C10000000000031 = {
 						CreatedOnToolsVersion = 15.2;
 					};
 				};
@@ -131,6 +169,7 @@
 			projectRoot = "";
 			targets = (
 				991C8EFD2B8FEC6100B227BA /* Stickers */,
+				9D0000012C10000000000031 /* StickersDev */,
 			);
 		};
 /* End PBXProject section */
@@ -144,6 +183,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		9D0000012C10000000000022 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9D0000012C10000000000002 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -152,6 +199,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				991C8F022B8FEC6100B227BA /* StickersApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9D0000012C10000000000023 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9D0000012C10000000000001 /* StickersApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -286,6 +341,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLOUDKIT_ENV = Production;
 				CODE_SIGN_ALLOW_ENTITLEMENTS_MODIFICATION = YES;
 				CODE_SIGN_ENTITLEMENTS = Stickers/Stickers.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -322,6 +378,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLOUDKIT_ENV = Production;
 				CODE_SIGN_ALLOW_ENTITLEMENTS_MODIFICATION = YES;
 				CODE_SIGN_ENTITLEMENTS = Stickers/Stickers.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -353,6 +410,80 @@
 			};
 			name = Release;
 		};
+		9D0000012C10000000000041 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLOUDKIT_ENV = Development;
+				CODE_SIGN_ALLOW_ENTITLEMENTS_MODIFICATION = YES;
+				CODE_SIGN_ENTITLEMENTS = Stickers/StickersDev.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = 47C966XSTJ;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Stickers/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.garrett-harris.adam.stickersapp.dev";
+				PRODUCT_NAME = "Stickers Dev";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		9D0000012C10000000000042 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLOUDKIT_ENV = Development;
+				CODE_SIGN_ALLOW_ENTITLEMENTS_MODIFICATION = YES;
+				CODE_SIGN_ENTITLEMENTS = Stickers/StickersDev.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = 47C966XSTJ;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Stickers/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.garrett-harris.adam.stickersapp.dev";
+				PRODUCT_NAME = "Stickers Dev";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -370,6 +501,15 @@
 			buildConfigurations = (
 				991C8F232B8FEC6300B227BA /* Debug */,
 				991C8F242B8FEC6300B227BA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9D0000012C10000000000043 /* Build configuration list for PBXNativeTarget "StickersDev" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9D0000012C10000000000041 /* Debug */,
+				9D0000012C10000000000042 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -91,7 +91,10 @@ public struct ChartView: View {
                 set: { _ in store.send(.shareDismissed) }
             )
         ) { sharedRecord in
-            CloudSharingView(sharedRecord: sharedRecord)
+            CloudSharingView(
+                sharedRecord: sharedRecord,
+                availablePermissions: [.allowReadWrite]
+            )
         }
     }
 }
