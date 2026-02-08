@@ -1,5 +1,6 @@
 import ComposableArchitecture
 import SwiftUI
+import Models
 
 extension BackgroundColor {
     public var color: Color {

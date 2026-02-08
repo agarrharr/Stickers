@@ -60,6 +60,14 @@ extension DependencyValues {
                 .execute(db)
         }
 
+        migrator.registerMigration("Add column 'color' to 'charts'") { db in
+            try #sql("""
+                ALTER TABLE "charts"
+                ADD COLUMN "color" TEXT NOT NULL ON CONFLICT REPLACE DEFAULT 'yellow'
+                """)
+                .execute(db)
+        }
+
         try migrator.migrate(database)
         defaultDatabase = database
         defaultSyncEngine = try SyncEngine(

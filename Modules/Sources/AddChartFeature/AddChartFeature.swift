@@ -2,6 +2,7 @@ import ComposableArchitecture
 import Dependencies
 import Foundation
 import IdentifiedCollections
+import Models
 
 public struct QuickActionInput: Identifiable, Equatable, Sendable {
     public var id: UUID
