@@ -32,7 +32,6 @@ public struct AddChartView: View {
                 Section {
                     LabeledContent {
                         TextField("Add name", text: $store.name)
-//                        TextField("Name", text: $store.name.sending(\.nameChanged))
                             .multilineTextAlignment(.trailing)
                     } label: {
                         Text("Name")

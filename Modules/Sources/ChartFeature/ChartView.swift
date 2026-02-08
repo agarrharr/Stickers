@@ -7,24 +7,6 @@ import SwiftUI
 import Models
 import StickerFeature
 
-//public struct ChartDataRequest: FetchKeyRequest {
-//    var chartID: Chart.ID
-//
-//    public struct Value: Equatable, Sendable {
-//        var chart: Chart?
-//        var stickers: [Sticker] = []
-//        var quickActions: [QuickAction] = []
-//    }
-//
-//    public func fetch(_ db: Database) throws -> Value {
-//        try Value(
-//            chart: Chart.find(chartID).fetchOne(db),
-//            stickers: Sticker.where { $0.chartID.eq(chartID) }.fetchAll(db),
-//            quickActions: QuickAction.where { $0.chartID.eq(chartID) }.fetchAll(db)
-//        )
-//    }
-//}
-
 public struct ChartView: View {
     @FetchAll var stickers: [Sticker]
     @FetchAll var quickActions: [QuickAction]

@@ -9,8 +9,9 @@ import Models
 @Reducer
 public struct ChartsFeature {
     @ObservableState
-    public struct State: Equatable {
+    public struct State {
         @Presents var addChart: AddChartFeature.State?
+        @ObservationStateIgnored @FetchAll var charts: [Chart]
         var path = StackState<ChartFeature.State>()
 
         public init(
@@ -40,12 +41,11 @@ public struct ChartsFeature {
             case let .chartTapped(chart):
                 state.path.append(ChartFeature.State(chart: chart))
                 return .none
-                
+
             case let .chartsDeleteRequested(offsets):
+                let charts = state.charts
                 let database = database
                 return .run { _ in
-                    @FetchAll var charts: [Chart]
-                    
                     withErrorReporting {
                         try database.write { db in
                             try Chart.find(offsets.map { charts[$0].id })

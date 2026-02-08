@@ -5,7 +5,7 @@ import ChartsFeature
 @Reducer
 public struct AppFeature {
     @ObservableState
-    public struct State: Equatable {
+    public struct State {
         var charts: ChartsFeature.State
 
         public init() {
