@@ -49,10 +49,12 @@ public struct ChartFeature {
                 let chartID = state.chart.id
                 let database = database
                 return .run { _ in
-                    try database.write { db in
-                        try Sticker.insert {
-                            Sticker.Draft(chartID: chartID, imageName: imageName)
-                        }.execute(db)
+                    withErrorReporting {
+                        try database.write { db in
+                            try Sticker.insert {
+                                Sticker.Draft(chartID: chartID, imageName: imageName)
+                            }.execute(db)
+                        }
                     }
                 }
                 
@@ -65,13 +67,15 @@ public struct ChartFeature {
                 }
                 let database = database
                 return .run { _ in
-                    try database.write { db in
-                        guard let quickAction = try QuickAction.find(quickActionID).fetchOne(db)
-                        else { return }
-                        for imageName in maxImageNames.prefix(quickAction.amount) {
-                            try Sticker.insert {
-                                Sticker.Draft(chartID: chartID, imageName: imageName)
-                            }.execute(db)
+                    withErrorReporting {
+                        try database.write { db in
+                            guard let quickAction = try QuickAction.find(quickActionID).fetchOne(db)
+                            else { return }
+                            for imageName in maxImageNames.prefix(quickAction.amount) {
+                                try Sticker.insert {
+                                    Sticker.Draft(chartID: chartID, imageName: imageName)
+                                }.execute(db)
+                            }
                         }
                     }
                 }

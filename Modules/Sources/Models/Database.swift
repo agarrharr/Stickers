@@ -13,6 +13,7 @@ extension DependencyValues {
     public mutating func bootstrapDatabase() throws {
         var configuration = Configuration()
         configuration.prepareDatabase { db in
+            try db.attachMetadatabase()
             db.add(function: $uuid)
         }
         let database = try SQLiteData.defaultDatabase(configuration: configuration)
