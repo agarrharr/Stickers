@@ -37,6 +37,18 @@ public struct ChartView: View {
             .ignoresSafeArea()
 
             ScrollView {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text("\(stickers.count)")
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                    Text("stickers")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                }
+                .padding(.horizontal)
+                .padding(.top, 8)
+
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))], spacing: 20) {
                     ForEach(stickers) { sticker in
                         StickerView(
