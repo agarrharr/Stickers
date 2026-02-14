@@ -2,7 +2,6 @@ import ComposableArchitecture
 import Dependencies
 import Foundation
 import IdentifiedCollections
-import Models
 
 public struct QuickActionInput: Identifiable, Equatable, Sendable {
     public var id: UUID
@@ -26,12 +25,10 @@ public struct AddChartFeature {
     @ObservableState
     public struct State: Equatable, Sendable {
         var name = ""
-        var color: BackgroundColor = .yellow
         var quickActions: IdentifiedArrayOf<QuickActionInput> = []
 
-        public init(name: String = "", color: BackgroundColor = .yellow, quickActions: IdentifiedArrayOf<QuickActionInput> = []) {
+        public init(name: String = "", quickActions: IdentifiedArrayOf<QuickActionInput> = []) {
             self.name = name
-            self.color = color
             self.quickActions = quickActions
         }
     }
@@ -45,7 +42,6 @@ public struct AddChartFeature {
         public enum ViewAction: Sendable {
             case addButtonTapped
             case cancelButtonTapped
-            case colorButtonTapped(BackgroundColor)
             case addQuickActionButtonTapped
             case nameChanged(String)
             case removeQuickAction(QuickActionInput.ID)
@@ -55,7 +51,7 @@ public struct AddChartFeature {
 
         @CasePathable
         public enum DelegateAction: Sendable {
-            case onChartAdded(String, BackgroundColor, [QuickActionInput])
+            case onChartAdded(String, [QuickActionInput])
         }
     }
 
@@ -66,17 +62,14 @@ public struct AddChartFeature {
             case let .view(action):
                 switch action {
                 case .addButtonTapped:
-                    return .run { [name = state.name, color = state.color, quickActions = Array(state.quickActions)] send in
-                        await send(.delegate(.onChartAdded(name, color, quickActions)))
+                    return .run { [name = state.name, quickActions = Array(state.quickActions)] send in
+                        await send(.delegate(.onChartAdded(name, quickActions)))
                     }
                 case .cancelButtonTapped:
                     return .run { _ in
                         @Dependency(\.dismiss) var dismiss
                         await dismiss()
                     }
-                case let .colorButtonTapped(color):
-                    state.color = color
-                    return .none
                 case .addQuickActionButtonTapped:
                     state.quickActions.append(QuickActionInput())
                     return .none

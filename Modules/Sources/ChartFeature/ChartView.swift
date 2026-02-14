@@ -4,8 +4,8 @@ import NonEmpty
 import SQLiteData
 import SwiftUI
 
-import Models
 import StickerFeature
+import Models
 
 public struct ChartView: View {
     @FetchAll var stickers: [Sticker]
@@ -25,41 +25,29 @@ public struct ChartView: View {
     }
 
     public var body: some View {
-        ZStack {
-            LinearGradient(
-                colors: [
-                    chartColor.opacity(0.55),
-                    chartColor.opacity(0.16),
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
-
-            ScrollView {
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Text("\(stickers.count)")
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .monospacedDigit()
-                    Text("stickers")
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                }
-                .padding(.horizontal)
-                .padding(.top, 8)
-
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))], spacing: 20) {
-                    ForEach(stickers) { sticker in
-                        StickerView(
-                            store: Store(initialState: StickerFeature.State(sticker: sticker)) {
-                                StickerFeature()
-                            }
-                        )
-                    }
-                }
-                .padding(.horizontal)
+        ScrollView {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text("\(stickers.count)")
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .monospacedDigit()
+                Text("stickers")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.secondary)
+                Spacer()
             }
+            .padding(.horizontal)
+            .padding(.top, 8)
+
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))], spacing: 20) {
+                ForEach(stickers) { sticker in
+                    StickerView(
+                        store: Store(initialState: StickerFeature.State(sticker: sticker)) {
+                            StickerFeature()
+                        }
+                    )
+                }
+            }
+            .padding(.horizontal)
         }
         .navigationTitle(store.chart.name)
         .toolbar {
@@ -119,26 +107,6 @@ public struct ChartView: View {
                 sharedRecord: sharedRecord,
                 availablePermissions: [.allowPrivate, .allowPublic, .allowReadWrite]
             )
-        }
-    }
-}
-
-private extension ChartView {
-    var chartColor: Color {
-        color(for: store.chart.backgroundColor)
-    }
-
-    func color(for backgroundColor: BackgroundColor) -> Color {
-        switch backgroundColor {
-        case .yellow: return Color(red: 1.0, green: 0.85, blue: 0.35)
-        case .orange: return Color(red: 1.0, green: 0.58, blue: 0.10)
-        case .red: return Color(red: 0.95, green: 0.28, blue: 0.28)
-        case .purple: return Color(red: 0.55, green: 0.35, blue: 0.95)
-        case .blue: return Color(red: 0.25, green: 0.50, blue: 0.95)
-        case .green: return Color(red: 0.25, green: 0.75, blue: 0.45)
-        case .gray: return Color(red: 0.62, green: 0.62, blue: 0.65)
-        case .black: return Color(red: 0.20, green: 0.20, blue: 0.22)
-        case .brown: return Color(red: 0.65, green: 0.45, blue: 0.28)
         }
     }
 }

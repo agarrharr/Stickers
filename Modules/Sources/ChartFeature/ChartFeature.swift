@@ -89,11 +89,15 @@ public struct ChartFeature {
                 return .none
 
             case .shareButtonTapped:
-                let chart = state.chart
+                let chartID = state.chart.id
+                let database = database
                 let syncEngine = syncEngine
                 return .run { send in
                     do {
                         try await syncEngine.sendChanges()
+                        guard let chart = try await database.read({ db in
+                            try Chart.find(chartID).fetchOne(db)
+                        }) else { return }
                         let sharedRecord = try await syncEngine.share(record: chart) {
                             $0[CKShare.SystemFieldKey.title] = chart.name
                         }

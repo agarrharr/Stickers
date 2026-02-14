@@ -57,13 +57,13 @@ public struct ChartsFeature {
 
             case let .addChart(.presented(.delegate(action))):
                 switch action {
-                case let .onChartAdded(name, color, quickActions):
+                case let .onChartAdded(name, quickActions):
                     state.addChart = nil
                     let database = database
                     return .run { _ in
                         try database.write { db in
                             let chart = try Chart.insert {
-                                Chart.Draft(name: name, color: color.rawValue)
+                                Chart.Draft(name: name)
                             }
                             .returning(\.self)
                             .fetchOne(db)!

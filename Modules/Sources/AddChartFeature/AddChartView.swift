@@ -1,27 +1,8 @@
 import ComposableArchitecture
 import SwiftUI
-import Models
-
-extension BackgroundColor {
-    public var color: Color {
-        switch self {
-        case .yellow: .yellow
-        case .orange: .orange
-        case .red: .red
-        case .purple: .purple
-        case .blue: .blue
-        case .green: .green
-        case .gray: .gray
-        case .black: .black
-        case .brown: .brown
-        }
-    }
-}
 
 public struct AddChartView: View {
     @Bindable var store: StoreOf<AddChartFeature>
-
-    let colors: [BackgroundColor] = [.yellow, .orange, .red, .purple, .blue, .green, .gray, .black, .brown]
 
     public init(store: StoreOf<AddChartFeature>) {
         self.store = store
@@ -37,29 +18,6 @@ public struct AddChartView: View {
                     } label: {
                         Text("Name")
                     }
-                }
-                Section("Color") {
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))]) {
-                            ForEach(colors, id: \.self) { color in
-                                Button {
-                                    store.send(.view(.colorButtonTapped(color)))
-                                    print(color.rawValue)
-                                } label: {
-                                    ZStack {
-                                        Circle()
-                                            .fill(color.color)
-                                            .frame(width: 40)
-                                        if store.color == color {
-                                            Circle()
-                                                .stroke(color.color, lineWidth: 4)
-                                                .frame(width: 50)
-                                        }
-                                    }
-                                }
-                                .frame(height: 50)
-                                .buttonStyle(.borderless) // This is to prevent a bug where EVERY button gets triggered when you tap on one of them
-                            }
-                        }
                 }
                 Section("Quick Actions") {
                     ForEach(store.quickActions) { action in
@@ -119,7 +77,6 @@ public struct AddChartView: View {
         AddChartView(
             store: Store(
                 initialState: AddChartFeature.State(
-                    color: .blue,
                     quickActions: []
                 )
         ) {
