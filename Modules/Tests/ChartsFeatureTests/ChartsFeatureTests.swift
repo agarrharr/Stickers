@@ -15,6 +15,7 @@ import Models
     .dependencies {
         $0.uuid = .incrementing
         try $0.bootstrapDatabase()
+        $0.defaultSyncEngine = .testValue
     }
 )
 struct ChartsFeatureTests {
@@ -45,7 +46,7 @@ struct ChartsFeatureTests {
             QuickActionInput(id: UUID(99), name: "Take out trash", amount: 5)
         ]
 
-        await store.send(.addChart(.presented(.delegate(.onChartAdded("Chores", .yellow, quickActions))))) {
+        await store.send(.addChart(.presented(.delegate(.onChartAdded("Chores", quickActions))))) {
             $0.addChart = nil
         }
 

@@ -64,7 +64,7 @@ extension DependencyValues {
         try migrator.migrate(database)
         defaultDatabase = database
         defaultSyncEngine = try SyncEngine(
-            for: database,
+            for: defaultDatabase,
             tables: Chart.self, QuickAction.self, Sticker.self,
             defaultZone: CKRecordZone(zoneName: "com.garrett-harris.adam.stickersapp")
         )

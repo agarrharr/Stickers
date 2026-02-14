@@ -9,7 +9,7 @@ import Models
 @Reducer
 public struct ChartsFeature {
     @ObservableState
-    public struct State {
+    public struct State: Equatable {
         @Presents var addChart: AddChartFeature.State?
         @ObservationStateIgnored @FetchAll var charts: [Chart]
         var path = StackState<ChartFeature.State>()

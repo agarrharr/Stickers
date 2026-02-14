@@ -23,6 +23,11 @@ private struct LCRNG: RandomNumberGenerator, @unchecked Sendable {
     .dependencies {
         $0.uuid = .incrementing
         try $0.bootstrapDatabase()
+//        try $0.defaultDatabase.write { db in
+//            try db.seed {
+//                
+//            }
+//        }
     }
 )
 struct ChartFeatureTests {

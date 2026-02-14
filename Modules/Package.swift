@@ -30,7 +30,7 @@ let package = Package(
         .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.10.1"),
         .package(url: "https://github.com/pointfreeco/swift-identified-collections", from: "1.1.1"),
         .package(url: "https://github.com/pointfreeco/swift-nonempty", from: "0.4.0"),
-        .package(url: "https://github.com/pointfreeco/sqlite-data", from: "1.0.0"),
+        .package(url: "https://github.com/pointfreeco/sqlite-data", from: "1.5.2"),
     ],
     targets: [
         .target(

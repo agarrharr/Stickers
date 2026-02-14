@@ -11,7 +11,6 @@ struct AddChartFeatureTests {
     func addButtonTapped() async {
         let store = TestStore(initialState: AddChartFeature.State(
             name: "Chores",
-            color: .blue,
             quickActions: [
                 QuickActionInput(id: UUID(1), name: "Take out trash", amount: 5)
             ]
@@ -27,7 +26,6 @@ struct AddChartFeatureTests {
     func cancelButtonTapped() async {
         let store = TestStore(
             initialState: AddChartFeature.State(
-                color: .blue,
                 quickActions: []
             )
         ) {
@@ -38,29 +36,12 @@ struct AddChartFeatureTests {
     }
 
     @Test
-    func colorButtonTapped() async {
-        let store = TestStore(
-            initialState: AddChartFeature.State(
-                color: .blue,
-                quickActions: []
-            )
-        ) {
-            AddChartFeature()
-        }
-
-        await store.send(.view(.colorButtonTapped(.red))) {
-            $0.color = .red
-        }
-    }
-
-    @Test
     func addQuickAction() async {
         prepareDependencies {
             $0.uuid = .incrementing
         }
         let store = TestStore(
             initialState: AddChartFeature.State(
-                color: .blue,
                 quickActions: []
             )
         ) {
@@ -77,7 +58,6 @@ struct AddChartFeatureTests {
         let id = UUID(1)
         let store = TestStore(
             initialState: AddChartFeature.State(
-                color: .blue,
                 quickActions: [
                     QuickActionInput(id: UUID(1), name: "Chore", amount: 3)
                 ]
@@ -96,7 +76,6 @@ struct AddChartFeatureTests {
         let id = UUID(1)
         let store = TestStore(
             initialState: AddChartFeature.State(
-                color: .blue,
                 quickActions: [
                     QuickActionInput(id: id, name: "", amount: 1)
                 ]
@@ -115,7 +94,6 @@ struct AddChartFeatureTests {
         let id = UUID(1)
         let store = TestStore(
             initialState: AddChartFeature.State(
-                color: .blue,
                 quickActions: [
                     QuickActionInput(id: id, name: "Chore", amount: 1)
                 ]
@@ -133,7 +111,6 @@ struct AddChartFeatureTests {
     func nameChanged() async {
         let store = TestStore(
             initialState: AddChartFeature.State(
-                color: .blue,
                 quickActions: []
             )
         ) {
