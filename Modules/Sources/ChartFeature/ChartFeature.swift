@@ -93,6 +93,7 @@ public struct ChartFeature {
                 let syncEngine = syncEngine
                 return .run { send in
                     do {
+                        try await syncEngine.sendChanges()
                         let sharedRecord = try await syncEngine.share(record: chart) {
                             $0[CKShare.SystemFieldKey.title] = chart.name
                         }

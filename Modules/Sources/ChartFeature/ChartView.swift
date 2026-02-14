@@ -117,7 +117,7 @@ public struct ChartView: View {
         ) { sharedRecord in
             CloudSharingView(
                 sharedRecord: sharedRecord,
-                availablePermissions: [.allowReadWrite]
+                availablePermissions: [.allowPrivate, .allowPublic, .allowReadWrite]
             )
         }
     }
