@@ -1,5 +1,3 @@
-import ComposableArchitecture
-import SQLiteData
 import SwiftUI
 
 import Models
@@ -11,11 +9,7 @@ struct StickerGridView: View {
     var body: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))], spacing: 20) {
             ForEach(stickers) { sticker in
-                StickerView(
-                    store: Store(initialState: StickerFeature.State(sticker: sticker)) {
-                        StickerFeature()
-                    }
-                )
+                StickerView(sticker: sticker)
             }
         }
         .padding(.horizontal)

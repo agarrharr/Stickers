@@ -1,18 +1,16 @@
-import ComposableArchitecture
-import Dependencies
 import SwiftUI
 
 import Models
 
 public struct StickerView: View {
-    var store: StoreOf<StickerFeature>
+    let imageName: String
 
-    public init(store: StoreOf<StickerFeature>) {
-        self.store = store
+    public init(sticker: Sticker) {
+        self.imageName = sticker.imageName
     }
 
     public var body: some View {
-        Image(store.sticker.imageName, bundle: .module)
+        Image(imageName, bundle: .module)
             .resizable()
             .aspectRatio(contentMode: .fit)
             .frame(width: 60, height: 60)
@@ -21,12 +19,6 @@ public struct StickerView: View {
 
 #Preview {
     StickerView(
-        store: Store(
-            initialState: StickerFeature.State(
-                sticker: Sticker(id: UUID(0), chartID: UUID(0), imageName: stickerPack.first)
-            )
-        ) {
-            StickerFeature()
-        }
+        sticker: Sticker(id: UUID(0), chartID: UUID(0), imageName: stickerPack.first)
     )
 }

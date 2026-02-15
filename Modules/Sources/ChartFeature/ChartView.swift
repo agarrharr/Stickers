@@ -34,10 +34,14 @@ public struct ChartView: View {
                     Text("stickers")
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(.secondary)
-                    if syncEngine.isSynchronizing {
-                        ProgressView()
-                            .controlSize(.small)
-                    }
+                    ProgressView()
+                        .controlSize(.small)
+                        .frame(width: 14, height: 14)
+                        .alignmentGuide(.firstTextBaseline) { dimensions in
+                            dimensions[VerticalAlignment.bottom]
+                        }
+                        .opacity(syncEngine.isSynchronizing ? 1 : 0)
+                        .accessibilityHidden(!syncEngine.isSynchronizing)
                     Spacer()
                 }
                 .padding(.horizontal)
