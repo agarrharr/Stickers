@@ -61,6 +61,15 @@ extension DependencyValues {
                 .execute(db)
         }
 
+        migrator.registerMigration("Add column 'createdAt' to 'stickers'") { db in
+            // Use a constant default for existing rows; new inserts provide actual date
+            try #sql("""
+                ALTER TABLE "stickers"
+                ADD COLUMN "createdAt" TEXT NOT NULL DEFAULT '2025-01-01T00:00:00.000Z'
+                """)
+                .execute(db)
+        }
+
         try migrator.migrate(database)
         defaultDatabase = database
         defaultSyncEngine = try SyncEngine(

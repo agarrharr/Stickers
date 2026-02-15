@@ -15,7 +15,9 @@ public struct ChartView: View {
     public init(store: StoreOf<ChartFeature>) {
         self.store = store
         _stickers = FetchAll(
-            Sticker.where { $0.chartID.eq(store.chart.id) },
+            Sticker
+                .where { $0.chartID.eq(store.chart.id) }
+                .order { $0.createdAt.desc() },
             animation: .default
         )
         _quickActions = FetchAll(
@@ -26,28 +28,34 @@ public struct ChartView: View {
 
     public var body: some View {
         ScrollView {
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text("\(stickers.count)")
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-                Text("stickers")
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(.secondary)
-                Spacer()
-            }
-            .padding(.horizontal)
-            .padding(.top, 8)
+            VStack(spacing: 16) {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text("\(stickers.count)")
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                    Text("stickers")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                }
+                .padding(.horizontal)
 
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))], spacing: 20) {
-                ForEach(stickers) { sticker in
-                    StickerView(
-                        store: Store(initialState: StickerFeature.State(sticker: sticker)) {
-                            StickerFeature()
-                        }
-                    )
+                Picker("View Mode", selection: $store.viewMode) {
+                    ForEach(ViewMode.allCases, id: \.self) { mode in
+                        Text(mode.rawValue).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal)
+
+                switch store.viewMode {
+                case .grid:
+                    StickerGridView(stickers: stickers)
+                case .history:
+                    StickerHistoryView(chartID: store.chart.id)
                 }
             }
-            .padding(.horizontal)
+            .padding(.top, 8)
         }
         .navigationTitle(store.chart.name)
         .toolbar {

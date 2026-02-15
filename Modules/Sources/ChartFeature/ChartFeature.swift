@@ -7,6 +7,11 @@ import SQLiteData
 import Models
 import StickerFeature
 
+public enum ViewMode: String, CaseIterable, Sendable {
+    case grid = "Grid"
+    case history = "History"
+}
+
 @Reducer
 public struct ChartFeature {
     @ObservableState
@@ -14,13 +19,15 @@ public struct ChartFeature {
         public var chart: Chart
         var sharedRecord: SharedRecord?
         var showSettings = false
+        var viewMode: ViewMode = .grid
 
         public init(chart: Chart) {
             self.chart = chart
         }
     }
 
-    public enum Action: Sendable {
+    public enum Action: BindableAction, Sendable {
+        case binding(BindingAction<State>)
         case addStickerButtonTapped
         case quickActionTapped(QuickAction.ID)
         case settingsButtonTapped
@@ -40,8 +47,12 @@ public struct ChartFeature {
     @Dependency(\.withRandomNumberGenerator) var withRandomNumberGenerator
 
     public var body: some ReducerOf<Self> {
+        BindingReducer()
         Reduce { state, action in
             switch action {
+            case .binding:
+                return .none
+
             case .addStickerButtonTapped:
                 let imageName = withRandomNumberGenerator { generator in
                     stickerPack.randomElement(using: &generator)!
