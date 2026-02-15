@@ -141,9 +141,7 @@ struct ChartSettingsView: View {
                             get: { store.chart.name },
                             set: { store.send(.nameChanged($0)) }
                         ))
-//                        TextField("Chart name", text: $store.chart.name)
-//                        TextField("Chart name", text: $store.chart.name.sending(\.nameChanged))
-                            .multilineTextAlignment(.trailing)
+                        .multilineTextAlignment(.trailing)
                     } label: {
                         Text("Name")
                     }

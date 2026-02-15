@@ -204,18 +204,6 @@ public struct ChartFeature {
                         }
                     }
                 }
-
-//            case .task:
-//                state.isLoading = true
-//                let request = ChartDataRequest(chartID: state.chartID)
-//                
-//                let database = database
-//                return .run { send in
-//                    let value = try await database.read { db in
-//                        try request.fetch(db)
-//                    }
-//                    await send(.chartDataResponse(value))
-//                }
             }
         }
     }
