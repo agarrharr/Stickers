@@ -143,6 +143,7 @@ public struct ChartFeature {
                 }
 
             case let .nameChanged(name):
+                state.chart.name = name
                 let chartID = state.chart.id
                 let database = database
                 return .run { send in

@@ -159,7 +159,9 @@ struct ChartFeatureTests {
             ChartFeature()
         }
 
-        await store.send(.nameChanged("Homework"))
+        await store.send(.nameChanged("Homework")) {
+            $0.chart.name = "Homework"
+        }
 
         let chart = try await database.read { db in
             try Chart.find(UUID(-1)).fetchOne(db)
