@@ -14,14 +14,13 @@ struct StickerHistoryView: View {
     @FetchAll var stickers: [Sticker]
     @State private var currentUserRecordID: CKRecord.ID?
     @State private var creatorsBySticker: [Sticker.ID: CKRecord.ID] = [:]
+    @State private var modificationTimeBySticker: [Sticker.ID: Int64] = [:]
     @State private var participantNames: [String: String] = [:] // recordName -> displayName
 
     init(chartID: Chart.ID) {
         self.chartID = chartID
         _stickers = FetchAll(
-            Sticker
-                .where { $0.chartID.eq(chartID) }
-                .order { $0.createdAt.desc() },
+            Sticker.where { $0.chartID.eq(chartID) },
             animation: .default
         )
     }
@@ -34,7 +33,7 @@ struct StickerHistoryView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             // Time and creator name above stickers
                             HStack(spacing: 4) {
-                                Text(batch.stickers.first?.createdAt ?? Date(), style: .time)
+                                Text(createdAt(for: batch.stickers.first), style: .time)
                                     .font(.subheadline)
                                 Text("·")
                                     .foregroundStyle(.secondary)
@@ -132,12 +131,17 @@ struct StickerHistoryView: View {
             }
 
             var creators: [Sticker.ID: CKRecord.ID] = [:]
+            var modificationTimes: [Sticker.ID: Int64] = [:]
             for (stickerID, syncMetadata) in metadata {
+                if let syncMetadata {
+                    modificationTimes[stickerID] = syncMetadata.userModificationTime
+                }
                 if let creatorID = syncMetadata?.lastKnownServerRecord?.creatorUserRecordID {
                     creators[stickerID] = creatorID
                 }
             }
             creatorsBySticker = creators
+            modificationTimeBySticker = modificationTimes
         } catch {
             // Ignore errors
         }
@@ -167,6 +171,14 @@ struct StickerHistoryView: View {
         creatorsBySticker[sticker.id]?.recordName ?? "local"
     }
 
+    private func createdAt(for sticker: Sticker?) -> Date {
+        guard let sticker else { return Date.now }
+        guard let time = modificationTimeBySticker[sticker.id], time > 0 else {
+            return Date.now
+        }
+        return Date(timeIntervalSince1970: TimeInterval(time) / 1_000_000_000)
+    }
+
     /// Round a date to the nearest 2-minute window
     private func timeWindow(for date: Date) -> Date {
         let interval: TimeInterval = 120 // 2 minutes
@@ -179,14 +191,14 @@ struct StickerHistoryView: View {
 
         // First group by day
         let byDay = Dictionary(grouping: stickers) { sticker in
-            calendar.startOfDay(for: sticker.createdAt)
+            calendar.startOfDay(for: createdAt(for: sticker))
         }
 
         return byDay.map { (date, dayStickers) in
             // Group by (timeWindow, creator) to batch stickers together
             let grouped = Dictionary(grouping: dayStickers) { sticker in
                 BatchKey(
-                    timeWindow: timeWindow(for: sticker.createdAt),
+                    timeWindow: timeWindow(for: createdAt(for: sticker)),
                     creator: creatorKey(for: sticker)
                 )
             }
@@ -196,10 +208,10 @@ struct StickerHistoryView: View {
                 StickerBatch(
                     creatorKey: key.creator,
                     // Sort ascending within batch so new stickers appear at the end
-                    stickers: stickers.sorted { $0.createdAt < $1.createdAt }
+                    stickers: stickers.sorted { createdAt(for: $0) < createdAt(for: $1) }
                 )
             }
-            .sorted { ($0.stickers.first?.createdAt ?? .distantPast) > ($1.stickers.first?.createdAt ?? .distantPast) }
+            .sorted { createdAt(for: $0.stickers.first) > createdAt(for: $1.stickers.first) }
 
             return DayGroup(date: date, batches: batches)
         }

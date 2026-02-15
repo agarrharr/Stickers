@@ -51,7 +51,11 @@ final class SceneDelegate: NSObject, UIWindowSceneDelegate {
         userDidAcceptCloudKitShareWith cloudKitShareMetadata: CKShare.Metadata
     ) {
         Task {
-            try await syncEngine.acceptShare(metadata: cloudKitShareMetadata)
+            do {
+                try await syncEngine.acceptShare(metadata: cloudKitShareMetadata)
+            } catch {
+                SyncDiagnostics.log(error: error, operation: "Accepting CloudKit share")
+            }
         }
     }
 
@@ -63,7 +67,11 @@ final class SceneDelegate: NSObject, UIWindowSceneDelegate {
         guard let cloudKitShareMetadata = connectionOptions.cloudKitShareMetadata
         else { return }
         Task {
-            try await syncEngine.acceptShare(metadata: cloudKitShareMetadata)
+            do {
+                try await syncEngine.acceptShare(metadata: cloudKitShareMetadata)
+            } catch {
+                SyncDiagnostics.log(error: error, operation: "Accepting CloudKit share")
+            }
         }
     }
 }

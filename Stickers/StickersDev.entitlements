@@ -6,7 +6,7 @@
 	<string>development</string>
 	<key>com.apple.developer.icloud-container-identifiers</key>
 	<array>
-		<string>iCloud.com.garrett-harris.adam.stickersapp</string>
+		<string>$(CLOUDKIT_CONTAINER_IDENTIFIER)</string>
 	</array>
 	<key>com.apple.developer.icloud-container-environment</key>
 	<string>$(CLOUDKIT_ENV)</string>

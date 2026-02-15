@@ -1,14 +1,13 @@
 import ComposableArchitecture
-import GRDB
-import NonEmpty
 import SQLiteData
 import SwiftUI
 import SwiftUINavigation
 
-import StickerFeature
 import Models
+import StickerFeature
 
 public struct ChartView: View {
+    @Dependency(\.defaultSyncEngine) var syncEngine
     @FetchAll var stickers: [Sticker]
     @FetchAll var quickActions: [QuickAction]
     @Bindable var store: StoreOf<ChartFeature>
@@ -16,9 +15,7 @@ public struct ChartView: View {
     public init(store: StoreOf<ChartFeature>) {
         self.store = store
         _stickers = FetchAll(
-            Sticker
-                .where { $0.chartID.eq(store.chart.id) }
-                .order { $0.createdAt.desc() },
+            Sticker.where { $0.chartID.eq(store.chart.id) },
             animation: .default
         )
         _quickActions = FetchAll(
@@ -37,6 +34,10 @@ public struct ChartView: View {
                     Text("stickers")
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(.secondary)
+                    if syncEngine.isSynchronizing {
+                        ProgressView()
+                            .controlSize(.small)
+                    }
                     Spacer()
                 }
                 .padding(.horizontal)
@@ -65,6 +66,13 @@ public struct ChartView: View {
                     store.send(.settingsButtonTapped)
                 } label: {
                     Image(systemName: "gear")
+                }
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    store.send(.syncNowButtonTapped)
+                } label: {
+                    Image(systemName: "arrow.clockwise")
                 }
             }
             ToolbarItem(placement: .topBarTrailing) {
@@ -116,6 +124,23 @@ public struct ChartView: View {
                 sharedRecord: sharedRecord,
                 availablePermissions: [.allowPrivate, .allowPublic, .allowReadWrite]
             )
+        }
+        .alert(
+            "CloudKit Sync Error",
+            isPresented: Binding(
+                get: { store.syncErrorMessage != nil },
+                set: { newValue in
+                    if !newValue {
+                        store.send(.syncErrorDismissed)
+                    }
+                }
+            )
+        ) {
+            Button("OK", role: .cancel) {
+                store.send(.syncErrorDismissed)
+            }
+        } message: {
+            Text(store.syncErrorMessage ?? "Unknown CloudKit error.")
         }
     }
 }

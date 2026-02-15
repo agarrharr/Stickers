@@ -2,6 +2,7 @@ import CloudKit
 import Dependencies
 import Foundation
 import GRDB
+import OSLog
 import SQLiteData
 import StructuredQueriesSQLite
 
@@ -17,6 +18,9 @@ extension DependencyValues {
             try db.attachMetadatabase()
             db.add(function: $uuid)
         }
+
+        SyncDiagnostics.logStartupConfiguration()
+
         let database = try SQLiteData.defaultDatabase(configuration: configuration)
 
         var migrator = DatabaseMigrator()
@@ -65,7 +69,58 @@ extension DependencyValues {
             // Use a constant default for existing rows; new inserts provide actual date
             try #sql("""
                 ALTER TABLE "stickers"
-                ADD COLUMN "createdAt" TEXT NOT NULL DEFAULT '2025-01-01T00:00:00.000Z'
+                ADD COLUMN "createdAt" TEXT NOT NULL DEFAULT '2025-01-01 00:00:00'
+                """)
+                .execute(db)
+        }
+
+        migrator.registerMigration("Add column 'createdAtEncrypted' to 'stickers'") { db in
+            // Use a constant default for existing rows; new inserts provide actual date
+            try #sql("""
+                ALTER TABLE "stickers"
+                ADD COLUMN "createdAtEncrypted" TEXT NOT NULL DEFAULT '2025-01-01 00:00:00'
+                """)
+                .execute(db)
+        }
+
+        migrator.registerMigration("Normalize sticker createdAt timestamps") { db in
+            // Normalize ISO-8601 defaults to SQLite's preferred "YYYY-MM-DD HH:MM:SS"
+            try #sql("""
+                UPDATE "stickers"
+                SET "createdAt" = substr(
+                  replace(replace("createdAt", 'T', ' '), 'Z', ''),
+                  1, 19
+                )
+                WHERE "createdAt" LIKE '%T%Z'
+                """)
+                .execute(db)
+            try #sql("""
+                UPDATE "stickers"
+                SET "createdAtEncrypted" = substr(
+                  replace(replace("createdAtEncrypted", 'T', ' '), 'Z', ''),
+                  1, 19
+                )
+                WHERE "createdAtEncrypted" LIKE '%T%Z'
+                """)
+                .execute(db)
+        }
+
+        migrator.registerMigration("Backfill sticker createdAt from createdAtEncrypted") { db in
+            try #sql("""
+                UPDATE "stickers"
+                SET "createdAt" = "createdAtEncrypted"
+                WHERE "createdAt" = '2025-01-01 00:00:00'
+                  AND "createdAtEncrypted" != '2025-01-01 00:00:00'
+                """)
+                .execute(db)
+        }
+
+        migrator.registerMigration("Backfill sticker createdAtEncrypted from createdAt") { db in
+            try #sql("""
+                UPDATE "stickers"
+                SET "createdAtEncrypted" = "createdAt"
+                WHERE "createdAtEncrypted" = '2025-01-01 00:00:00'
+                  AND "createdAt" != '2025-01-01 00:00:00'
                 """)
                 .execute(db)
         }
@@ -73,10 +128,36 @@ extension DependencyValues {
         try migrator.migrate(database)
         defaultDatabase = database
         defaultSyncEngine = try SyncEngine(
-            for: defaultDatabase,
+            for: database,
             tables: Chart.self, QuickAction.self, Sticker.self,
-            defaultZone: CKRecordZone(zoneName: "com.garrett-harris.adam.stickersapp")
+            containerIdentifier: SyncDiagnostics.cloudKitContainerIdentifier,
+            defaultZone: CKRecordZone(zoneName: "com.garrett-harris.adam.stickersapp"),
+            logger: Logger(
+                subsystem: Bundle.main.bundleIdentifier ?? "Stickers",
+                category: "CloudKit"
+            )
         )
+
+        let stickerMetadataResetKey = "Stickers.ClearStickerAllFieldsCache.v1"
+        if !UserDefaults.standard.bool(forKey: stickerMetadataResetKey) {
+            do {
+                try database.write { db in
+                    try SyncMetadata
+                        .where { $0.recordType.eq(Sticker.tableName) }
+                        .update {
+                            $0.lastKnownServerRecord = nil
+                            $0._lastKnownServerRecordAllFields = nil
+                        }
+                        .execute(db)
+                }
+                UserDefaults.standard.set(true, forKey: stickerMetadataResetKey)
+            } catch {
+                SyncDiagnostics.log(
+                    error: error,
+                    operation: "Clearing stale sticker CloudKit record cache"
+                )
+            }
+        }
     }
 }
 
