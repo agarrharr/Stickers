@@ -14,12 +14,18 @@ public enum ViewMode: String, CaseIterable, Sendable {
 
 @Reducer
 public struct ChartFeature {
+    @CasePathable
+    enum Destination: Equatable, Sendable {
+        case deleteAllStickersAlert
+    }
+
     @ObservableState
     public struct State: Equatable, Sendable {
         public var chart: Chart
         var sharedRecord: SharedRecord?
         var showSettings = false
         var viewMode: ViewMode = .grid
+        var destination: Destination?
 
         public init(chart: Chart) {
             self.chart = chart
@@ -40,6 +46,8 @@ public struct ChartFeature {
         case removeQuickAction(QuickAction.ID)
         case quickActionNameChanged(QuickAction.ID, String)
         case quickActionAmountChanged(QuickAction.ID, Int)
+        case deleteAllStickersButtonTapped
+        case deleteAllStickersConfirmed
     }
 
     @Dependency(\.defaultDatabase) var database
@@ -177,7 +185,26 @@ public struct ChartFeature {
                             .execute(db)
                     }
                 }
-                
+
+            case .deleteAllStickersButtonTapped:
+                state.destination = .deleteAllStickersAlert
+                return .none
+
+            case .deleteAllStickersConfirmed:
+                state.destination = nil
+                let chartID = state.chart.id
+                let database = database
+                return .run { _ in
+                    withErrorReporting {
+                        try database.write { db in
+                            try Sticker
+                                .where { $0.chartID.eq(chartID) }
+                                .delete()
+                                .execute(db)
+                        }
+                    }
+                }
+
 //            case .task:
 //                state.isLoading = true
 //                let request = ChartDataRequest(chartID: state.chartID)

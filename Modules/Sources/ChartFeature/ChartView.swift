@@ -3,6 +3,7 @@ import GRDB
 import NonEmpty
 import SQLiteData
 import SwiftUI
+import SwiftUINavigation
 
 import StickerFeature
 import Models
@@ -176,6 +177,25 @@ struct ChartSettingsView: View {
                         Label("Add New", systemImage: "plus")
                     }
                 }
+
+                Section {
+                    Button(role: .destructive) {
+                        store.send(.deleteAllStickersButtonTapped)
+                    } label: {
+                        Text("Delete All Stickers")
+                    }
+                }
+            }
+            .alert(
+                "Delete All Stickers?",
+                isPresented: $store.destination.deleteAllStickersAlert
+            ) {
+                Button("Cancel", role: .cancel) {}
+                Button("Delete", role: .destructive) {
+                    store.send(.deleteAllStickersConfirmed)
+                }
+            } message: {
+                Text("This will permanently delete all stickers from this chart. This action cannot be undone.")
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
