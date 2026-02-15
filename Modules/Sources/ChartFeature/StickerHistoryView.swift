@@ -15,7 +15,6 @@ struct StickerHistoryView: View {
     @State private var currentUserRecordID: CKRecord.ID?
     @State private var creatorsBySticker: [Sticker.ID: CKRecord.ID] = [:]
     @State private var modificationTimeBySticker: [Sticker.ID: Int64] = [:]
-    @State private var fallbackAnchorDate = Date.now
     @State private var fallbackCreatedAtBySticker: [Sticker.ID: Date] = [:]
     @State private var participantNames: [String: String] = [:] // recordName -> displayName
 
@@ -73,8 +72,8 @@ struct StickerHistoryView: View {
             }
         }
         .task(id: stickers.map(\.id)) {
-            refreshFallbackCreatedAt()
             await loadCreatorInfo(forceReloadAll: false)
+            refreshFallbackCreatedAt()
         }
         .onChange(of: syncEngine.isSynchronizing) {
             guard !syncEngine.isSynchronizing else { return }
@@ -93,8 +92,14 @@ struct StickerHistoryView: View {
 
         var fallback = Date.now
         for sticker in stickers where updatedFallbackCreatedAt[sticker.id] == nil {
-            updatedFallbackCreatedAt[sticker.id] = fallback
-            fallback = fallback.addingTimeInterval(0.001)
+            if let time = modificationTimeBySticker[sticker.id], time > 0 {
+                updatedFallbackCreatedAt[sticker.id] = Date(
+                    timeIntervalSince1970: TimeInterval(time) / 1_000_000_000
+                )
+            } else {
+                updatedFallbackCreatedAt[sticker.id] = fallback
+                fallback = fallback.addingTimeInterval(0.001)
+            }
         }
 
         if updatedFallbackCreatedAt != fallbackCreatedAtBySticker {
@@ -235,13 +240,13 @@ struct StickerHistoryView: View {
     }
 
     private func createdAt(for sticker: Sticker) -> Date {
-        if let time = modificationTimeBySticker[sticker.id], time > 0 {
-            return Date(timeIntervalSince1970: TimeInterval(time) / 1_000_000_000)
-        }
         if let fallbackCreatedAt = fallbackCreatedAtBySticker[sticker.id] {
             return fallbackCreatedAt
         }
-        return fallbackAnchorDate
+        if let time = modificationTimeBySticker[sticker.id], time > 0 {
+            return Date(timeIntervalSince1970: TimeInterval(time) / 1_000_000_000)
+        }
+        return Date.now
     }
 
     /// Round a date to the nearest 2-minute window
