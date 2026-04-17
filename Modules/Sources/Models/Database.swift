@@ -145,8 +145,8 @@ extension DependencyValues {
                     try SyncMetadata
                         .where { $0.recordType.eq(Sticker.tableName) }
                         .update {
-                            $0.lastKnownServerRecord = nil
-                            $0._lastKnownServerRecordAllFields = nil
+                            $0.lastKnownServerRecord = #bind(nil as CKRecord?)
+                            $0._lastKnownServerRecordAllFields = #bind(nil as CKRecord?)
                         }
                         .execute(db)
                 }

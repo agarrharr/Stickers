@@ -82,9 +82,9 @@ public struct ChartFeature {
                         }
                         try await syncEngine.sendChanges()
                     } catch {
-                        await send(.syncFailed(
-                            SyncDiagnostics.log(error: error, operation: "Adding quick action")
-                        ))
+                        if let message = SyncDiagnostics.log(error: error, operation: "Adding quick action") {
+                            await send(.syncFailed(message))
+                        }
                     }
                 }
 
@@ -111,9 +111,9 @@ public struct ChartFeature {
                         }
                         try await syncEngine.sendChanges()
                     } catch {
-                        await send(.syncFailed(
-                            SyncDiagnostics.log(error: error, operation: "Adding sticker")
-                        ))
+                        if let message = SyncDiagnostics.log(error: error, operation: "Adding sticker") {
+                            await send(.syncFailed(message))
+                        }
                     }
                 }
 
@@ -136,9 +136,9 @@ public struct ChartFeature {
                         }
                         try await syncEngine.sendChanges()
                     } catch {
-                        await send(.syncFailed(
-                            SyncDiagnostics.log(error: error, operation: "Deleting stickers")
-                        ))
+                        if let message = SyncDiagnostics.log(error: error, operation: "Deleting stickers") {
+                            await send(.syncFailed(message))
+                        }
                     }
                 }
 
@@ -150,13 +150,13 @@ public struct ChartFeature {
                     do {
                         try await database.write { db in
                             try Chart.find(chartID)
-                                .update { $0.name = name }
+                                .update { $0.name = #bind(name) }
                                 .execute(db)
                         }
                     } catch {
-                        await send(.syncFailed(
-                            SyncDiagnostics.log(error: error, operation: "Renaming chart")
-                        ))
+                        if let message = SyncDiagnostics.log(error: error, operation: "Renaming chart") {
+                            await send(.syncFailed(message))
+                        }
                     }
                 }
 
@@ -166,13 +166,13 @@ public struct ChartFeature {
                     do {
                         try await database.write { db in
                             try QuickAction.find(id)
-                                .update { $0.amount = amount }
+                                .update { $0.amount = #bind(amount) }
                                 .execute(db)
                         }
                     } catch {
-                        await send(.syncFailed(
-                            SyncDiagnostics.log(error: error, operation: "Updating quick action amount")
-                        ))
+                        if let message = SyncDiagnostics.log(error: error, operation: "Updating quick action amount") {
+                            await send(.syncFailed(message))
+                        }
                     }
                 }
 
@@ -182,13 +182,13 @@ public struct ChartFeature {
                     do {
                         try await database.write { db in
                             try QuickAction.find(id)
-                                .update { $0.name = name }
+                                .update { $0.name = #bind(name) }
                                 .execute(db)
                         }
                     } catch {
-                        await send(.syncFailed(
-                            SyncDiagnostics.log(error: error, operation: "Renaming quick action")
-                        ))
+                        if let message = SyncDiagnostics.log(error: error, operation: "Renaming quick action") {
+                            await send(.syncFailed(message))
+                        }
                     }
                 }
 
@@ -221,9 +221,9 @@ public struct ChartFeature {
                         }
                         try await syncEngine.sendChanges()
                     } catch {
-                        await send(.syncFailed(
-                            SyncDiagnostics.log(error: error, operation: "Running quick action")
-                        ))
+                        if let message = SyncDiagnostics.log(error: error, operation: "Running quick action") {
+                            await send(.syncFailed(message))
+                        }
                     }
                 }
 
@@ -239,9 +239,9 @@ public struct ChartFeature {
                         }
                         try await syncEngine.sendChanges()
                     } catch {
-                        await send(.syncFailed(
-                            SyncDiagnostics.log(error: error, operation: "Removing quick action")
-                        ))
+                        if let message = SyncDiagnostics.log(error: error, operation: "Removing quick action") {
+                            await send(.syncFailed(message))
+                        }
                     }
                 }
 
@@ -268,9 +268,9 @@ public struct ChartFeature {
                         }
                         await send(.shareResponse(sharedRecord))
                     } catch {
-                        await send(.syncFailed(
-                            SyncDiagnostics.log(error: error, operation: "Sharing chart")
-                        ))
+                        if let message = SyncDiagnostics.log(error: error, operation: "Sharing chart") {
+                            await send(.syncFailed(message))
+                        }
                     }
                 }
 
@@ -296,9 +296,9 @@ public struct ChartFeature {
                     do {
                         try await syncEngine.syncChanges()
                     } catch {
-                        await send(.syncFailed(
-                            SyncDiagnostics.log(error: error, operation: "Synchronizing changes")
-                        ))
+                        if let message = SyncDiagnostics.log(error: error, operation: "Synchronizing changes") {
+                            await send(.syncFailed(message))
+                        }
                     }
                 }
             }

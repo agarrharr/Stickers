@@ -31,10 +31,22 @@ public enum SyncDiagnostics {
     }
 
     @discardableResult
-    public static func log(error: any Error, operation: String) -> String {
+    public static func log(error: any Error, operation: String) -> String? {
         let message = describe(error: error, operation: operation)
         logger.error("\(message, privacy: .public)")
+        if isNotAuthenticated(error) { return nil }
         return message
+    }
+
+    private static func isNotAuthenticated(_ error: any Error) -> Bool {
+        if let ckError = error as? CKError, ckError.code == .notAuthenticated {
+            return true
+        }
+        let nsError = error as NSError
+        if let underlying = nsError.userInfo[NSUnderlyingErrorKey] as? any Error {
+            return isNotAuthenticated(underlying)
+        }
+        return false
     }
 
     public static func describe(error: any Error, operation: String) -> String {
