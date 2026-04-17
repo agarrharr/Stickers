@@ -14,7 +14,7 @@ public let stickerPack = NonEmpty<[String]>(
     "face-6",
     "face-7",
     "face-8",
-    "face-8",
+    "face-9",
     "face-10",
     "face-11",
     "face-12",
