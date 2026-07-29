@@ -125,11 +125,39 @@ extension DependencyValues {
                 .execute(db)
         }
 
+        migrator.registerMigration("Create 'stickerBatches' table and add 'batchID' to 'stickers'") { db in
+            try #sql("""
+                CREATE TABLE "stickerBatches" (
+                    "id" TEXT PRIMARY KEY NOT NULL ON CONFLICT REPLACE DEFAULT (uuid()),
+                    "chartID" TEXT NOT NULL REFERENCES "charts"("id") ON DELETE CASCADE,
+                    "note" TEXT,
+                    "createdAt" TEXT NOT NULL ON CONFLICT REPLACE DEFAULT (datetime('now'))
+                ) STRICT
+                """)
+                .execute(db)
+            try #sql("""
+                CREATE INDEX "index_stickerBatches_on_chartID" ON "stickerBatches"("chartID")
+                """)
+                .execute(db)
+
+            // Not a foreign key on purpose: stickers must keep a single FK
+            // (chartID) so CloudKit sharing continues to include them.
+            try #sql("""
+                ALTER TABLE "stickers"
+                ADD COLUMN "batchID" TEXT
+                """)
+                .execute(db)
+            try #sql("""
+                CREATE INDEX "index_stickers_on_batchID" ON "stickers"("batchID")
+                """)
+                .execute(db)
+        }
+
         try migrator.migrate(database)
         defaultDatabase = database
         defaultSyncEngine = try SyncEngine(
             for: database,
-            tables: Chart.self, QuickAction.self, Sticker.self,
+            tables: Chart.self, QuickAction.self, StickerBatch.self, Sticker.self,
             containerIdentifier: SyncDiagnostics.cloudKitContainerIdentifier,
             defaultZone: CKRecordZone(zoneName: "com.garrett-harris.adam.stickersapp"),
             logger: Logger(
@@ -170,12 +198,24 @@ extension DatabaseWriter {
                 
                 QuickAction.Draft(id: UUID(1), chartID: UUID(0), name: "Take out the trash", amount: 5)
                 QuickAction.Draft(id: UUID(2), chartID: UUID(0), name: "Do homework", amount: 3)
-                Sticker.Draft(id: UUID(3), chartID: UUID(0), imageName: "face-0")
-                Sticker.Draft(id: UUID(4), chartID: UUID(0), imageName: "face-1")
-                Sticker.Draft(id: UUID(5), chartID: UUID(0), imageName: "face-2")
-                Sticker.Draft(id: UUID(6), chartID: UUID(0), imageName: "face-3")
-                Sticker.Draft(id: UUID(7), chartID: UUID(0), imageName: "face-4")
-                Sticker.Draft(id: UUID(8), chartID: UUID(0), imageName: "face-5")
+                StickerBatch.Draft(
+                    id: UUID(11),
+                    chartID: UUID(0),
+                    note: "Cleaned room",
+                    createdAt: Date(timeIntervalSince1970: 1_753_500_000)
+                )
+                StickerBatch.Draft(
+                    id: UUID(12),
+                    chartID: UUID(0),
+                    note: nil,
+                    createdAt: Date(timeIntervalSince1970: 1_753_600_000)
+                )
+                Sticker.Draft(id: UUID(3), chartID: UUID(0), imageName: "face-0", batchID: UUID(11))
+                Sticker.Draft(id: UUID(4), chartID: UUID(0), imageName: "face-1", batchID: UUID(11))
+                Sticker.Draft(id: UUID(5), chartID: UUID(0), imageName: "face-2", batchID: UUID(11))
+                Sticker.Draft(id: UUID(6), chartID: UUID(0), imageName: "face-3", batchID: UUID(12))
+                Sticker.Draft(id: UUID(7), chartID: UUID(0), imageName: "face-4", batchID: UUID(12))
+                Sticker.Draft(id: UUID(8), chartID: UUID(0), imageName: "face-5", batchID: UUID(12))
                 Sticker.Draft(id: UUID(9), chartID: UUID(0), imageName: "face-6")
                 Sticker.Draft(id: UUID(10), chartID: UUID(0), imageName: "face-7")
             }

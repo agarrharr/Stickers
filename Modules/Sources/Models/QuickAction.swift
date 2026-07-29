@@ -15,3 +15,12 @@ public struct QuickAction: Equatable, Identifiable, Sendable {
         self.amount = amount
     }
 }
+
+extension QuickAction.Draft {
+    public init(chartID: Chart.ID, name: String = "", amount: Int = 1) {
+        self.id = nil
+        self.chartID = chartID
+        self.name = name
+        self.amount = amount
+    }
+}

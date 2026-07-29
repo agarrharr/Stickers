@@ -34,9 +34,67 @@ struct ChartFeatureTests {
     @Dependency(\.defaultDatabase) var database
 
     @Test(
-        .dependency(\.withRandomNumberGenerator, WithRandomNumberGenerator(LCRNG(seed: 0)))
+        .dependency(\.withRandomNumberGenerator, WithRandomNumberGenerator(LCRNG(seed: 0))),
+        .dependency(\.date, .constant(Date(timeIntervalSince1970: 1_753_500_000)))
     )
-    func addStickerButtonTapped() async throws {
+    func addStickers() async throws {
+        var gen = LCRNG(seed: 0)
+        let expectedImageNames = (0..<3).map { _ in
+            stickerPack.randomElement(using: &gen)!
+        }
+
+        try await database.write { db in
+            try db.seed {
+                Chart(id: UUID(-1), name: "Chores")
+            }
+        }
+        let store = TestStore(
+            initialState: ChartFeature.State(chart: Chart(id: UUID(-1), name: "Chores"))
+        ) {
+            ChartFeature()
+        }
+
+        await store.send(.addStickerButtonTapped) {
+            $0.destination = .addStickersForm
+        }
+        await store.send(.binding(.set(\.addStickersAmount, 3))) {
+            $0.addStickersAmount = 3
+        }
+        await store.send(.binding(.set(\.addStickersNote, "  Cleaned room  "))) {
+            $0.addStickersNote = "  Cleaned room  "
+        }
+        await store.send(.addStickersConfirmed) {
+            $0.destination = nil
+        }
+        await store.finish()
+
+        let batches = try await database.read { db in
+            try StickerBatch.where { $0.chartID.eq(UUID(-1)) }.fetchAll(db)
+        }
+        expectNoDifference(batches, [
+            StickerBatch(
+                id: UUID(0),
+                chartID: UUID(-1),
+                note: "Cleaned room",
+                createdAt: Date(timeIntervalSince1970: 1_753_500_000)
+            ),
+        ])
+
+        let stickers = try await database.read { db in
+            try Sticker.where { $0.chartID.eq(UUID(-1)) }.fetchAll(db)
+        }
+        expectNoDifference(stickers, [
+            Sticker(id: UUID(1), chartID: UUID(-1), imageName: expectedImageNames[0], batchID: UUID(0)),
+            Sticker(id: UUID(2), chartID: UUID(-1), imageName: expectedImageNames[1], batchID: UUID(0)),
+            Sticker(id: UUID(3), chartID: UUID(-1), imageName: expectedImageNames[2], batchID: UUID(0)),
+        ])
+    }
+
+    @Test(
+        .dependency(\.withRandomNumberGenerator, WithRandomNumberGenerator(LCRNG(seed: 0))),
+        .dependency(\.date, .constant(Date(timeIntervalSince1970: 1_753_500_000)))
+    )
+    func addStickersWithoutNote() async throws {
         var gen = LCRNG(seed: 0)
         let expectedImageName = stickerPack.randomElement(using: &gen)!
 
@@ -51,22 +109,54 @@ struct ChartFeatureTests {
             ChartFeature()
         }
 
-        await store.send(.addStickerButtonTapped)
+        await store.send(.addStickerButtonTapped) {
+            $0.destination = .addStickersForm
+        }
+        await store.send(.addStickersConfirmed) {
+            $0.destination = nil
+        }
+        await store.finish()
+
+        let batches = try await database.read { db in
+            try StickerBatch.where { $0.chartID.eq(UUID(-1)) }.fetchAll(db)
+        }
+        expectNoDifference(batches, [
+            StickerBatch(
+                id: UUID(0),
+                chartID: UUID(-1),
+                note: nil,
+                createdAt: Date(timeIntervalSince1970: 1_753_500_000)
+            ),
+        ])
 
         let stickers = try await database.read { db in
             try Sticker.where { $0.chartID.eq(UUID(-1)) }.fetchAll(db)
         }
         expectNoDifference(stickers, [
-            Sticker(id: UUID(0), chartID: UUID(-1), imageName: expectedImageName),
+            Sticker(id: UUID(1), chartID: UUID(-1), imageName: expectedImageName, batchID: UUID(0)),
         ])
     }
 
+    @Test
+    func addStickersDismissed() async {
+        var state = ChartFeature.State(chart: Chart(id: UUID(-1), name: "Chores"))
+        state.destination = .addStickersForm
+        let store = TestStore(initialState: state) {
+            ChartFeature()
+        }
+
+        await store.send(.addStickersDismissed) {
+            $0.destination = nil
+        }
+    }
+
     @Test(
-        .dependency(\.withRandomNumberGenerator, WithRandomNumberGenerator(LCRNG(seed: 0)))
+        .dependency(\.withRandomNumberGenerator, WithRandomNumberGenerator(LCRNG(seed: 0))),
+        .dependency(\.date, .constant(Date(timeIntervalSince1970: 1_753_500_000)))
     )
     func quickActionTapped() async throws {
         var gen = LCRNG(seed: 0)
-        let expectedImageNames = (0..<3).map { _ in
+        let expectedImageNames = (0..<99).map { _ in
             stickerPack.randomElement(using: &gen)!
         }
 
@@ -86,19 +176,33 @@ struct ChartFeatureTests {
         }
 
         await store.send(.quickActionTapped(quickActionID))
+        await store.finish()
+
+        let batches = try await database.read { db in
+            try StickerBatch.where { $0.chartID.eq(chartID) }.fetchAll(db)
+        }
+        expectNoDifference(batches, [
+            StickerBatch(
+                id: UUID(0),
+                chartID: chartID,
+                note: "Chore",
+                createdAt: Date(timeIntervalSince1970: 1_753_500_000)
+            ),
+        ])
 
         let stickers = try await database.read { db in
             try Sticker.where { $0.chartID.eq(chartID) }.fetchAll(db)
         }
         expectNoDifference(stickers, [
-            Sticker(id: UUID(0), chartID: chartID, imageName: expectedImageNames[0]),
-            Sticker(id: UUID(1), chartID: chartID, imageName: expectedImageNames[1]),
-            Sticker(id: UUID(2), chartID: chartID, imageName: expectedImageNames[2]),
+            Sticker(id: UUID(1), chartID: chartID, imageName: expectedImageNames[0], batchID: UUID(0)),
+            Sticker(id: UUID(2), chartID: chartID, imageName: expectedImageNames[1], batchID: UUID(0)),
+            Sticker(id: UUID(3), chartID: chartID, imageName: expectedImageNames[2], batchID: UUID(0)),
         ])
     }
 
     @Test(
-        .dependency(\.withRandomNumberGenerator, WithRandomNumberGenerator(LCRNG(seed: 0)))
+        .dependency(\.withRandomNumberGenerator, WithRandomNumberGenerator(LCRNG(seed: 0))),
+        .dependency(\.date, .constant(Date(timeIntervalSince1970: 1_753_500_000)))
     )
     func quickActionTappedWithInvalidID() async throws {
         try await database.write { db in
@@ -113,11 +217,17 @@ struct ChartFeatureTests {
         }
 
         await store.send(.quickActionTapped(UUID(99)))
+        await store.finish()
 
         let stickers = try await database.read { db in
             try Sticker.where { $0.chartID.eq(UUID(-1)) }.fetchAll(db)
         }
         #expect(stickers.isEmpty)
+
+        let batches = try await database.read { db in
+            try StickerBatch.where { $0.chartID.eq(UUID(-1)) }.fetchAll(db)
+        }
+        #expect(batches.isEmpty)
     }
 
     @Test

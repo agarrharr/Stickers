@@ -119,6 +119,16 @@ public struct ChartView: View {
             ChartSettingsView(store: store)
         }
         .sheet(
+            isPresented: Binding(
+                get: { store.destination == .addStickersForm },
+                set: { newValue in
+                    if !newValue { store.send(.addStickersDismissed) }
+                }
+            )
+        ) {
+            AddStickersFormView(store: store)
+        }
+        .sheet(
             item: Binding(
                 get: { store.sharedRecord },
                 set: { _ in store.send(.shareDismissed) }
@@ -146,6 +156,36 @@ public struct ChartView: View {
         } message: {
             Text(store.syncErrorMessage ?? "Unknown CloudKit error.")
         }
+    }
+}
+
+struct AddStickersFormView: View {
+    @Bindable var store: StoreOf<ChartFeature>
+
+    var body: some View {
+        NavigationView {
+            Form {
+                Stepper(value: $store.addStickersAmount, in: 1...99) {
+                    LabeledContent("Amount", value: "\(store.addStickersAmount)")
+                }
+                TextField("Description (optional)", text: $store.addStickersNote)
+            }
+            .navigationTitle("Add Stickers")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        store.send(.addStickersDismissed)
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") {
+                        store.send(.addStickersConfirmed)
+                    }
+                }
+            }
+        }
+        .presentationDetents([.medium])
     }
 }
 

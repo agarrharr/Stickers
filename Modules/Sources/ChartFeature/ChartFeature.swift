@@ -16,11 +16,14 @@ public enum ViewMode: String, CaseIterable, Sendable {
 public struct ChartFeature {
     @CasePathable
     enum Destination: Equatable, Sendable {
+        case addStickersForm
         case deleteAllStickersAlert
     }
 
     @ObservableState
     public struct State: Equatable, Sendable {
+        var addStickersAmount = 1
+        var addStickersNote = ""
         public var chart: Chart
         var destination: Destination?
         var sharedRecord: SharedRecord?
@@ -36,6 +39,8 @@ public struct ChartFeature {
     public enum Action: BindableAction, Sendable {
         case addQuickActionButtonTapped
         case addStickerButtonTapped
+        case addStickersConfirmed
+        case addStickersDismissed
         case binding(BindingAction<State>)
         case deleteAllStickersButtonTapped
         case deleteAllStickersConfirmed
@@ -54,6 +59,7 @@ public struct ChartFeature {
         case syncNowButtonTapped
     }
 
+    @Dependency(\.date) var date
     @Dependency(\.defaultDatabase) var database
     @Dependency(\.defaultSyncEngine) var syncEngine
     @Dependency(\.withRandomNumberGenerator) var withRandomNumberGenerator
@@ -89,10 +95,22 @@ public struct ChartFeature {
                 }
 
             case .addStickerButtonTapped:
-                let imageName = withRandomNumberGenerator { generator in
-                    stickerPack.randomElement(using: &generator)!
+                state.addStickersAmount = 1
+                state.addStickersNote = ""
+                state.destination = .addStickersForm
+                return .none
+
+            case .addStickersConfirmed:
+                state.destination = nil
+                let amount = min(max(state.addStickersAmount, 1), 99)
+                let note = state.addStickersNote.trimmingCharacters(in: .whitespacesAndNewlines)
+                let imageNames = withRandomNumberGenerator { generator in
+                    (0..<amount).map { _ in
+                        stickerPack.randomElement(using: &generator)!
+                    }
                 }
                 let chartID = state.chart.id
+                let createdAt = date.now
                 let database = database
                 let syncEngine = syncEngine
                 return .run { send in
@@ -101,21 +119,37 @@ public struct ChartFeature {
                             guard try Chart.find(chartID).fetchOne(db) != nil else {
                                 throw ChartMutationError.chartNoLongerExists
                             }
-                            try Sticker.insert {
-                                Sticker.Draft(
+                            let batchID = try StickerBatch.insert {
+                                StickerBatch.Draft(
                                     chartID: chartID,
-                                    imageName: imageName
+                                    note: note.isEmpty ? nil : note,
+                                    createdAt: createdAt
                                 )
                             }
-                            .execute(db)
+                            .returning(\.id)
+                            .fetchOne(db)
+                            for imageName in imageNames {
+                                try Sticker.insert {
+                                    Sticker.Draft(
+                                        chartID: chartID,
+                                        imageName: imageName,
+                                        batchID: batchID
+                                    )
+                                }
+                                .execute(db)
+                            }
                         }
                         try await syncEngine.sendChanges()
                     } catch {
-                        if let message = SyncDiagnostics.log(error: error, operation: "Adding sticker") {
+                        if let message = SyncDiagnostics.log(error: error, operation: "Adding stickers") {
                             await send(.syncFailed(message))
                         }
                     }
                 }
+
+            case .addStickersDismissed:
+                state.destination = nil
+                return .none
 
             case .deleteAllStickersButtonTapped:
                 state.destination = .deleteAllStickersAlert
@@ -130,6 +164,10 @@ public struct ChartFeature {
                     do {
                         try await database.write { db in
                             try Sticker
+                                .where { $0.chartID.eq(chartID) }
+                                .delete()
+                                .execute(db)
+                            try StickerBatch
                                 .where { $0.chartID.eq(chartID) }
                                 .delete()
                                 .execute(db)
@@ -199,6 +237,7 @@ public struct ChartFeature {
                         stickerPack.randomElement(using: &generator)!
                     }
                 }
+                let createdAt = date.now
                 let database = database
                 let syncEngine = syncEngine
                 return .run { send in
@@ -209,11 +248,22 @@ public struct ChartFeature {
                             }
                             guard let quickAction = try QuickAction.find(quickActionID).fetchOne(db)
                             else { return }
+                            let note = quickAction.name.trimmingCharacters(in: .whitespacesAndNewlines)
+                            let batchID = try StickerBatch.insert {
+                                StickerBatch.Draft(
+                                    chartID: chartID,
+                                    note: note.isEmpty ? nil : note,
+                                    createdAt: createdAt
+                                )
+                            }
+                            .returning(\.id)
+                            .fetchOne(db)
                             for imageName in maxImageNames.prefix(quickAction.amount) {
                                 try Sticker.insert {
                                     Sticker.Draft(
                                         chartID: chartID,
-                                        imageName: imageName
+                                        imageName: imageName,
+                                        batchID: batchID
                                     )
                                 }
                                 .execute(db)

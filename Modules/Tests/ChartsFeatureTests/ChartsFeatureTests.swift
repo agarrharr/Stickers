@@ -15,7 +15,6 @@ import Models
     .dependencies {
         $0.uuid = .incrementing
         try $0.bootstrapDatabase()
-        $0.defaultSyncEngine = .testValue
     }
 )
 struct ChartsFeatureTests {

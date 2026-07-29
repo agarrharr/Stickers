@@ -11,3 +11,10 @@ public struct Chart: Identifiable, Equatable, Sendable {
         self.name = name
     }
 }
+
+extension Chart.Draft {
+    public init(name: String = "") {
+        self.id = nil
+        self.name = name
+    }
+}

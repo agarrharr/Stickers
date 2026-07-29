@@ -11,57 +11,49 @@ struct StickerHistoryView: View {
     @Dependency(\.defaultSyncEngine) var syncEngine
 
     let chartID: Chart.ID
+    @FetchAll var batches: [StickerBatch]
     @FetchAll var stickers: [Sticker]
     @State private var currentUserRecordID: CKRecord.ID?
-    @State private var creatorsBySticker: [Sticker.ID: CKRecord.ID] = [:]
-    @State private var modificationTimeBySticker: [Sticker.ID: Int64] = [:]
-    @State private var fallbackCreatedAtBySticker: [Sticker.ID: Date] = [:]
+    @State private var creatorsByBatch: [StickerBatch.ID: CKRecord.ID] = [:]
     @State private var participantNames: [String: String] = [:] // recordName -> displayName
 
     init(chartID: Chart.ID) {
         self.chartID = chartID
+        _batches = FetchAll(
+            StickerBatch
+                .where { $0.chartID.eq(chartID) }
+                .order { $0.createdAt.desc() },
+            sectionBy: { #sql("date(\($0.createdAt), 'localtime')", as: String.self).desc() }
+        )
         _stickers = FetchAll(Sticker.where { $0.chartID.eq(chartID) })
     }
 
     var body: some View {
+        let stickersByBatch = Dictionary(grouping: stickers, by: \.batchID)
         LazyVStack(spacing: 0) {
-            ForEach(groupedStickers, id: \.date) { dayGroup in
+            ForEach($batches.sections) { section in
                 Section {
-                    ForEach(dayGroup.batches) { batch in
-                        VStack(alignment: .leading, spacing: 8) {
-                            // Time and creator name above stickers
-                            HStack(spacing: 4) {
-                                Text(batch.createdAt, style: .time)
-                                    .font(.subheadline)
-                                Text("·")
-                                    .foregroundStyle(.secondary)
-                                Text(displayName(for: batch.creatorKey))
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                                if batch.stickers.count > 1 {
-                                    Text("(\(batch.stickers.count))")
-                                        .font(.subheadline)
-                                        .foregroundStyle(.tertiary)
-                                }
-                            }
-
-                            // Stickers in a grid that goes all the way across
-                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 44))], spacing: 4) {
-                                ForEach(batch.stickers) { sticker in
-                                    StickerView(sticker: sticker)
-                                    .frame(width: 44, height: 44)
-                                }
-                            }
-                        }
-                        .padding(.horizontal)
-                        .padding(.vertical, 8)
+                    ForEach(section) { batch in
+                        batchView(batch, stickers: stickersByBatch[batch.id] ?? [])
                     }
                 } header: {
+                    dayHeader(
+                        name: section.name,
+                        totalCount: section.reduce(0) { $0 + (stickersByBatch[$1.id]?.count ?? 0) }
+                    )
+                }
+            }
+            if let ungrouped = stickersByBatch[nil], !ungrouped.isEmpty {
+                Section {
+                    stickerGrid(ungrouped)
+                        .padding(.horizontal)
+                        .padding(.vertical, 8)
+                } header: {
                     HStack {
-                        Text(dayGroup.date, style: .date)
+                        Text("Earlier")
                             .font(.headline)
                         Spacer()
-                        Text("\(dayGroup.totalCount) stickers")
+                        Text("\(ungrouped.count) stickers")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
@@ -71,9 +63,8 @@ struct StickerHistoryView: View {
                 }
             }
         }
-        .task(id: stickers.map(\.id)) {
+        .task(id: batches.map(\.id)) {
             await loadCreatorInfo(forceReloadAll: false)
-            refreshFallbackCreatedAt()
         }
         .onChange(of: syncEngine.isSynchronizing) {
             guard !syncEngine.isSynchronizing else { return }
@@ -86,26 +77,68 @@ struct StickerHistoryView: View {
         }
     }
 
-    private func refreshFallbackCreatedAt() {
-        let stickerIDs = Set(stickers.map(\.id))
-        var updatedFallbackCreatedAt = fallbackCreatedAtBySticker.filter { stickerIDs.contains($0.key) }
+    private func batchView(_ batch: StickerBatch, stickers: [Sticker]) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 4) {
+                Text(batch.createdAt, style: .time)
+                    .font(.subheadline)
+                if let note = batch.note {
+                    Text("·")
+                        .foregroundStyle(.secondary)
+                    Text(note)
+                        .font(.subheadline)
+                }
+                Text("·")
+                    .foregroundStyle(.secondary)
+                Text(displayName(for: creatorKey(for: batch)))
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                if stickers.count > 1 {
+                    Text("(\(stickers.count))")
+                        .font(.subheadline)
+                        .foregroundStyle(.tertiary)
+                }
+            }
 
-        var fallback = Date.now
-        for sticker in stickers where updatedFallbackCreatedAt[sticker.id] == nil {
-            if let time = modificationTimeBySticker[sticker.id], time > 0 {
-                updatedFallbackCreatedAt[sticker.id] = Date(
-                    timeIntervalSince1970: TimeInterval(time) / 1_000_000_000
-                )
-            } else {
-                updatedFallbackCreatedAt[sticker.id] = fallback
-                fallback = fallback.addingTimeInterval(0.001)
+            stickerGrid(stickers)
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+    }
+
+    private func stickerGrid(_ stickers: [Sticker]) -> some View {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 44))], spacing: 4) {
+            ForEach(stickers) { sticker in
+                StickerView(sticker: sticker)
+                    .frame(width: 44, height: 44)
             }
         }
-
-        if updatedFallbackCreatedAt != fallbackCreatedAtBySticker {
-            fallbackCreatedAtBySticker = updatedFallbackCreatedAt
-        }
     }
+
+    private func dayHeader(name: String?, totalCount: Int) -> some View {
+        HStack {
+            if let name, let day = Self.dayFormatter.date(from: name) {
+                Text(day, style: .date)
+                    .font(.headline)
+            } else {
+                Text(name ?? "")
+                    .font(.headline)
+            }
+            Spacer()
+            Text("\(totalCount) stickers")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+        .background(Color(.systemGroupedBackground))
+    }
+
+    private static let dayFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }()
 
     private func loadCreatorInfo(forceReloadAll: Bool) async {
         do {
@@ -140,7 +173,7 @@ struct StickerHistoryView: View {
                 }
 
                 // Prefer the share's current participant identity when available.
-                // This resolves local creator grouping early, before per-sticker
+                // This resolves local creator attribution early, before per-batch
                 // metadata catches up.
                 if let shareCurrentUserRecordID = share.currentUserParticipant?.userIdentity.userRecordID {
                     if currentUserRecordID?.recordName != shareCurrentUserRecordID.recordName {
@@ -152,48 +185,37 @@ struct StickerHistoryView: View {
             // Ignore
         }
 
-        // Fetch sync metadata for relevant stickers.
-        let liveStickerIDs = Set(stickers.map(\.id))
+        // Fetch sync metadata for relevant batches.
+        let liveBatchIDs = Set(batches.map(\.id))
         var updatedCreators = forceReloadAll
             ? [:]
-            : creatorsBySticker.filter { liveStickerIDs.contains($0.key) }
-        var updatedModificationTimes = forceReloadAll
-            ? [:]
-            : modificationTimeBySticker.filter { liveStickerIDs.contains($0.key) }
-        let stickersToLookup = forceReloadAll
-            ? stickers
-            : stickers.filter {
-                updatedCreators[$0.id] == nil || updatedModificationTimes[$0.id] == nil
-            }
+            : creatorsByBatch.filter { liveBatchIDs.contains($0.key) }
+        let batchesToLookup = forceReloadAll
+            ? batches
+            : batches.filter { updatedCreators[$0.id] == nil }
 
-        guard !stickersToLookup.isEmpty || forceReloadAll else { return }
+        guard !batchesToLookup.isEmpty || forceReloadAll else { return }
 
         do {
-            let metadata: [(Sticker.ID, SyncMetadata?)] = try await database.read { db in
-                try stickersToLookup.map { sticker in
+            let metadata: [(StickerBatch.ID, SyncMetadata?)] = try await database.read { db in
+                try batchesToLookup.map { batch in
                     let syncMetadata = try SyncMetadata
-                        .find(sticker.syncMetadataID)
+                        .find(batch.syncMetadataID)
                         .fetchOne(db)
-                    return (sticker.id, syncMetadata)
+                    return (batch.id, syncMetadata)
                 }
             }
 
-            for (stickerID, syncMetadata) in metadata {
-                if let syncMetadata {
-                    updatedModificationTimes[stickerID] = syncMetadata.userModificationTime
-                }
+            for (batchID, syncMetadata) in metadata {
                 if let creatorID = syncMetadata?.lastKnownServerRecord?.creatorUserRecordID {
-                    updatedCreators[stickerID] = creatorID
+                    updatedCreators[batchID] = creatorID
                 }
             }
 
-            let existingCreatorRecordNames = creatorsBySticker.mapValues(\.recordName)
+            let existingCreatorRecordNames = creatorsByBatch.mapValues(\.recordName)
             let updatedCreatorRecordNames = updatedCreators.mapValues(\.recordName)
             if existingCreatorRecordNames != updatedCreatorRecordNames {
-                creatorsBySticker = updatedCreators
-            }
-            if modificationTimeBySticker != updatedModificationTimes {
-                modificationTimeBySticker = updatedModificationTimes
+                creatorsByBatch = updatedCreators
             }
         } catch {
             // Ignore errors
@@ -227,7 +249,7 @@ struct StickerHistoryView: View {
             return currentUserRecordID.recordName
         }
 
-        let knownCreatorKeys = Set(stickers.compactMap { creatorsBySticker[$0.id]?.recordName })
+        let knownCreatorKeys = Set(batches.compactMap { creatorsByBatch[$0.id]?.recordName })
         if knownCreatorKeys.count == 1, let knownCreatorKey = knownCreatorKeys.first {
             return knownCreatorKey
         }
@@ -235,130 +257,7 @@ struct StickerHistoryView: View {
         return "local"
     }
 
-    private func creatorKey(for sticker: Sticker) -> String {
-        creatorsBySticker[sticker.id]?.recordName ?? localCreatorKey
-    }
-
-    private func createdAt(for sticker: Sticker) -> Date {
-        if let fallbackCreatedAt = fallbackCreatedAtBySticker[sticker.id] {
-            return fallbackCreatedAt
-        }
-        if let time = modificationTimeBySticker[sticker.id], time > 0 {
-            return Date(timeIntervalSince1970: TimeInterval(time) / 1_000_000_000)
-        }
-        return Date.now
-    }
-
-    /// Round a date to the nearest 2-minute window
-    private func timeWindow(for date: Date) -> Date {
-        let interval: TimeInterval = 120 // 2 minutes
-        let rounded = (date.timeIntervalSince1970 / interval).rounded(.down) * interval
-        return Date(timeIntervalSince1970: rounded)
-    }
-
-    private var groupedStickers: [DayGroup] {
-        let calendar = Calendar.current
-        var contexts: [StickerGroupingContext] = []
-        contexts.reserveCapacity(stickers.count)
-        for sticker in stickers {
-            let createdAt = createdAt(for: sticker)
-            contexts.append(
-                StickerGroupingContext(
-                    sticker: sticker,
-                    createdAt: createdAt,
-                    creatorKey: creatorKey(for: sticker),
-                    day: calendar.startOfDay(for: createdAt),
-                    timeWindow: timeWindow(for: createdAt)
-                )
-            )
-        }
-
-        // Deterministic ordering prevents broad list invalidation/jitter:
-        // day desc -> time window desc -> creator -> createdAt asc -> id
-        contexts.sort { lhs, rhs in
-            if lhs.day != rhs.day { return lhs.day > rhs.day }
-            if lhs.timeWindow != rhs.timeWindow { return lhs.timeWindow > rhs.timeWindow }
-            if lhs.creatorKey != rhs.creatorKey { return lhs.creatorKey < rhs.creatorKey }
-            if lhs.createdAt != rhs.createdAt { return lhs.createdAt < rhs.createdAt }
-            return lhs.sticker.id.uuidString < rhs.sticker.id.uuidString
-        }
-
-        var dayGroups: [DayGroup] = []
-        dayGroups.reserveCapacity(contexts.count)
-
-        var currentDay: Date?
-        var currentBatches: [StickerBatch] = []
-        var currentBatch: StickerBatch?
-
-        for context in contexts {
-            if currentDay != context.day {
-                if let currentBatch {
-                    currentBatches.append(currentBatch)
-                }
-                if let currentDay {
-                    dayGroups.append(DayGroup(date: currentDay, batches: currentBatches))
-                }
-                currentDay = context.day
-                currentBatches = []
-                currentBatch = nil
-            }
-
-            let batchKey = BatchKey(timeWindow: context.timeWindow, creator: context.creatorKey)
-            if currentBatch?.key == batchKey {
-                currentBatch?.stickers.append(context.sticker)
-            } else {
-                if let currentBatch {
-                    currentBatches.append(currentBatch)
-                }
-                currentBatch = StickerBatch(
-                    key: batchKey,
-                    creatorKey: context.creatorKey,
-                    createdAt: context.createdAt,
-                    stickers: [context.sticker]
-                )
-            }
-        }
-
-        if let currentBatch {
-            currentBatches.append(currentBatch)
-        }
-        if let currentDay {
-            dayGroups.append(DayGroup(date: currentDay, batches: currentBatches))
-        }
-
-        return dayGroups
-    }
-}
-
-private struct StickerGroupingContext {
-    let sticker: Sticker
-    let createdAt: Date
-    let creatorKey: String
-    let day: Date
-    let timeWindow: Date
-}
-
-private struct BatchKey: Hashable {
-    let timeWindow: Date
-    let creator: String
-}
-
-private struct DayGroup {
-    let date: Date
-    let batches: [StickerBatch]
-
-    var totalCount: Int {
-        batches.reduce(0) { $0 + $1.stickers.count }
-    }
-}
-
-private struct StickerBatch: Identifiable {
-    let key: BatchKey
-    let creatorKey: String
-    let createdAt: Date
-    var stickers: [Sticker]
-
-    var id: BatchKey {
-        key
+    private func creatorKey(for batch: StickerBatch) -> String {
+        creatorsByBatch[batch.id]?.recordName ?? localCreatorKey
     }
 }
