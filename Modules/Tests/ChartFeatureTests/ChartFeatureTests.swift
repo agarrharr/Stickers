@@ -230,6 +230,235 @@ struct ChartFeatureTests {
         #expect(batches.isEmpty)
     }
 
+    @Test(
+        .dependency(\.withRandomNumberGenerator, WithRandomNumberGenerator(LCRNG(seed: 0)))
+    )
+    func editBatchIncreaseAmount() async throws {
+        var gen = LCRNG(seed: 0)
+        let expectedImageNames = (0..<99).map { _ in
+            stickerPack.randomElement(using: &gen)!
+        }
+
+        let chartID = UUID(-1)
+        let batchID = UUID(-2)
+        let batch = StickerBatch(
+            id: batchID,
+            chartID: chartID,
+            note: "Old note",
+            createdAt: Date(timeIntervalSince1970: 1_753_500_000)
+        )
+        try await database.write { db in
+            try db.seed {
+                Chart(id: chartID, name: "Chores")
+                batch
+                Sticker(id: UUID(-3), chartID: chartID, imageName: "star", batchID: batchID)
+            }
+        }
+        let store = TestStore(
+            initialState: ChartFeature.State(chart: Chart(id: chartID, name: "Chores"))
+        ) {
+            ChartFeature()
+        }
+
+        await store.send(.editBatchButtonTapped(batch, stickerCount: 1)) {
+            $0.editBatchID = batchID
+            $0.editBatchAmount = 1
+            $0.editBatchNote = "Old note"
+            $0.editBatchDate = Date(timeIntervalSince1970: 1_753_500_000)
+            $0.destination = .editBatchForm
+        }
+        await store.send(.binding(.set(\.editBatchAmount, 3))) {
+            $0.editBatchAmount = 3
+        }
+        await store.send(.binding(.set(\.editBatchNote, "  New note  "))) {
+            $0.editBatchNote = "  New note  "
+        }
+        await store.send(.binding(.set(\.editBatchDate, Date(timeIntervalSince1970: 1_753_600_000)))) {
+            $0.editBatchDate = Date(timeIntervalSince1970: 1_753_600_000)
+        }
+        await store.send(.editBatchConfirmed) {
+            $0.destination = nil
+            $0.editBatchID = nil
+        }
+        await store.finish()
+
+        let batches = try await database.read { db in
+            try StickerBatch.where { $0.chartID.eq(chartID) }.fetchAll(db)
+        }
+        expectNoDifference(batches, [
+            StickerBatch(
+                id: batchID,
+                chartID: chartID,
+                note: "New note",
+                createdAt: Date(timeIntervalSince1970: 1_753_600_000)
+            ),
+        ])
+
+        let stickers = try await database.read { db in
+            try Sticker.where { $0.chartID.eq(chartID) }.fetchAll(db)
+        }
+        expectNoDifference(stickers, [
+            Sticker(id: UUID(-3), chartID: chartID, imageName: "star", batchID: batchID),
+            Sticker(id: UUID(0), chartID: chartID, imageName: expectedImageNames[0], batchID: batchID),
+            Sticker(id: UUID(1), chartID: chartID, imageName: expectedImageNames[1], batchID: batchID),
+        ])
+    }
+
+    @Test(
+        .dependency(\.withRandomNumberGenerator, WithRandomNumberGenerator(LCRNG(seed: 0)))
+    )
+    func editBatchDecreaseAmountAndClearNote() async throws {
+        let chartID = UUID(-1)
+        let batchID = UUID(-2)
+        let batch = StickerBatch(
+            id: batchID,
+            chartID: chartID,
+            note: "Old note",
+            createdAt: Date(timeIntervalSince1970: 1_753_500_000)
+        )
+        try await database.write { db in
+            try db.seed {
+                Chart(id: chartID, name: "Chores")
+                batch
+                Sticker(id: UUID(-3), chartID: chartID, imageName: "star", batchID: batchID)
+                Sticker(id: UUID(-4), chartID: chartID, imageName: "heart", batchID: batchID)
+                Sticker(id: UUID(-5), chartID: chartID, imageName: "moon", batchID: batchID)
+            }
+        }
+        let store = TestStore(
+            initialState: ChartFeature.State(chart: Chart(id: chartID, name: "Chores"))
+        ) {
+            ChartFeature()
+        }
+
+        await store.send(.editBatchButtonTapped(batch, stickerCount: 3)) {
+            $0.editBatchID = batchID
+            $0.editBatchAmount = 3
+            $0.editBatchNote = "Old note"
+            $0.editBatchDate = Date(timeIntervalSince1970: 1_753_500_000)
+            $0.destination = .editBatchForm
+        }
+        await store.send(.binding(.set(\.editBatchAmount, 1))) {
+            $0.editBatchAmount = 1
+        }
+        await store.send(.binding(.set(\.editBatchNote, ""))) {
+            $0.editBatchNote = ""
+        }
+        await store.send(.editBatchConfirmed) {
+            $0.destination = nil
+            $0.editBatchID = nil
+        }
+        await store.finish()
+
+        let batches = try await database.read { db in
+            try StickerBatch.where { $0.chartID.eq(chartID) }.fetchAll(db)
+        }
+        expectNoDifference(batches, [
+            StickerBatch(
+                id: batchID,
+                chartID: chartID,
+                note: nil,
+                createdAt: Date(timeIntervalSince1970: 1_753_500_000)
+            ),
+        ])
+
+        let stickers = try await database.read { db in
+            try Sticker.where { $0.chartID.eq(chartID) }.fetchAll(db)
+        }
+        expectNoDifference(stickers.count, 1)
+    }
+
+    @Test
+    func editBatchDismissed() async {
+        var state = ChartFeature.State(chart: Chart(id: UUID(-1), name: "Chores"))
+        state.destination = .editBatchForm
+        state.editBatchID = UUID(-2)
+        let store = TestStore(initialState: state) {
+            ChartFeature()
+        }
+
+        await store.send(.editBatchDismissed) {
+            $0.destination = nil
+            $0.editBatchID = nil
+        }
+    }
+
+    @Test
+    func deleteBatch() async throws {
+        let chartID = UUID(-1)
+        let batchID = UUID(-2)
+        let otherBatchID = UUID(-6)
+        try await database.write { db in
+            try db.seed {
+                Chart(id: chartID, name: "Chores")
+                StickerBatch(
+                    id: batchID,
+                    chartID: chartID,
+                    note: "To delete",
+                    createdAt: Date(timeIntervalSince1970: 1_753_500_000)
+                )
+                StickerBatch(
+                    id: otherBatchID,
+                    chartID: chartID,
+                    note: "To keep",
+                    createdAt: Date(timeIntervalSince1970: 1_753_400_000)
+                )
+                Sticker(id: UUID(-3), chartID: chartID, imageName: "star", batchID: batchID)
+                Sticker(id: UUID(-4), chartID: chartID, imageName: "heart", batchID: batchID)
+                Sticker(id: UUID(-5), chartID: chartID, imageName: "moon", batchID: otherBatchID)
+            }
+        }
+        let store = TestStore(
+            initialState: ChartFeature.State(chart: Chart(id: chartID, name: "Chores"))
+        ) {
+            ChartFeature()
+        }
+
+        await store.send(.deleteBatchButtonTapped(batchID)) {
+            $0.deleteBatchID = batchID
+            $0.destination = .deleteBatchAlert
+        }
+        await store.send(.deleteBatchConfirmed) {
+            $0.destination = nil
+            $0.deleteBatchID = nil
+        }
+        await store.finish()
+
+        let batches = try await database.read { db in
+            try StickerBatch.where { $0.chartID.eq(chartID) }.fetchAll(db)
+        }
+        expectNoDifference(batches, [
+            StickerBatch(
+                id: otherBatchID,
+                chartID: chartID,
+                note: "To keep",
+                createdAt: Date(timeIntervalSince1970: 1_753_400_000)
+            ),
+        ])
+
+        let stickers = try await database.read { db in
+            try Sticker.where { $0.chartID.eq(chartID) }.fetchAll(db)
+        }
+        expectNoDifference(stickers, [
+            Sticker(id: UUID(-5), chartID: chartID, imageName: "moon", batchID: otherBatchID),
+        ])
+    }
+
+    @Test
+    func deleteBatchDismissed() async {
+        var state = ChartFeature.State(chart: Chart(id: UUID(-1), name: "Chores"))
+        state.destination = .deleteBatchAlert
+        state.deleteBatchID = UUID(-2)
+        let store = TestStore(initialState: state) {
+            ChartFeature()
+        }
+
+        await store.send(.deleteBatchDismissed) {
+            $0.destination = nil
+            $0.deleteBatchID = nil
+        }
+    }
+
     @Test
     func settingsButtonTapped() async {
         let store = TestStore(
@@ -272,6 +501,7 @@ struct ChartFeatureTests {
         await store.send(.nameChanged("Homework")) {
             $0.chart.name = "Homework"
         }
+        await store.finish()
 
         let chart = try await database.read { db in
             try Chart.find(UUID(-1)).fetchOne(db)
