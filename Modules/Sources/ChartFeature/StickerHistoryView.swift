@@ -1,4 +1,5 @@
 import CloudKit
+import ComposableArchitecture
 import Dependencies
 import SQLiteData
 import SwiftUI
@@ -10,6 +11,7 @@ struct StickerHistoryView: View {
     @Dependency(\.defaultDatabase) var database
     @Dependency(\.defaultSyncEngine) var syncEngine
 
+    let store: StoreOf<ChartFeature>
     let chartID: Chart.ID
     @FetchAll var batches: [StickerBatch]
     @FetchAll var stickers: [Sticker]
@@ -17,7 +19,9 @@ struct StickerHistoryView: View {
     @State private var creatorsByBatch: [StickerBatch.ID: CKRecord.ID] = [:]
     @State private var participantNames: [String: String] = [:] // recordName -> displayName
 
-    init(chartID: Chart.ID) {
+    init(store: StoreOf<ChartFeature>) {
+        self.store = store
+        let chartID = store.chart.id
         self.chartID = chartID
         _batches = FetchAll(
             StickerBatch
@@ -104,6 +108,20 @@ struct StickerHistoryView: View {
         }
         .padding(.horizontal)
         .padding(.vertical, 8)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
+        .contextMenu {
+            Button {
+                store.send(.editBatchButtonTapped(batch, stickerCount: stickers.count))
+            } label: {
+                Label("Edit", systemImage: "pencil")
+            }
+            Button(role: .destructive) {
+                store.send(.deleteBatchButtonTapped(batch.id))
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
+        }
     }
 
     private func stickerGrid(_ stickers: [Sticker]) -> some View {

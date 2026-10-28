@@ -58,7 +58,7 @@ public struct ChartView: View {
                 case .grid:
                     StickerGridView(stickers: stickers)
                 case .history:
-                    StickerHistoryView(chartID: store.chart.id)
+                    StickerHistoryView(store: store)
                 }
             }
             .padding(.top, 8)
@@ -129,6 +129,34 @@ public struct ChartView: View {
             AddStickersFormView(store: store)
         }
         .sheet(
+            isPresented: Binding(
+                get: { store.destination == .editBatchForm },
+                set: { newValue in
+                    if !newValue { store.send(.editBatchDismissed) }
+                }
+            )
+        ) {
+            EditStickersFormView(store: store)
+        }
+        .alert(
+            "Delete Stickers?",
+            isPresented: Binding(
+                get: { store.destination == .deleteBatchAlert },
+                set: { newValue in
+                    if !newValue { store.send(.deleteBatchDismissed) }
+                }
+            )
+        ) {
+            Button("Cancel", role: .cancel) {
+                store.send(.deleteBatchDismissed)
+            }
+            Button("Delete", role: .destructive) {
+                store.send(.deleteBatchConfirmed)
+            }
+        } message: {
+            Text("This will permanently delete this group of stickers. This action cannot be undone.")
+        }
+        .sheet(
             item: Binding(
                 get: { store.sharedRecord },
                 set: { _ in store.send(.shareDismissed) }
@@ -181,6 +209,37 @@ struct AddStickersFormView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add") {
                         store.send(.addStickersConfirmed)
+                    }
+                }
+            }
+        }
+        .presentationDetents([.medium])
+    }
+}
+
+struct EditStickersFormView: View {
+    @Bindable var store: StoreOf<ChartFeature>
+
+    var body: some View {
+        NavigationView {
+            Form {
+                Stepper(value: $store.editBatchAmount, in: 1...99) {
+                    LabeledContent("Amount", value: "\(store.editBatchAmount)")
+                }
+                TextField("Description (optional)", text: $store.editBatchNote)
+                DatePicker("Date", selection: $store.editBatchDate)
+            }
+            .navigationTitle("Edit Stickers")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        store.send(.editBatchDismissed)
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        store.send(.editBatchConfirmed)
                     }
                 }
             }
